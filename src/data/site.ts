@@ -1,0 +1,26 @@
+export const siteConfig = {
+  name: "CUONG DESIGN",
+  title: "CUONG DESIGN - Freelancer Developer & UI/UX Designer",
+  description: "Thiết kế UI/UX và lập trình website, landing page, dashboard chuẩn SEO, tối ưu chuyển đổi và tốc độ cao.",
+  url: "https://cuongdesign.com",
+  ogImage: "https://cuongdesign.com/images/og-image.jpg",
+  author: "Cường Design",
+  contact: {
+    email: "contact@cuongdesign.com",
+    phone: "0963.456.789",
+    zalo: "https://zalo.me/0963456789",
+    location: "Hồ Chí Minh City, Vietnam",
+    facebook: "https://facebook.com/cuongdesign",
+    github: "https://github.com/cuongdesign",
+  },
+  navLinks: [
+    { label: "Trang chủ", href: "/" },
+    { label: "Dịch vụ", href: "/dich-vu" },
+    { label: "Dự án", href: "/du-an" },
+    { label: "Quy trình", href: "/quy-trinh" },
+    { label: "Kỹ năng", href: "/ky-nang" },
+    { label: "Sản phẩm", href: "/san-pham" },
+    { label: "Đánh giá", href: "/danh-gia" },
+    { label: "Liên hệ", href: "/lien-he" },
+  ],
+};

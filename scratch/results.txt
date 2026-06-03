@@ -1,0 +1,73 @@
+Found 72 matches:
+src\app\page.tsx:29: email: "admin@cuongdev.com",
+src\app\page.tsx:31: name: "Cường Dev",
+src\app\robots.ts:5: const baseUrl = siteConfig?.url || "https://cuongdev.com";
+src\app\sitemap.ts:6: const baseUrl = siteConfig?.url || "https://cuongdev.com";
+src\app\(website)\[slug]\page.tsx:23: title: `${page.seoTitle || page.title} - CUONG DEV`,
+src\app\api\admin\chats\route.ts:100: notificationText = "🔔 Admin (Cường Dev) đã tham gia cuộc trò chuyện. Chatbot tạm ngưng.";
+src\app\api\chat\route.ts:48: `Bạn là trợ lý ảo AI cao cấp đại diện cho Cường Dev (CUONG DEV) - một Senior Fullstack Developer kiêm UI/UX Designer.
+src\app\api\chat\route.ts:114: content: "Xin chào! Cảm ơn bạn đã liên hệ. Bạn có thể gửi form liên hệ trực tiếp cho Cường Dev tại phần cuối trang để nhận phản hồi nhanh nhất.",
+src\app\api\contact\route.ts:48: const adminEmail = adminSettings?.value || process.env.ADMIN_EMAIL || "admin@cuongdev.com";
+src\app\api\contact\route.ts:51: ? `[CUONG DEV] Yêu cầu nhận code: ${productTitle}`
+src\app\api\contact\route.ts:52: : `[CUONG DEV] Liên hệ mới: ${validatedData.subject}`;
+src\app\api\contact\route.ts:67: <p style="font-size: 11px; color: #999; margin-top: 30px;">Hệ thống tự động gửi từ Website CUONG DEV.</p>
+src\app\api\contact\route.ts:87: 🔔 *[CUONG DEV] CÓ LIÊN HỆ MỚI*
+src\app\api\webhook\sepay\route.ts:87: <p>Cảm ơn bạn đã mua sản phẩm số từ **CUONG DEV**. Giao dịch của bạn đã được xác nhận tự động thành công.</p>
+src\app\api\webhook\sepay\route.ts:105: <p style="font-size: 11px; color: #999;">Hệ thống gửi thư tự động từ Website CUONG DEV. Hỗ trợ kỹ thuật: ${siteConfig.contact.email}</p>
+src\app\api\webhook\sepay\route.ts:111: subject: `[CUONG DEV] Link tải mã nguồn: ${matchedOrder.product.title}`,
+src\app\api\webhook\sepay\route.ts:125: ✅ *[CUONG DEV] ĐƠN HÀNG HOÀN TẤT*
+src\app\bai-viet\[slug]\page.tsx:32: title: `${post.seoTitle || post.title} - Bài viết | CUONG DEV`,
+src\app\bai-viet\[slug]\page.tsx:68: "@id": `https://cuongdev.com/bai-viet/${post.slug}`,
+src\app\bai-viet\[slug]\page.tsx:72: "image": post.coverImage ? `https://cuongdev.com${post.coverImage}` : "https://cuongdev.com/images/og-image.jpg",
+src\app\bai-viet\[slug]\page.tsx:75: "name": "Cường Dev",
+src\app\bai-viet\[slug]\page.tsx:76: "url": "https://cuongdev.com",
+src\app\bai-viet\[slug]\page.tsx:80: "name": "CUONG DEV",
+src\app\bai-viet\[slug]\page.tsx:83: "url": "https://cuongdev.com/favicon.ico",
+src\app\bai-viet\[slug]\page.tsx:122: <span>Người viết: <strong>Cường Dev</strong></span>
+src\app\du-an\[slug]\page.tsx:28: title: `${project.title} - Chi tiết dự án | Cường Dev`,
+src\app\du-an\[slug]\page.tsx:60: "name": "Cường Dev",
+src\app\du-an\[slug]\page.tsx:162: <span className="font-semibold text-white">Cường Dev</span>
+src\app\gioi-thieu\page.tsx:13: title: "Giới thiệu bản thân - Cường Dev | Senior Solution Architect & Fullstack Web Developer",
+src\app\gioi-thieu\page.tsx:14: description: "Tìm hiểu tiểu sử, kỹ năng, kinh nghiệm và hành trình lập trình của Cường Dev. Chuyên thiết kế UI/UX Figma và lập trình web Next.js, React, Node.js.",
+src\app\gioi-thieu\page.tsx:15: keywords: ["Giới thiệu Cường Dev", "Hồ sơ Cường Dev", "Kỹ năng lập trình", "Senior Fullstack Developer Việt Nam"],
+src\app\gioi-thieu\page.tsx:26: "alternateName": "Cường Dev / Cuong Design",
+src\app\gioi-thieu\page.tsx:32: "url": "https://cuongdev.com",
+src\app\gioi-thieu\page.tsx:34: "https://github.com/cuongdev",
+src\app\gioi-thieu\page.tsx:35: "https://linkedin.com/in/cuongdev"
+src\app\gioi-thieu\page.tsx:52: company: "Tự do (Thương hiệu cá nhân Cuong Dev)",
+src\app\gioi-thieu\page.tsx:145: <h2 className="text-xl font-bold text-white">Cường Dev</h2>
+src\app\gioi-thieu\page.tsx:152: <span className="truncate">contact@cuongdev.com</span>
+src\app\gioi-thieu\page.tsx:175: Tôi tên đầy đủ là <strong>Nguyễn Văn Cường</strong>, được cộng đồng biết đến nhiều hơn dưới nghệ danh <strong>Cường Dev</strong> hoặc <strong>Cường Design</strong>.
+src\app\login\page.tsx:76: placeholder="admin@cuongdev.com"
+src\app\san-pham\[slug]\page.tsx:26: title: `${product.title} - Mua mã nguồn | Cường Dev`,
+src\app\san-pham\[slug]\page.tsx:87: "url": `https://cuongdev.com/san-pham/${product.slug}`,
+src\components\layout\Footer.tsx:146: <p>© {new Date().getFullYear()} Cuong Dev. All rights reserved.</p>
+src\components\layout\Footer.tsx:148: Made with <span className="text-pink-500">❤️</span> by Cuong Dev
+src\components\sections\AboutSection.tsx:61: <h3 className="font-bold text-lg">Cường Dev</h3>
+src\components\sections\AboutSection.tsx:71: Cuong Dev
+src\components\sections\AdminSettingsForm.tsx:143: placeholder='"CUONG DEV" <noreply@cuongdev.com>'
+src\components\sections\AdminSettingsForm.tsx:181: placeholder="admin@cuongdev.com"
+src\components\sections\AdminSettingsForm.tsx:230: placeholder="Bạn là trợ lý ảo AI của Cuong Dev. Hãy tư vấn nhiệt tình về các dịch vụ: thiết kế UI/UX, lập trình web (Next.js, React), landing page..."
+src\components\sections\HeroSection.tsx:108: <span className="text-gray-400">name:</span> <span className="text-green-300">"Cường Dev"</span>,
+src\components\ui\Breadcrumbs.tsx:18: const baseUrl = siteConfig?.url || "https://cuongdev.com";
+src\components\ui\ChatWidget.tsx:32: const savedSessionId = localStorage.getItem("cuongdev_chat_session");
+src\components\ui\ChatWidget.tsx:43: content: "Xin chào! Tôi là trợ lý AI của Cường Dev. Tôi có thể giúp gì cho bạn hôm nay? (Bạn có thể hỏi về thiết kế website, giá cả, hoặc cách mua source code)",
+src\components\ui\ChatWidget.tsx:128: localStorage.setItem("cuongdev_chat_session", data.sessionId);
+src\components\ui\ChatWidget.tsx:154: <span>CUONG DEV COPILOT</span>
+src\components\ui\ChatWidget.tsx:158: {status === "HUMAN_ACTIVE" ? "🔔 Đang chat với Cường Dev" : "🤖 Trợ lý AI đang hoạt động"}
+src\components\ui\ChatWidget.tsx:191: <span className="text-purple-400 font-semibold">Cường Dev (Quản trị viên)</span>
+src\data\products.ts:26: demoUrl: "https://shopbase.cuongdev.com",
+src\data\products.ts:38: demoUrl: "https://landing.cuongdev.com",
+src\data\products.ts:50: demoUrl: "https://admin.cuongdev.com",
+src\data\products.ts:62: demoUrl: "https://corp.cuongdev.com",
+src\data\products.ts:74: demoUrl: "https://github.com/cuongdev/laravel-pack",
+src\data\products.ts:86: demoUrl: "https://uikit.cuongdev.com",
+src\data\site.ts:2: name: "CUONG DEV",
+src\data\site.ts:3: title: "CUONG DEV - Freelancer Developer & UI/UX Designer",
+src\data\site.ts:5: url: "https://cuongdev.com",
+src\data\site.ts:6: ogImage: "https://cuongdev.com/images/og-image.jpg",
+src\data\site.ts:7: author: "Cường Dev",
+src\data\site.ts:9: email: "contact@cuongdev.com",
+src\data\site.ts:13: facebook: "https://facebook.com/cuongdev",
+src\data\site.ts:14: github: "https://github.com/cuongdev",
+src\lib\mailer.ts:24: const from = smtpConfig["smtp_from"] || process.env.SMTP_FROM || `"CUONG DEV" <noreply@cuongdev.com>`;

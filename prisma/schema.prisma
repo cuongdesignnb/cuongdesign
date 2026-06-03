@@ -1,0 +1,264 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+enum OrderStatus {
+  PENDING
+  COMPLETED
+  FAILED
+}
+
+enum ProductType {
+  SOURCE_CODE
+  TEMPLATE
+  UI_KIT
+  SERVICE
+}
+
+enum PostStatus {
+  DRAFT
+  SCHEDULED
+  PUBLISHED
+}
+
+enum AiTaskStatus {
+  PENDING
+  GENERATING_TEXT
+  GENERATING_IMAGE
+  COMPLETED
+  FAILED
+}
+
+enum Role {
+  ADMIN
+  CUSTOMER
+}
+
+enum ChatSessionStatus {
+  AI_ACTIVE       // AI is automatically responding
+  HUMAN_ACTIVE    // Admin has taken over manually
+  CLOSED          // Conversation closed
+}
+
+enum SenderType {
+  USER
+  AI
+  ADMIN
+}
+
+// User accounts (Admin and Customers)
+model User {
+  id            String    @id @default(cuid())
+  email         String    @unique
+  password      String    // Hashed password
+  name          String?
+  avatar        String?
+  role          Role      @default(CUSTOMER)
+  orders        Order[]   // Customer orders
+  reviews       Review[]  // Customer reviews
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+}
+
+// Reusable media uploads library
+model Media {
+  id        String   @id @default(cuid())
+  name      String
+  url       String   // File path (WebP converted image)
+  size      Int      // File size in bytes
+  width     Int?
+  height    Int?
+  createdAt DateTime @default(now())
+}
+
+// General and page-specific configurations (Home, About, SMTP, colors, AI chatbot keys)
+model Setting {
+  id        String   @id @default(cuid())
+  key       String   @unique // e.g. "smtp_host", "theme_primary_color", "homepage_seo", "ai_chat_prompt"
+  value     String   @db.Text
+  updatedAt DateTime @updatedAt
+}
+
+// Dynamic Policy Pages (Privacy policy, Terms of service, etc.)
+model Page {
+  id             String   @id @default(cuid())
+  title          String
+  slug           String   @unique // e.g. "chinh-sach-bao-mat"
+  content        String   @db.Text
+  isPublished    Boolean  @default(true)
+  seoTitle       String?
+  seoDescription String?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+}
+
+// Showcase Projects
+model Project {
+  id          String   @id @default(cuid())
+  title       String
+  slug        String   @unique
+  description String
+  content     String   @db.Text
+  coverImage  String   // Media URL link
+  images      String[] // List of Media URL links
+  category    String   @default("Web Application")
+  demoUrl     String?
+  githubUrl   String?
+  techStack   String[]
+  isFeatured  Boolean  @default(false)
+  order       Int      @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+// Digital Products for Sale / Free download
+model Product {
+  id          String      @id @default(cuid())
+  title       String
+  slug        String      @unique
+  description String
+  price       Float       // 0 means it requires contact form
+  salePrice   Float?      
+  type        ProductType @default(SOURCE_CODE)
+  features    String[]    
+  techStack   String[]
+  coverImage  String      // Media URL link
+  images      String[]
+  demoUrl     String?
+  downloadUrl String?     // Link to secure zip file
+  maxDownloads Int        @default(5) // Max allowed downloads per order
+  isFeatured  Boolean     @default(false)
+  order       Int         @default(0)
+  orders      Order[]
+  reviews     Review[]
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+}
+
+// Product reviews from verified buyers
+model Review {
+  id          String   @id @default(cuid())
+  productId   String
+  product     Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  rating      Int      @default(5) // 1 to 5 stars
+  comment     String   @db.Text
+  isApproved  Boolean  @default(false) // Must be approved by admin
+  createdAt   DateTime @default(now())
+}
+
+// Orders processed via SePay Webhook
+model Order {
+  id            String      @id @default(cuid())
+  productId     String
+  product       Product     @relation(fields: [productId], references: [id])
+  userId        String?     // Nullable for guest checkouts
+  user          User?       @relation(fields: [userId], references: [id])
+  customerName  String
+  customerEmail String
+  customerPhone String?
+  amount        Float
+  status        OrderStatus @default(PENDING)
+  paymentMethod String      @default("SEPAY")
+  sepayCode     String      @unique // Unique bank transfer content
+  downloadCount Int         @default(0) // Download attempts
+  downloadToken String?     @unique // Unique download token sent via email
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+}
+
+// Blog Posts
+model Post {
+  id             String     @id @default(cuid())
+  title          String
+  slug           String     @unique
+  excerpt        String?    @db.Text
+  content        String     @db.Text
+  coverImage     String?
+  status         PostStatus @default(DRAFT)
+  publishedAt    DateTime?
+  seoTitle       String?
+  seoDescription String?
+  seoKeywords    String[]
+  schemaMarkup   Json?      
+  createdAt      DateTime   @default(now())
+  updatedAt      DateTime   @updatedAt
+}
+
+// AI Post Generator Queue
+model AiTask {
+  id             String       @id @default(cuid())
+  keyword        String
+  status         AiTaskStatus @default(PENDING)
+  scheduleTime   DateTime     
+  generatedPostId String?     
+  errorMessage   String?      @db.Text
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+}
+
+// Live Chat Sessions
+model ChatSession {
+  id          String            @id @default(cuid())
+  socketId    String?           
+  status      ChatSessionStatus @default(AI_ACTIVE)
+  messages    ChatMessage[]
+  createdAt   DateTime          @default(now())
+  updatedAt   DateTime          @updatedAt
+}
+
+// Chat Messages
+model ChatMessage {
+  id          String      @id @default(cuid())
+  sessionId   String
+  session     ChatSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  sender      SenderType
+  content     String      @db.Text
+  createdAt   DateTime    @default(now())
+}
+
+// Leads & Free Product Request Contact Forms
+model Contact {
+  id          String   @id @default(cuid())
+  name        String
+  email       String
+  phone       String?
+  subject     String
+  message     String   @db.Text
+  productId   String?  // References the free product if applicable
+  isProcessed Boolean  @default(false)
+  createdAt   DateTime @default(now())
+}
+
+// Testimonials Showcase
+model Testimonial {
+  id          String   @id @default(cuid())
+  name        String
+  role        String
+  company     String?
+  avatar      String
+  rating      Int      @default(5)
+  quote       String   @db.Text
+  isPublished Boolean  @default(true)
+  order       Int      @default(0)
+  createdAt   DateTime @default(now())
+}
+
+// Hierarchical Navigation Menu
+model MenuItem {
+  id        String     @id @default(cuid())
+  label     String
+  href      String?    // Nullable if it's a dropdown header category
+  order     Int        @default(0)
+  parentId  String?
+  parent    MenuItem?  @relation("MenuHierarchy", fields: [parentId], references: [id], onDelete: Cascade)
+  children  MenuItem[] @relation("MenuHierarchy")
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+}
