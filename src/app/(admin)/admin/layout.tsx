@@ -13,6 +13,9 @@ import {
   MessageSquare,
   Sparkles,
   Menu,
+  Star,
+  MessageSquarePlus,
+  Users,
 } from "lucide-react";
 import Link from "next/link";
 import GradientText from "@/components/ui/GradientText";
@@ -40,10 +43,14 @@ export default async function AdminLayout({ children }: AdminLayoutProps) {
     { label: "Quản lý Sản phẩm", href: "/admin/products", icon: ShoppingBag },
     { label: "Đơn hàng (SePay)", href: "/admin/orders", icon: CreditCard },
     { label: "AI Auto Blog", href: "/admin/blog", icon: Sparkles },
+    { label: "Quản lý Bài viết", href: "/admin/blog/posts", icon: FileText },
     { label: "Cấu hình Menu", href: "/admin/menu", icon: Menu },
     { label: "Hộp thư Liên hệ", href: "/admin/contacts", icon: Mail },
+    { label: "Duyệt Đánh giá", href: "/admin/reviews", icon: Star },
+    { label: "Đánh giá Khách hàng", href: "/admin/testimonials", icon: MessageSquarePlus },
     { label: "Trang Chính sách", href: "/admin/pages", icon: FileText },
     { label: "Trò chuyện Live", href: "/admin/chats", icon: MessageSquare },
+    { label: "Quản lý Users", href: "/admin/users", icon: Users },
     { label: "Cấu hình Hệ thống", href: "/admin/settings", icon: Settings },
   ];
 

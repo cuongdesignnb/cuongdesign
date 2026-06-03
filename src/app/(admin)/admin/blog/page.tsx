@@ -1,4 +1,5 @@
 import React from "react";
+import Link from "next/link";
 import { prisma } from "@/lib/db";
 import { addKeywordsToQueue, deleteAiTask } from "@/app/actions/blog";
 import BlogQueueClient from "./BlogQueueClient";
@@ -17,6 +18,13 @@ export default async function AdminBlogPage() {
           Lập lịch tự động viết bài chuẩn SEO dựa trên từ khóa bằng GPT-4o và vẽ ảnh bìa bằng DALL-E 3.
         </p>
       </div>
+
+      <Link
+        href="/admin/blog/posts"
+        className="inline-flex items-center gap-2 px-4 py-2.5 rounded-lg bg-white/5 border border-white/10 text-sm text-pink-400 hover:bg-white/10 hover:text-pink-300 transition-all font-semibold"
+      >
+        Quản lý bài viết đã tạo →
+      </Link>
 
       <BlogQueueClient initialTasks={JSON.parse(JSON.stringify(tasks))} />
     </div>
