@@ -7,13 +7,15 @@ import GradientText from "@/components/ui/GradientText";
 import Button from "@/components/ui/Button";
 import { User, Calendar, Briefcase, Award, ArrowRight, ShieldCheck, Mail, Phone, MapPin } from "lucide-react";
 import Link from "next/link";
-import { Metadata } from "next";
+import { createMetadata, JsonLd } from "@/lib/seo";
 
-export const metadata: Metadata = {
-  title: "Giới thiệu bản thân - Cường Design | Senior Solution Architect & Fullstack Web Developer",
+export const metadata = createMetadata({
+  title: "Giới thiệu — Nguyễn Văn Cường",
   description: "Tìm hiểu tiểu sử, kỹ năng, kinh nghiệm và hành trình lập trình của Cường Design. Chuyên thiết kế UI/UX Figma và lập trình web Next.js, React, Node.js.",
-  keywords: ["Giới thiệu Cường Design", "Hồ sơ Cường Design", "Kỹ năng lập trình", "Senior Fullstack Developer Việt Nam"],
-};
+  path: "/gioi-thieu",
+  openGraph: { type: "profile" },
+  keywords: ["giới thiệu", "Nguyễn Văn Cường", "portfolio developer", "Giới thiệu Cường Design", "Hồ sơ Cường Design", "Kỹ năng lập trình", "Senior Fullstack Developer Việt Nam"],
+});
 
 export default function AboutPage() {
   // Schema.org Person & AboutPage Structured Metadata
@@ -111,10 +113,7 @@ export default function AboutPage() {
   return (
     <div className="min-h-screen bg-[#030014] text-gray-200 flex flex-col">
       {/* Inject Structured Data */}
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(personSchema) }}
-      />
+      <JsonLd data={personSchema} />
 
       <Header />
 

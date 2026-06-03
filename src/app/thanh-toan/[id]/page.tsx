@@ -4,9 +4,21 @@ import { prisma } from "@/lib/db";
 import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
 import CheckoutClient from "./CheckoutClient";
+import { Metadata } from "next";
 
 interface CheckoutPageProps {
   params: Promise<{ id: string }>;
+}
+
+export async function generateMetadata(): Promise<Metadata> {
+  return {
+    title: "Thanh toán đơn hàng | CUONG DESIGN",
+    description: "Trang thanh toán đơn hàng — Cuong Design",
+    robots: {
+      index: false,
+      follow: false,
+    },
+  };
 }
 
 export default async function CheckoutPage({ params }: CheckoutPageProps) {

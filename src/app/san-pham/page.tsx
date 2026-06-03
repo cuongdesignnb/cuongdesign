@@ -4,13 +4,15 @@ import Footer from "@/components/layout/Footer";
 import Breadcrumbs from "@/components/ui/Breadcrumbs";
 import DigitalProductsSection from "@/components/sections/DigitalProductsSection";
 import { prisma } from "@/lib/db";
-import { Metadata } from "next";
+import { createMetadata, JsonLd } from "@/lib/seo";
+import { siteConfig } from "@/data/site";
 
-export const metadata: Metadata = {
-  title: "Cửa hàng Sản phẩm số & Source Code | Cường Design",
+export const metadata = createMetadata({
+  title: "Sản phẩm số — Mua mã nguồn & Template",
   description: "Khám phá cửa hàng sản phẩm số của Cường Design. Mua mã nguồn website Next.js, React chất lượng cao, UI kit và template chuyên nghiệp tối ưu SEO.",
+  path: "/san-pham",
   keywords: ["Mua source code Next.js", "Mã nguồn React", "Landing page mẫu", "UI Kit website", "Cửa hàng Cường Design"],
-};
+});
 
 export default async function ProductsListPage() {
   // Fetch active products from database
@@ -18,8 +20,32 @@ export default async function ProductsListPage() {
     orderBy: { order: "asc" }
   });
 
+  // CollectionPage JSON-LD schema
+  const collectionSchema = {
+    "@context": "https://schema.org",
+    "@type": "CollectionPage",
+    "name": "Sản phẩm số — Cuong Design",
+    "description": "Cửa hàng sản phẩm số, mã nguồn website và template chuyên nghiệp của Cuong Design.",
+    "url": `${siteConfig.url}/san-pham`,
+    "publisher": {
+      "@type": "Person",
+      "name": siteConfig.author.name,
+      "url": siteConfig.url
+    },
+    "mainEntity": {
+      "@type": "ItemList",
+      "numberOfItems": dbProducts.length,
+      "itemListElement": dbProducts.map((product, index) => ({
+        "@type": "ListItem",
+        "position": index + 1,
+        "url": `${siteConfig.url}/san-pham/${product.slug}`
+      }))
+    }
+  };
+
   return (
     <div className="min-h-screen bg-[#030014] text-gray-200 flex flex-col">
+      <JsonLd data={collectionSchema} />
       <Header />
 
       <main className="grow pt-28 pb-12 px-4 sm:px-6 lg:px-8 relative overflow-hidden">

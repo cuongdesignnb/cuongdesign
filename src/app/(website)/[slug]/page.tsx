@@ -19,9 +19,29 @@ export async function generateMetadata({ params }: PolicyPageProps): Promise<Met
     return {};
   }
 
+  const pageTitle = `${page.seoTitle || page.title} - CUONG DESIGN`;
+  const pageDescription = page.seoDescription || page.title;
+
   return {
-    title: `${page.seoTitle || page.title} - CUONG DESIGN`,
-    description: page.seoDescription || page.title,
+    title: pageTitle,
+    description: pageDescription,
+    openGraph: {
+      title: pageTitle,
+      description: pageDescription,
+      url: `https://cuongdesign.com/${slug}`,
+      siteName: "Cuong Design",
+      locale: "vi_VN",
+      type: "website",
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: pageTitle,
+      description: pageDescription,
+    },
+    robots: {
+      index: false,
+      follow: false,
+    },
   };
 }
 

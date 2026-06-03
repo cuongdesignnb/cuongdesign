@@ -4,13 +4,14 @@ import Footer from "@/components/layout/Footer";
 import Breadcrumbs from "@/components/ui/Breadcrumbs";
 import ContactPageClient from "@/components/sections/ContactPageClient";
 import { faqs } from "@/data/faqs";
-import { Metadata } from "next";
+import { createMetadata, JsonLd } from "@/lib/seo";
 
-export const metadata: Metadata = {
-  title: "Liên hệ & Câu hỏi thường gặp | Cường Design",
+export const metadata = createMetadata({
+  title: "Liên hệ & Yêu cầu báo giá",
   description: "Liên hệ trực tiếp với Cường Design để thảo luận về ý tưởng dự án thiết kế UI/UX Figma hoặc lập trình website Next.js. Xem giải đáp chi tiết tại mục FAQ.",
+  path: "/lien-he",
   keywords: ["Liên hệ Cường Design", "Thông tin liên lạc", "Zalo Cường Design", "FAQ thiết kế website"],
-};
+});
 
 export default function ContactListPage() {
   // Schema.org FAQPage metadata
@@ -30,10 +31,7 @@ export default function ContactListPage() {
   return (
     <div className="min-h-screen bg-[#030014] text-gray-200 flex flex-col">
       {/* Inject Structured Data */}
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }}
-      />
+      <JsonLd data={faqSchema} />
 
       <Header />
 

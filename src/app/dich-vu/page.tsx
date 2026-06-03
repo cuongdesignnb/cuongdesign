@@ -7,13 +7,14 @@ import GradientText from "@/components/ui/GradientText";
 import Button from "@/components/ui/Button";
 import { Layout, Globe, Target, ShoppingBag, BarChart3, Zap, Code, ArrowRight, ShieldCheck, CheckCircle2 } from "lucide-react";
 import Link from "next/link";
-import { Metadata } from "next";
+import { createMetadata, JsonLd } from "@/lib/seo";
 
-export const metadata: Metadata = {
-  title: "Dịch vụ Thiết kế UI/UX & Lập trình Web chuyên sâu | Cường Design",
+export const metadata = createMetadata({
+  title: "Dịch vụ thiết kế UI/UX & lập trình website",
   description: "Cung cấp giải pháp trọn gói thiết kế giao diện Figma chuyên sâu, lập trình website doanh nghiệp Next.js, xây dựng hệ thống e-commerce, admin dashboard và tối ưu Core Web Vitals chuẩn SEO.",
-  keywords: ["Dịch vụ thiết kế UI/UX", "Lập trình web Next.js", "Thiết kế Landing Page", "Dịch vụ tối ưu SEO", "Cường Design"],
-};
+  path: "/dich-vu",
+  keywords: ["dịch vụ thiết kế website", "lập trình web", "UI/UX design", "Dịch vụ thiết kế UI/UX", "Lập trình web Next.js", "Thiết kế Landing Page", "Dịch vụ tối ưu SEO"],
+});
 
 export default function ServicesPage() {
   const serviceDetails = [
@@ -145,10 +146,7 @@ export default function ServicesPage() {
   return (
     <div className="min-h-screen bg-[#030014] text-gray-200 flex flex-col">
       {/* Inject Structured Data */}
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(servicesSchema) }}
-      />
+      <JsonLd data={servicesSchema} />
 
       <Header />
 

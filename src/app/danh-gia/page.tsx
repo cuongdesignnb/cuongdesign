@@ -8,13 +8,14 @@ import TestimonialForm from "@/components/ui/TestimonialForm";
 import { prisma } from "@/lib/db";
 import { testimonials as staticTestimonials } from "@/data/testimonials";
 import { Star, Quote, MessageSquare } from "lucide-react";
-import { Metadata } from "next";
+import { createMetadata, JsonLd, buildProfessionalServiceSchema } from "@/lib/seo";
 
-export const metadata: Metadata = {
-  title: "Khách hàng đánh giá & Nhận xét về dịch vụ | Cường Design",
+export const metadata = createMetadata({
+  title: "Đánh giá & Nhận xét từ khách hàng",
   description: "Đọc các nhận xét, phản hồi thực tế từ các đối tác, khách hàng đã hợp tác thiết kế UI/UX và lập trình website cùng Cường Design. Gửi đánh giá của riêng bạn.",
+  path: "/danh-gia",
   keywords: ["Đánh giá Cường Design", "Nhận xét khách hàng", "Testimonials freelancer", "Thiết kế website uy tín"],
-};
+});
 
 export default async function TestimonialsListPage() {
   // Fetch only published testimonials from database
@@ -37,41 +38,36 @@ export default async function TestimonialsListPage() {
   // Calculate average rating for schema
   const avgRating = testimonials.reduce((acc, curr) => acc + curr.rating, 0) / testimonials.length;
 
-  // Schema.org AggregateRating metadata
+  // Schema.org ProfessionalService with AggregateRating metadata
   const ratingSchema = {
     "@context": "https://schema.org",
-    "@type": "Product",
-    "name": "Dịch vụ Thiết kế & Lập trình Web Cường Design",
-    "image": "https://cuongdesign.com/images/og-image.jpg",
-    "description": "Dịch vụ thiết kế UI/UX và lập trình Fullstack website chất lượng cao của Cường Design.",
-    "aggregateRating": {
-      "@type": "AggregateRating",
-      "ratingValue": avgRating.toFixed(1),
-      "reviewCount": testimonials.length,
-      "bestRating": "5",
-      "worstRating": "1"
-    },
-    "review": testimonials.map((t) => ({
-      "@type": "Review",
-      "author": {
-        "@type": "Person",
-        "name": t.name
+    ...buildProfessionalServiceSchema({
+      aggregateRating: {
+        "@type": "AggregateRating",
+        "ratingValue": avgRating.toFixed(1),
+        "reviewCount": testimonials.length,
+        "bestRating": "5",
+        "worstRating": "1"
       },
-      "reviewRating": {
-        "@type": "Rating",
-        "ratingValue": t.rating
-      },
-      "reviewBody": t.quote
-    }))
+      review: testimonials.map((t) => ({
+        "@type": "Review",
+        "author": {
+          "@type": "Person",
+          "name": t.name
+        },
+        "reviewRating": {
+          "@type": "Rating",
+          "ratingValue": t.rating
+        },
+        "reviewBody": t.quote
+      }))
+    })
   };
 
   return (
     <div className="min-h-screen bg-[#030014] text-gray-200 flex flex-col">
       {/* Inject Structured Data */}
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(ratingSchema) }}
-      />
+      <JsonLd data={ratingSchema} />
 
       <Header />
 

@@ -39,6 +39,9 @@ export async function generateMetadata({ params }: BlogPostPageProps): Promise<M
       type: "article",
       publishedTime: post.publishedAt?.toISOString(),
     },
+    alternates: {
+      canonical: `https://cuongdesign.com/bai-viet/${slug}`,
+    },
   };
 }
 

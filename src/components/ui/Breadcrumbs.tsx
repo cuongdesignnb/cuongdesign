@@ -3,7 +3,7 @@
 import React from "react";
 import Link from "next/link";
 import { ChevronRight, Home } from "lucide-react";
-import { siteConfig } from "@/data/site";
+import { JsonLd, buildBreadcrumbSchema } from "@/lib/seo";
 
 interface BreadcrumbItem {
   label: string;
@@ -15,35 +15,20 @@ interface BreadcrumbsProps {
 }
 
 export default function Breadcrumbs({ items }: BreadcrumbsProps) {
-  const baseUrl = siteConfig?.url || "https://cuongdesign.com";
-
-  // Build JSON-LD Structured Schema for search engines
-  const jsonLd = {
-    "@context": "https://schema.org",
-    "@type": "BreadcrumbList",
-    "itemListElement": [
-      {
-        "@type": "ListItem",
-        "position": 1,
-        "name": "Trang chủ",
-        "item": baseUrl,
-      },
-      ...items.map((item, index) => ({
-        "@type": "ListItem",
-        "position": index + 2,
-        "name": item.label,
-        "item": item.href ? `${baseUrl}${item.href}` : undefined,
-      })),
-    ],
-  };
+  // Map breadcrumb items for the schema builder:
+  // "Trang chủ" is always the first item, then all passed items
+  const schemaItems = [
+    { name: "Trang chủ", href: "/" },
+    ...items.map((item) => ({
+      name: item.label,
+      href: item.href || "",
+    })),
+  ];
 
   return (
     <nav className="flex flex-col space-y-2 text-left z-10 relative">
       {/* Inject JSON-LD Schema */}
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
-      />
+      <JsonLd data={buildBreadcrumbSchema(schemaItems)} />
 
       <ol className="flex flex-wrap items-center space-x-2 text-[11px] md:text-xs text-gray-500 font-medium">
         <li className="flex items-center">

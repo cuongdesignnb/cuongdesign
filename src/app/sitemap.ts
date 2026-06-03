@@ -1,6 +1,7 @@
 import { MetadataRoute } from "next";
 import { prisma } from "@/lib/db";
 import { siteConfig } from "@/data/site";
+import { servicesDetail } from "@/data/services-detail";
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const baseUrl = siteConfig?.url || "https://cuongdesign.com";
@@ -16,7 +17,11 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     "/ky-nang",
     "/danh-gia",
     "/lien-he",
+    "/bai-viet",
   ];
+
+  // Service landing pages
+  const servicePaths = servicesDetail.map((s) => `/dich-vu/${s.slug}`);
 
   const staticRoutes = staticPaths.map((path) => ({
     url: `${baseUrl}${path}`,
@@ -76,8 +81,16 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       priority: 0.8,
     }));
 
+    const serviceRoutes = servicePaths.map((path) => ({
+      url: `${baseUrl}${path}`,
+      lastModified: new Date(),
+      changeFrequency: "monthly" as const,
+      priority: 0.8,
+    }));
+
     return [
       ...staticRoutes,
+      ...serviceRoutes,
       ...pageRoutes,
       ...blogRoutes,
       ...projectRoutes,

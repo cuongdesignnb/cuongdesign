@@ -7,13 +7,15 @@ import GradientText from "@/components/ui/GradientText";
 import Button from "@/components/ui/Button";
 import { MessageSquare, Layout, Paintbrush, Cpu, CheckCircle2, ShieldAlert, ArrowRight } from "lucide-react";
 import Link from "next/link";
-import { Metadata } from "next";
+import { createMetadata, JsonLd } from "@/lib/seo";
+import { siteConfig } from "@/data/site";
 
-export const metadata: Metadata = {
-  title: "Quy trình thiết kế & Lập trình website chuyên nghiệp | Cường Design",
+export const metadata = createMetadata({
+  title: "Quy trình làm việc chuyên nghiệp",
   description: "Khám phá quy trình làm việc chuẩn 6 bước tại Cường Design giúp tối giản hóa thời gian triển khai dự án, nâng cao hiệu suất SEO, bảo mật cơ sở dữ liệu và đảm bảo bàn giao sản phẩm pixel-perfect.",
-  keywords: ["Quy trình thiết kế website", "Lập trình web freelancer", "Bàn giao source code", "Quy trình thiết kế Figma", "Cường Design"],
-};
+  path: "/quy-trinh",
+  keywords: ["Quy trình thiết kế website", "Lập trình web freelancer", "Bàn giao source code", "Quy trình thiết kế Figma"],
+});
 
 export default function ProcessPage() {
   const steps = [
@@ -79,8 +81,25 @@ export default function ProcessPage() {
     }
   ];
 
+  // HowTo JSON-LD schema with steps from work process
+  const howToSchema = {
+    "@context": "https://schema.org",
+    "@type": "HowTo",
+    "name": "Quy trình thiết kế & lập trình website chuyên nghiệp",
+    "description": "Quy trình 6 bước phát triển phần mềm và thiết kế giao diện chuẩn hóa tại Cuong Design.",
+    "url": `${siteConfig.url}/quy-trinh`,
+    "totalTime": "P30D",
+    "step": steps.map((step) => ({
+      "@type": "HowToStep",
+      "name": step.title,
+      "text": step.desc,
+      "url": `${siteConfig.url}/quy-trinh#step-${step.id}`
+    }))
+  };
+
   return (
     <div className="min-h-screen bg-[#030014] text-gray-200 flex flex-col">
+      <JsonLd data={howToSchema} />
       <Header />
 
       <main className="grow pt-28 pb-16 px-4 sm:px-6 lg:px-8 relative overflow-hidden">

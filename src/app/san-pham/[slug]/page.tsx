@@ -25,10 +25,20 @@ export async function generateMetadata({ params }: ProductPageProps): Promise<Me
   return {
     title: `${product.title} - Mua mã nguồn | Cường Design`,
     description: product.description,
+    keywords: product.techStack,
     openGraph: {
       title: product.title,
       description: product.description,
       images: [{ url: product.coverImage }],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: `${product.title} - Mua mã nguồn | Cường Design`,
+      description: product.description,
+      images: [product.coverImage],
+    },
+    alternates: {
+      canonical: `https://cuongdesign.com/san-pham/${slug}`,
     },
   };
 }

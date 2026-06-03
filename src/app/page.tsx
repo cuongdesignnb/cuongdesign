@@ -11,6 +11,8 @@ import TestimonialsSection from "@/components/sections/TestimonialsSection";
 import CTASection from "@/components/sections/CTASection";
 import ContactSection from "@/components/sections/ContactSection";
 import Footer from "@/components/layout/Footer";
+import { createMetadata, JsonLd } from "@/lib/seo";
+import { siteConfig } from "@/data/site";
 
 // Database integrations
 import { prisma } from "@/lib/db";
@@ -18,6 +20,20 @@ import { projects as staticProjects } from "@/data/projects";
 import { products as staticProducts } from "@/data/products";
 import { testimonials as staticTestimonials } from "@/data/testimonials";
 import bcrypt from "bcryptjs";
+
+export const metadata = createMetadata({
+  titleAbsolute: "Cuong Design — Freelancer Developer & Thiết kế UI/UX Website",
+  description:
+    "Thiết kế UI/UX và lập trình website, landing page, web app chuẩn SEO, tối ưu tốc độ & chuyển đổi cao. Freelancer Developer chuyên Next.js, React, Laravel tại Việt Nam.",
+  path: "/",
+  keywords: [
+    "thiết kế website",
+    "lập trình web",
+    "freelancer developer Việt Nam",
+    "thiết kế giao diện UI/UX",
+    "mua source code Next.js",
+  ],
+});
 
 export default async function Home() {
   // 0. Self-seeding database check for default Admin User

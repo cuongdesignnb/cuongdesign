@@ -8,13 +8,14 @@ import Button from "@/components/ui/Button";
 import { prisma } from "@/lib/db";
 import { BookOpen, Calendar, ArrowRight, Clock } from "lucide-react";
 import Link from "next/link";
-import { Metadata } from "next";
+import { createMetadata, JsonLd } from "@/lib/seo";
 
-export const metadata: Metadata = {
-  title: "Chia sẻ kiến thức & Tin tức công nghệ | Cường Design",
+export const metadata = createMetadata({
+  title: "Blog — Bài viết & Chia sẻ kiến thức",
   description: "Đọc các bài viết chia sẻ kinh nghiệm lập trình Next.js, React, Node.js, kiến thức thiết kế giao diện UI/UX Figma và tin tức xu hướng công nghệ mới từ Cường Design.",
+  path: "/bai-viet",
   keywords: ["Blog lập trình", "Hướng dẫn Next.js", "Kinh nghiệm thiết kế UI/UX", "Tin tức công nghệ", "Cường Design Blog"],
-};
+});
 
 export default async function BlogListPage() {
   // Fetch published posts
@@ -59,10 +60,7 @@ export default async function BlogListPage() {
   return (
     <div className="min-h-screen bg-[#030014] text-gray-200 flex flex-col">
       {/* Inject Structured Data */}
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(blogSchema) }}
-      />
+      <JsonLd data={blogSchema} />
 
       <Header />
 

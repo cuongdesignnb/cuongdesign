@@ -27,10 +27,20 @@ export async function generateMetadata({ params }: ProjectPageProps): Promise<Me
   return {
     title: `${project.title} - Chi tiết dự án | Cường Design`,
     description: project.description,
+    keywords: project.techStack,
     openGraph: {
       title: project.title,
       description: project.description,
       images: [{ url: project.coverImage }],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: `${project.title} - Chi tiết dự án | Cường Design`,
+      description: project.description,
+      images: [project.coverImage],
+    },
+    alternates: {
+      canonical: `https://cuongdesign.com/du-an/${slug}`,
     },
   };
 }

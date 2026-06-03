@@ -7,13 +7,15 @@ import GradientText from "@/components/ui/GradientText";
 import Button from "@/components/ui/Button";
 import { Cpu, Layout, Server, Database, Settings, Sparkles, ArrowRight, ShieldCheck } from "lucide-react";
 import Link from "next/link";
-import { Metadata } from "next";
+import { createMetadata, JsonLd } from "@/lib/seo";
+import { siteConfig } from "@/data/site";
 
-export const metadata: Metadata = {
-  title: "Năng lực công nghệ & Kỹ năng lập trình | Cường Design",
+export const metadata = createMetadata({
+  title: "Kỹ năng & Công nghệ sử dụng",
   description: "Xem chi tiết hệ sinh thái kỹ năng lập trình Fullstack (Next.js, React, TypeScript, Node.js, Prisma, PostgreSQL), thiết kế UI/UX Figma và tối ưu hóa hệ thống Web App của Cường Design.",
-  keywords: ["Kỹ năng lập trình", "Chuyên gia Next.js", "Lập trình viên Fullstack", "Thiết kế Figma UI/UX", "Cường Design"],
-};
+  path: "/ky-nang",
+  keywords: ["Kỹ năng lập trình", "Chuyên gia Next.js", "Lập trình viên Fullstack", "Thiết kế Figma UI/UX"],
+});
 
 export default function SkillsPage() {
   const skillGroups = [
@@ -90,8 +92,28 @@ export default function SkillsPage() {
     }
   ];
 
+  // WebPage + ItemList JSON-LD schema for skill categories
+  const skillsSchema = {
+    "@context": "https://schema.org",
+    "@type": "WebPage",
+    "name": "Kỹ năng & Công nghệ sử dụng — Cuong Design",
+    "description": "Tổng hợp bộ kỹ năng lập trình Fullstack và thiết kế UI/UX của Cuong Design.",
+    "url": `${siteConfig.url}/ky-nang`,
+    "mainEntity": {
+      "@type": "ItemList",
+      "numberOfItems": skillGroups.length,
+      "itemListElement": skillGroups.map((group, index) => ({
+        "@type": "ListItem",
+        "position": index + 1,
+        "name": group.category,
+        "description": group.desc
+      }))
+    }
+  };
+
   return (
     <div className="min-h-screen bg-[#030014] text-gray-200 flex flex-col">
+      <JsonLd data={skillsSchema} />
       <Header />
 
       <main className="grow pt-28 pb-16 px-4 sm:px-6 lg:px-8 relative overflow-hidden">
