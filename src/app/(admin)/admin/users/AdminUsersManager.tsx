@@ -2,6 +2,7 @@
 
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
+import { useToast } from "@/components/ui/Toast";
 import { updateUserRole, deleteUser } from "@/app/actions/admin-users";
 import {
   Users,
@@ -36,6 +37,7 @@ export default function AdminUsersManager({
   currentUserId,
 }: AdminUsersManagerProps) {
   const router = useRouter();
+  const toast = useToast();
   const [loading, setLoading] = useState<string | null>(null);
 
   const totalCount = initialData.length;
@@ -51,12 +53,13 @@ export default function AdminUsersManager({
     try {
       const res = await updateUserRole(userId, newRole, currentUserId);
       if (res.success) {
+        toast.success("Thành công", "Đã cập nhật vai trò người dùng");
         router.refresh();
       } else {
-        alert("Lỗi: " + res.error);
+        toast.error("Lỗi", res.error);
       }
     } catch (err: any) {
-      alert("Đã xảy ra lỗi: " + err.message);
+      toast.error("Lỗi", err.message);
     } finally {
       setLoading(null);
     }
@@ -69,12 +72,13 @@ export default function AdminUsersManager({
     try {
       const res = await deleteUser(userId, currentUserId);
       if (res.success) {
+        toast.success("Thành công", "Đã xóa người dùng");
         router.refresh();
       } else {
-        alert("Lỗi: " + res.error);
+        toast.error("Lỗi", res.error);
       }
     } catch (err: any) {
-      alert("Đã xảy ra lỗi: " + err.message);
+      toast.error("Lỗi", err.message);
     } finally {
       setLoading(null);
     }

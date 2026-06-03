@@ -3,6 +3,43 @@
 import { prisma } from "@/lib/db";
 import type { PostStatus } from "@prisma/client";
 
+export async function createPost(data: {
+  title: string;
+  slug: string;
+  excerpt?: string;
+  content?: string;
+  coverImage?: string;
+  status?: PostStatus;
+  categoryId?: string;
+  seoTitle?: string;
+  seoDescription?: string;
+  seoKeywords?: string;
+}) {
+  try {
+    const post = await prisma.post.create({
+      data: {
+        title: data.title,
+        slug: data.slug,
+        excerpt: data.excerpt || null,
+        content: data.content || "",
+        coverImage: data.coverImage || null,
+        status: data.status || "DRAFT",
+        categoryId: data.categoryId || null,
+        publishedAt: data.status === "PUBLISHED" ? new Date() : null,
+        seoTitle: data.seoTitle || null,
+        seoDescription: data.seoDescription || null,
+        seoKeywords: data.seoKeywords
+          ? data.seoKeywords.split(",").map((k) => k.trim()).filter(Boolean)
+          : [],
+      },
+    });
+    return { success: true, data: post };
+  } catch (error: any) {
+    console.error("Error creating post:", error);
+    return { success: false, error: error.message };
+  }
+}
+
 export async function getPosts(filter?: { status?: string }) {
   try {
     const where = filter?.status ? { status: filter.status as PostStatus } : {};

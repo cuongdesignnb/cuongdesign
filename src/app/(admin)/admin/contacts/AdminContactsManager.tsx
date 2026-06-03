@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useMemo } from "react";
+import { useToast } from "@/components/ui/Toast";
 import { useRouter } from "next/navigation";
 import {
   Inbox,
@@ -49,6 +50,7 @@ export default function AdminContactsManager({
   stats,
 }: Props) {
   const router = useRouter();
+  const toast = useToast();
   const [activeTab, setActiveTab] = useState<FilterTab>("ALL");
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const [loading, setLoading] = useState<string | null>(null);
@@ -65,9 +67,10 @@ export default function AdminContactsManager({
     setLoading(id);
     const result = await markContactProcessed(id);
     if (result.success) {
+      toast.success("Thành công", "Đã đánh dấu liên hệ là đã xử lý.");
       router.refresh();
     } else {
-      alert("Lỗi: " + result.error);
+      toast.error("Lỗi", result.error);
     }
     setLoading(null);
   }
@@ -77,9 +80,10 @@ export default function AdminContactsManager({
     setLoading(id);
     const result = await deleteContact(id);
     if (result.success) {
+      toast.success("Thành công", "Đã xoá liên hệ.");
       router.refresh();
     } else {
-      alert("Lỗi: " + result.error);
+      toast.error("Lỗi", result.error);
     }
     setLoading(null);
   }

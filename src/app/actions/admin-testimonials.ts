@@ -2,6 +2,35 @@
 
 import { prisma } from "@/lib/db";
 
+export async function createTestimonial(data: {
+  name: string;
+  role: string;
+  company?: string;
+  avatar?: string;
+  rating: number;
+  quote: string;
+  order?: number;
+}) {
+  try {
+    const testimonial = await prisma.testimonial.create({
+      data: {
+        name: data.name,
+        role: data.role,
+        company: data.company || null,
+        avatar: data.avatar || "",
+        rating: data.rating,
+        quote: data.quote,
+        order: data.order || 0,
+        isPublished: true,
+      },
+    });
+    return { success: true, data: testimonial };
+  } catch (error: any) {
+    console.error("Error creating testimonial:", error);
+    return { success: false, error: error.message };
+  }
+}
+
 export async function getTestimonials() {
   try {
     const testimonials = await prisma.testimonial.findMany({

@@ -2,7 +2,8 @@
 
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
-import { updatePost, deletePost, togglePostStatus } from "@/app/actions/admin-posts";
+import { createPost, updatePost, deletePost, togglePostStatus } from "@/app/actions/admin-posts";
+import { useToast } from "@/components/ui/Toast";
 import {
   FileText,
   Edit2,
@@ -15,6 +16,7 @@ import {
   Clock,
   PenLine,
   Search,
+  Plus,
 } from "lucide-react";
 
 interface CategoryOption {
@@ -51,8 +53,10 @@ type FilterTab = "ALL" | "PUBLISHED" | "DRAFT" | "SCHEDULED";
 
 export default function AdminPostsManager({ initialPosts, categories }: AdminPostsManagerProps) {
   const router = useRouter();
+  const toast = useToast();
   const [filter, setFilter] = useState<FilterTab>("ALL");
   const [editingPost, setEditingPost] = useState<PostItem | null>(null);
+  const [isCreateMode, setIsCreateMode] = useState(false);
   const [formData, setFormData] = useState<Partial<PostItem>>({});
   const [saving, setSaving] = useState(false);
 
@@ -78,6 +82,7 @@ export default function AdminPostsManager({ initialPosts, categories }: AdminPos
   const [selectedCategoryId, setSelectedCategoryId] = useState<string>("");
 
   const openEdit = (post: PostItem) => {
+    setIsCreateMode(false);
     setEditingPost(post);
     setFormData({
       title: post.title,
@@ -93,36 +98,62 @@ export default function AdminPostsManager({ initialPosts, categories }: AdminPos
     setSelectedCategoryId(post.categoryId || "");
   };
 
+  const openCreate = () => {
+    setIsCreateMode(true);
+    setEditingPost({ id: "__new__" } as PostItem);
+    setFormData({
+      title: "",
+      slug: "",
+      excerpt: "",
+      content: "",
+      coverImage: "",
+      status: "DRAFT",
+      seoTitle: "",
+      seoDescription: "",
+      seoKeywords: "",
+    });
+    setSelectedCategoryId("");
+  };
+
   const closeEdit = () => {
     setEditingPost(null);
+    setIsCreateMode(false);
     setFormData({});
     setSelectedCategoryId("");
   };
 
   const handleSave = async () => {
     if (!editingPost) return;
+    if (!formData.title?.trim() || !formData.slug?.trim()) {
+      toast.warning("Cảnh báo", "Vui lòng nhập tiêu đề và slug.");
+      return;
+    }
     setSaving(true);
     try {
-      const res = await updatePost(editingPost.id, {
+      const payload = {
         title: formData.title,
         slug: formData.slug,
         excerpt: formData.excerpt || undefined,
         content: formData.content || undefined,
         coverImage: formData.coverImage || undefined,
         status: formData.status as "DRAFT" | "PUBLISHED" | "SCHEDULED" | undefined,
-        categoryId: selectedCategoryId || null,
+        categoryId: selectedCategoryId || undefined,
         seoTitle: formData.seoTitle || undefined,
         seoDescription: formData.seoDescription || undefined,
         seoKeywords: formData.seoKeywords || undefined,
-      });
+      };
+      const res = isCreateMode
+        ? await createPost(payload)
+        : await updatePost(editingPost.id, { ...payload, categoryId: selectedCategoryId || null });
       if (res.success) {
+        toast.success("Thành công", isCreateMode ? "Đã tạo bài viết mới." : "Đã lưu thay đổi.");
         closeEdit();
         router.refresh();
       } else {
-        alert("Lỗi: " + res.error);
+        toast.error("Lỗi", res.error);
       }
     } catch (err: any) {
-      alert("Đã xảy ra lỗi: " + err.message);
+      toast.error("Lỗi", err.message);
     } finally {
       setSaving(false);
     }
@@ -132,12 +163,13 @@ export default function AdminPostsManager({ initialPosts, categories }: AdminPos
     try {
       const res = await togglePostStatus(id);
       if (res.success) {
+        toast.success("Thành công", "Đã cập nhật trạng thái bài viết.");
         router.refresh();
       } else {
-        alert("Lỗi: " + res.error);
+        toast.error("Lỗi", res.error);
       }
     } catch (err: any) {
-      alert("Đã xảy ra lỗi: " + err.message);
+      toast.error("Lỗi", err.message);
     }
   };
 
@@ -146,12 +178,13 @@ export default function AdminPostsManager({ initialPosts, categories }: AdminPos
     try {
       const res = await deletePost(id);
       if (res.success) {
+        toast.success("Thành công", "Đã xóa bài viết.");
         router.refresh();
       } else {
-        alert("Lỗi: " + res.error);
+        toast.error("Lỗi", res.error);
       }
     } catch (err: any) {
-      alert("Đã xảy ra lỗi: " + err.message);
+      toast.error("Lỗi", err.message);
     }
   };
 
@@ -210,21 +243,30 @@ export default function AdminPostsManager({ initialPosts, categories }: AdminPos
         ))}
       </div>
 
-      {/* Filter tabs */}
-      <div className="flex gap-2 flex-wrap">
-        {tabs.map((tab) => (
-          <button
-            key={tab.key}
-            onClick={() => setFilter(tab.key)}
-            className={`px-4 py-2 rounded-lg text-xs font-semibold transition-all cursor-pointer ${
-              filter === tab.key
-                ? "bg-pink-500 text-white"
-                : "bg-white/5 text-gray-400 hover:bg-white/10 border border-white/10"
-            }`}
-          >
-            {tab.label} ({tab.count})
-          </button>
-        ))}
+      {/* Filter tabs + Create button */}
+      <div className="flex items-center justify-between gap-4 flex-wrap">
+        <div className="flex gap-2 flex-wrap">
+          {tabs.map((tab) => (
+            <button
+              key={tab.key}
+              onClick={() => setFilter(tab.key)}
+              className={`px-4 py-2 rounded-lg text-xs font-semibold transition-all cursor-pointer ${
+                filter === tab.key
+                  ? "bg-pink-500 text-white"
+                  : "bg-white/5 text-gray-400 hover:bg-white/10 border border-white/10"
+              }`}
+            >
+              {tab.label} ({tab.count})
+            </button>
+          ))}
+        </div>
+        <button
+          onClick={openCreate}
+          className="px-4 py-2 rounded-lg text-xs font-semibold bg-pink-500 hover:bg-pink-600 text-white flex items-center gap-1.5 transition-all cursor-pointer"
+        >
+          <Plus className="w-4 h-4" />
+          Thêm bài viết mới
+        </button>
       </div>
 
       {/* Table */}
@@ -330,7 +372,7 @@ export default function AdminPostsManager({ initialPosts, categories }: AdminPos
             <div className="flex items-center justify-between border-b border-white/5 pb-4">
               <h3 className="text-lg font-bold text-white flex items-center gap-2">
                 <FileText className="w-5 h-5 text-pink-500" />
-                <span>Chỉnh sửa bài viết</span>
+                <span>{isCreateMode ? "Thêm bài viết mới" : "Chỉnh sửa bài viết"}</span>
               </h3>
               <button
                 onClick={closeEdit}
@@ -508,7 +550,7 @@ export default function AdminPostsManager({ initialPosts, categories }: AdminPos
                 ) : (
                   <>
                     <Save className="w-4 h-4" />
-                    <span>Lưu thay đổi</span>
+                    <span>{isCreateMode ? "Tạo bài viết" : "Lưu thay đổi"}</span>
                   </>
                 )}
               </button>

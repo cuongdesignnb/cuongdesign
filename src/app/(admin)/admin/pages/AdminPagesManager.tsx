@@ -2,6 +2,7 @@
 
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
+import { useToast } from "@/components/ui/Toast";
 import { upsertPage, deletePage } from "@/app/actions/pages";
 import GlassCard from "@/components/ui/GlassCard";
 import Button from "@/components/ui/Button";
@@ -38,6 +39,7 @@ function slugify(text: string) {
 
 export default function AdminPagesManager({ initialPages }: AdminPagesManagerProps) {
   const router = useRouter();
+  const toast = useToast();
   const [pages, setPages] = useState<PageItem[]>(initialPages);
   const [editingPage, setEditingPage] = useState<Partial<PageItem> | null>(null);
   const [saving, setSaving] = useState(false);
@@ -63,19 +65,20 @@ export default function AdminPagesManager({ initialPages }: AdminPagesManagerPro
     try {
       const res = await deletePage(id);
       if (res.success) {
+        toast.success("Thành công", "Đã xóa trang chính sách");
         router.refresh();
       } else {
-        alert("Lỗi: " + res.error);
+        toast.error("Lỗi", res.error);
       }
     } catch (err: any) {
-      alert("Đã xảy ra lỗi: " + err.message);
+      toast.error("Lỗi", err.message);
     }
   };
 
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!editingPage || !editingPage.title || !editingPage.slug) {
-      alert("Vui lòng điền đầy đủ tiêu đề và slug.");
+      toast.warning("Cảnh báo", "Vui lòng điền đầy đủ tiêu đề và slug.");
       return;
     }
 
@@ -92,13 +95,14 @@ export default function AdminPagesManager({ initialPages }: AdminPagesManagerPro
       });
 
       if (res.success) {
+        toast.success("Thành công", editingPage.id ? "Đã cập nhật trang" : "Đã tạo trang mới");
         setEditingPage(null);
         router.refresh();
       } else {
-        alert("Lỗi: " + res.error);
+        toast.error("Lỗi", res.error);
       }
     } catch (err: any) {
-      alert("Đã xảy ra lỗi: " + err.message);
+      toast.error("Lỗi", err.message);
     } finally {
       setSaving(false);
     }

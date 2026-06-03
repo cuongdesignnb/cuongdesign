@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useMemo } from "react";
+import { useToast } from "@/components/ui/Toast";
 import { useRouter } from "next/navigation";
 import {
   ShoppingCart,
@@ -70,6 +71,7 @@ const statusConfig = {
 
 export default function AdminOrdersManager({ initialOrders, stats }: Props) {
   const router = useRouter();
+  const toast = useToast();
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("ALL");
   const [expandedId, setExpandedId] = useState<string | null>(null);
@@ -101,9 +103,10 @@ export default function AdminOrdersManager({ initialOrders, stats }: Props) {
     setOpenMenuId(null);
     const result = await updateOrderStatus(id, status);
     if (result.success) {
+      toast.success("Thành công", `Đã cập nhật trạng thái đơn hàng thành ${status === "COMPLETED" ? "Hoàn thành" : "Thất bại"}.`);
       router.refresh();
     } else {
-      alert("Lỗi: " + result.error);
+      toast.error("Lỗi", result.error);
     }
     setLoading(null);
   }
@@ -114,9 +117,10 @@ export default function AdminOrdersManager({ initialOrders, stats }: Props) {
     setOpenMenuId(null);
     const result = await deleteOrder(id);
     if (result.success) {
+      toast.success("Thành công", "Đã xoá đơn hàng.");
       router.refresh();
     } else {
-      alert("Lỗi: " + result.error);
+      toast.error("Lỗi", result.error);
     }
     setLoading(null);
   }

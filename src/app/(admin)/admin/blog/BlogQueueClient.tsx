@@ -3,6 +3,7 @@
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
 import { addKeywordsToQueue, deleteAiTask } from "@/app/actions/blog";
+import { useToast } from "@/components/ui/Toast";
 import GlassCard from "@/components/ui/GlassCard";
 import Button from "@/components/ui/Button";
 import {
@@ -36,6 +37,7 @@ interface BlogQueueClientProps {
 
 export default function BlogQueueClient({ initialTasks, categories }: BlogQueueClientProps) {
   const router = useRouter();
+  const toast = useToast();
   const [tasks, setTasks] = useState<Task[]>(initialTasks);
   const [keywords, setKeywords] = useState("");
   const [scheduleStart, setScheduleStart] = useState(() => {
@@ -55,7 +57,7 @@ export default function BlogQueueClient({ initialTasks, categories }: BlogQueueC
     e.preventDefault();
     if (!keywords.trim()) return;
     if (!selectedCategoryId) {
-      alert("Vui lòng chọn chuyên mục cho bài viết.");
+      toast.warning("Cảnh báo", "Vui lòng chọn chuyên mục cho bài viết.");
       return;
     }
 
@@ -63,13 +65,14 @@ export default function BlogQueueClient({ initialTasks, categories }: BlogQueueC
     try {
       const res = await addKeywordsToQueue(keywords, scheduleStart, gapHours, selectedCategoryId);
       if (res.success) {
+        toast.success("Thành công", "Đã thêm từ khóa vào hàng đợi.");
         setKeywords("");
         router.refresh();
       } else {
-        alert("Lỗi: " + res.error);
+        toast.error("Lỗi", res.error);
       }
     } catch (err: any) {
-      alert("Đã xảy ra lỗi: " + err.message);
+      toast.error("Lỗi", err.message);
     } finally {
       setIsSubmitting(false);
     }
@@ -81,12 +84,13 @@ export default function BlogQueueClient({ initialTasks, categories }: BlogQueueC
     try {
       const res = await deleteAiTask(id);
       if (res.success) {
+        toast.success("Thành công", "Đã xóa từ khóa khỏi hàng đợi.");
         router.refresh();
       } else {
-        alert("Lỗi: " + res.error);
+        toast.error("Lỗi", res.error);
       }
     } catch (err: any) {
-      alert("Đã xảy ra lỗi: " + err.message);
+      toast.error("Lỗi", err.message);
     }
   };
 
@@ -98,14 +102,14 @@ export default function BlogQueueClient({ initialTasks, categories }: BlogQueueC
       });
       const data = await res.json();
       if (res.ok && data.success) {
-        alert("Bài viết đã được sinh thành công!");
+        toast.success("Thành công", "Bài viết đã được sinh thành công!");
         router.refresh();
       } else {
-        alert("Lỗi sinh bài viết: " + (data.error || "Không rõ nguyên nhân"));
+        toast.error("Lỗi", data.error || "Không rõ nguyên nhân");
         router.refresh();
       }
     } catch (err: any) {
-      alert("Lỗi kết nối: " + err.message);
+      toast.error("Lỗi", err.message);
     } finally {
       setRunningTaskId(null);
     }

@@ -2,6 +2,7 @@
 
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
+import { useToast } from "@/components/ui/Toast";
 import { approveReview, rejectReview, deleteReview } from "@/app/actions/admin-reviews";
 import {
   Star,
@@ -50,6 +51,7 @@ export default function AdminReviewsManager({
   initialPendingCount,
 }: AdminReviewsManagerProps) {
   const router = useRouter();
+  const toast = useToast();
   const [filter, setFilter] = useState<FilterTab>("ALL");
 
   const filteredReviews =
@@ -75,12 +77,13 @@ export default function AdminReviewsManager({
     try {
       const res = await approveReview(id);
       if (res.success) {
+        toast.success("Thành công", "Đã duyệt đánh giá");
         router.refresh();
       } else {
-        alert("Lỗi: " + res.error);
+        toast.error("Lỗi", res.error);
       }
     } catch (err: any) {
-      alert("Đã xảy ra lỗi: " + err.message);
+      toast.error("Lỗi", err.message);
     }
   };
 
@@ -88,12 +91,13 @@ export default function AdminReviewsManager({
     try {
       const res = await rejectReview(id);
       if (res.success) {
+        toast.success("Thành công", "Đã bỏ duyệt đánh giá");
         router.refresh();
       } else {
-        alert("Lỗi: " + res.error);
+        toast.error("Lỗi", res.error);
       }
     } catch (err: any) {
-      alert("Đã xảy ra lỗi: " + err.message);
+      toast.error("Lỗi", err.message);
     }
   };
 
@@ -102,12 +106,13 @@ export default function AdminReviewsManager({
     try {
       const res = await deleteReview(id);
       if (res.success) {
+        toast.success("Thành công", "Đã xóa đánh giá");
         router.refresh();
       } else {
-        alert("Lỗi: " + res.error);
+        toast.error("Lỗi", res.error);
       }
     } catch (err: any) {
-      alert("Đã xảy ra lỗi: " + err.message);
+      toast.error("Lỗi", err.message);
     }
   };
 

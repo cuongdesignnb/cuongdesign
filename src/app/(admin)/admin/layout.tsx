@@ -20,6 +20,7 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import GradientText from "@/components/ui/GradientText";
+import { ToastProvider } from "@/components/ui/Toast";
 
 interface AdminLayoutProps {
   children: React.ReactNode;
@@ -57,6 +58,7 @@ export default async function AdminLayout({ children }: AdminLayoutProps) {
   ];
 
   return (
+    <ToastProvider>
     <div className="min-h-screen bg-[#060417] text-gray-200 flex flex-col lg:flex-row">
       {/* Sidebar Navigation */}
       <aside className="w-full lg:w-64 border-r border-white/5 bg-[#0a0822] flex flex-col justify-between shrink-0">
@@ -117,5 +119,6 @@ export default async function AdminLayout({ children }: AdminLayoutProps) {
         </div>
       </main>
     </div>
+    </ToastProvider>
   );
 }

@@ -2,10 +2,12 @@
 
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
+import { useToast } from "@/components/ui/Toast";
 import {
   toggleTestimonialPublish,
   updateTestimonial,
   deleteTestimonial,
+  createTestimonial,
 } from "@/app/actions/admin-testimonials";
 import {
   Star,
@@ -17,6 +19,7 @@ import {
   EyeOff,
   MessageSquarePlus,
   Quote,
+  Plus,
 } from "lucide-react";
 
 interface Testimonial {
@@ -40,6 +43,7 @@ export default function AdminTestimonialsManager({
   initialData,
 }: AdminTestimonialsManagerProps) {
   const router = useRouter();
+  const toast = useToast();
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editForm, setEditForm] = useState<Partial<Testimonial>>({});
   const [saving, setSaving] = useState(false);
@@ -48,16 +52,19 @@ export default function AdminTestimonialsManager({
   const publishedCount = initialData.filter((t) => t.isPublished).length;
   const hiddenCount = totalCount - publishedCount;
 
+  const isCreateMode = editingId === "NEW";
+
   const handleTogglePublish = async (id: string) => {
     try {
       const res = await toggleTestimonialPublish(id);
       if (res.success) {
+        toast.success("Thành công", "Đã cập nhật trạng thái hiển thị");
         router.refresh();
       } else {
-        alert("Lỗi: " + res.error);
+        toast.error("Lỗi", res.error);
       }
     } catch (err: any) {
-      alert("Đã xảy ra lỗi: " + err.message);
+      toast.error("Lỗi", err.message);
     }
   };
 
@@ -66,13 +73,27 @@ export default function AdminTestimonialsManager({
     try {
       const res = await deleteTestimonial(id);
       if (res.success) {
+        toast.success("Thành công", "Đã xóa đánh giá");
         router.refresh();
       } else {
-        alert("Lỗi: " + res.error);
+        toast.error("Lỗi", res.error);
       }
     } catch (err: any) {
-      alert("Đã xảy ra lỗi: " + err.message);
+      toast.error("Lỗi", err.message);
     }
+  };
+
+  const openCreateModal = () => {
+    setEditingId("NEW");
+    setEditForm({
+      name: "",
+      role: "",
+      company: "",
+      avatar: "",
+      rating: 5,
+      quote: "",
+      order: 0,
+    });
   };
 
   const openEditModal = (t: Testimonial) => {
@@ -93,23 +114,45 @@ export default function AdminTestimonialsManager({
     if (!editingId) return;
     setSaving(true);
     try {
-      const res = await updateTestimonial(editingId, {
-        name: editForm.name,
-        role: editForm.role || undefined,
-        company: editForm.company || undefined,
-        avatar: editForm.avatar || undefined,
-        rating: editForm.rating,
-        quote: editForm.quote,
-        order: editForm.order,
-      });
-      if (res.success) {
-        setEditingId(null);
-        router.refresh();
+      if (isCreateMode) {
+        // Create mode
+        const res = await createTestimonial({
+          name: editForm.name || "",
+          role: editForm.role || "",
+          company: editForm.company || undefined,
+          avatar: editForm.avatar || undefined,
+          rating: editForm.rating || 5,
+          quote: editForm.quote || "",
+          order: editForm.order,
+        });
+        if (res.success) {
+          toast.success("Thành công", "Đã thêm đánh giá mới");
+          setEditingId(null);
+          router.refresh();
+        } else {
+          toast.error("Lỗi", res.error);
+        }
       } else {
-        alert("Lỗi: " + res.error);
+        // Edit mode
+        const res = await updateTestimonial(editingId, {
+          name: editForm.name,
+          role: editForm.role || undefined,
+          company: editForm.company || undefined,
+          avatar: editForm.avatar || undefined,
+          rating: editForm.rating,
+          quote: editForm.quote,
+          order: editForm.order,
+        });
+        if (res.success) {
+          toast.success("Thành công", "Đã cập nhật đánh giá");
+          setEditingId(null);
+          router.refresh();
+        } else {
+          toast.error("Lỗi", res.error);
+        }
       }
     } catch (err: any) {
-      alert("Đã xảy ra lỗi: " + err.message);
+      toast.error("Lỗi", err.message);
     } finally {
       setSaving(false);
     }
@@ -160,11 +203,20 @@ export default function AdminTestimonialsManager({
 
       {/* Table */}
       <div className="rounded-xl border border-white/5 bg-[#0a0822]/50 p-4">
-        <div className="flex items-center gap-2 mb-4">
-          <MessageSquarePlus className="w-5 h-5 text-pink-500" />
-          <h3 className="text-lg font-bold text-white">
-            Danh sách đánh giá khách hàng
-          </h3>
+        <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center gap-2">
+            <MessageSquarePlus className="w-5 h-5 text-pink-500" />
+            <h3 className="text-lg font-bold text-white">
+              Danh sách đánh giá khách hàng
+            </h3>
+          </div>
+          <button
+            onClick={openCreateModal}
+            className="px-4 py-2 text-sm rounded-lg bg-pink-500 hover:bg-pink-600 text-white font-semibold flex items-center gap-2 transition-all cursor-pointer"
+          >
+            <Plus className="w-4 h-4" />
+            <span>Thêm đánh giá mới</span>
+          </button>
         </div>
 
         <div className="overflow-x-auto">
@@ -267,14 +319,14 @@ export default function AdminTestimonialsManager({
         </div>
       </div>
 
-      {/* Edit Modal */}
+      {/* Create / Edit Modal */}
       {editingId && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
           <div className="w-full max-w-lg mx-4 rounded-xl border border-white/10 bg-[#0a0822] p-6 space-y-5 shadow-2xl">
             <div className="flex items-center justify-between border-b border-white/5 pb-4">
               <h3 className="text-lg font-bold text-white flex items-center gap-2">
                 <Quote className="w-5 h-5 text-pink-500" />
-                Chỉnh sửa đánh giá
+                {isCreateMode ? "Thêm đánh giá mới" : "Chỉnh sửa đánh giá"}
               </h3>
               <button
                 onClick={() => setEditingId(null)}
@@ -425,7 +477,7 @@ export default function AdminTestimonialsManager({
                   ) : (
                     <>
                       <Save className="w-4 h-4" />
-                      <span>Lưu thay đổi</span>
+                      <span>{isCreateMode ? "Tạo mới" : "Lưu thay đổi"}</span>
                     </>
                   )}
                 </button>

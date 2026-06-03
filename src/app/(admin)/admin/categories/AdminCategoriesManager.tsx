@@ -2,6 +2,7 @@
 
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
+import { useToast } from "@/components/ui/Toast";
 import {
   upsertCategory,
   deleteCategory,
@@ -54,6 +55,7 @@ export default function AdminCategoriesManager({
   initialCategories,
 }: AdminCategoriesManagerProps) {
   const router = useRouter();
+  const toast = useToast();
   const [showModal, setShowModal] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
@@ -104,7 +106,7 @@ export default function AdminCategoriesManager({
 
   const handleSave = async () => {
     if (!formData.name.trim() || !formData.slug.trim()) {
-      alert("Tên và slug không được để trống.");
+      toast.warning("Cảnh báo", "Tên và slug không được để trống.");
       return;
     }
     setSaving(true);
@@ -119,13 +121,14 @@ export default function AdminCategoriesManager({
         order: formData.order,
       });
       if (res.success) {
+        toast.success("Thành công", editingId ? "Đã cập nhật chuyên mục" : "Đã tạo chuyên mục mới");
         closeModal();
         router.refresh();
       } else {
-        alert("Lỗi: " + res.error);
+        toast.error("Lỗi", res.error);
       }
     } catch (err: any) {
-      alert("Đã xảy ra lỗi: " + err.message);
+      toast.error("Lỗi", err.message);
     } finally {
       setSaving(false);
     }
@@ -136,12 +139,13 @@ export default function AdminCategoriesManager({
     try {
       const res = await deleteCategory(id);
       if (res.success) {
+        toast.success("Thành công", "Đã xóa chuyên mục");
         router.refresh();
       } else {
-        alert("Lỗi: " + res.error);
+        toast.error("Lỗi", res.error);
       }
     } catch (err: any) {
-      alert("Đã xảy ra lỗi: " + err.message);
+      toast.error("Lỗi", err.message);
     }
   };
 
@@ -151,12 +155,13 @@ export default function AdminCategoriesManager({
     try {
       const res = await seedDefaultCategories();
       if (res.success) {
+        toast.success("Thành công", "Đã tạo chuyên mục mặc định");
         router.refresh();
       } else {
-        alert("Lỗi: " + res.error);
+        toast.error("Lỗi", res.error);
       }
     } catch (err: any) {
-      alert("Đã xảy ra lỗi: " + err.message);
+      toast.error("Lỗi", err.message);
     } finally {
       setSeeding(false);
     }
