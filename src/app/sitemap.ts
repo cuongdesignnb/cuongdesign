@@ -44,14 +44,26 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       priority: 0.5,
     }));
 
-    // Dynamic blog posts
-    const dbPosts = await prisma.post.findMany({
-      where: { status: "PUBLISHED" },
+    // Dynamic blog categories
+    const dbCategories = await prisma.category.findMany({
       select: { slug: true, updatedAt: true },
     });
 
+    const categoryRoutes = dbCategories.map((cat) => ({
+      url: `${baseUrl}/bai-viet/${cat.slug}`,
+      lastModified: new Date(cat.updatedAt),
+      changeFrequency: "weekly" as const,
+      priority: 0.8,
+    }));
+
+    // Dynamic blog posts
+    const dbPosts = await prisma.post.findMany({
+      where: { status: "PUBLISHED" },
+      select: { slug: true, updatedAt: true, category: { select: { slug: true } } },
+    });
+
     const blogRoutes = dbPosts.map((post) => ({
-      url: `${baseUrl}/bai-viet/${post.slug}`,
+      url: `${baseUrl}/bai-viet/${post.category?.slug || "chua-phan-loai"}/${post.slug}`,
       lastModified: new Date(post.updatedAt),
       changeFrequency: "weekly" as const,
       priority: 0.8,
@@ -92,6 +104,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       ...staticRoutes,
       ...serviceRoutes,
       ...pageRoutes,
+      ...categoryRoutes,
       ...blogRoutes,
       ...projectRoutes,
       ...productRoutes,

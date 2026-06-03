@@ -5,6 +5,12 @@ import AdminPostsManager from "./AdminPostsManager";
 export default async function AdminPostsPage() {
   const posts = await prisma.post.findMany({
     orderBy: { createdAt: "desc" },
+    include: { category: { select: { id: true, name: true, slug: true, color: true } } },
+  });
+
+  const categories = await prisma.category.findMany({
+    orderBy: { order: "asc" },
+    select: { id: true, name: true, slug: true, color: true },
   });
 
   return (
@@ -15,7 +21,10 @@ export default async function AdminPostsPage() {
           Xem, chỉnh sửa và quản lý tất cả bài viết blog đã tạo.
         </p>
       </div>
-      <AdminPostsManager initialPosts={JSON.parse(JSON.stringify(posts))} />
+      <AdminPostsManager
+        initialPosts={JSON.parse(JSON.stringify(posts))}
+        categories={JSON.parse(JSON.stringify(categories))}
+      />
     </div>
   );
 }

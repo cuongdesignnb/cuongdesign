@@ -8,18 +8,23 @@ export const contentType = "image/png";
 export default async function OGImage({
   params,
 }: {
-  params: Promise<{ slug: string }>;
+  params: Promise<{ category: string; slug: string }>;
 }) {
   const { slug } = await params;
 
   let title = "Cuong Design - Bài viết";
   let authorName = "Cường Design";
   let publishDate = "";
+  let categoryName = "";
+  let categoryColor = "#ec4899";
 
   try {
     const post = await prisma.post.findFirst({
       where: {
         OR: [{ slug }, { id: slug }],
+      },
+      include: {
+        category: { select: { name: true, color: true } },
       },
     });
 
@@ -32,6 +37,10 @@ export default async function OGImage({
         month: "long",
         day: "numeric",
       });
+      if (post.category) {
+        categoryName = post.category.name;
+        categoryColor = post.category.color || "#ec4899";
+      }
     }
   } catch {
     // Fallback to defaults
@@ -66,7 +75,7 @@ export default async function OGImage({
           }}
         />
 
-        {/* Top section: brand + article badge */}
+        {/* Top section: brand + category badge */}
         <div
           style={{
             display: "flex",
@@ -87,22 +96,24 @@ export default async function OGImage({
             CUONG DESIGN
           </div>
 
-          {/* Article badge */}
+          {/* Category or Article badge */}
           <div
             style={{
               fontSize: 14,
               fontWeight: 600,
-              color: "#ec4899",
+              color: categoryName ? categoryColor : "#ec4899",
               padding: "6px 16px",
               borderRadius: "20px",
-              border: "1px solid rgba(236, 72, 153, 0.3)",
-              background: "rgba(236, 72, 153, 0.1)",
+              border: `1px solid ${categoryName ? categoryColor : "rgba(236, 72, 153, 0.3)"}`,
+              background: categoryName
+                ? `${categoryColor}1a`
+                : "rgba(236, 72, 153, 0.1)",
               textTransform: "uppercase",
               letterSpacing: "1px",
               display: "flex",
             }}
           >
-            BÀI VIẾT
+            {categoryName || "BÀI VIẾT"}
           </div>
         </div>
 
@@ -133,7 +144,7 @@ export default async function OGImage({
             style={{
               width: "120px",
               height: "4px",
-              background: "linear-gradient(90deg, #ec4899, #a855f7)",
+              background: `linear-gradient(90deg, ${categoryColor}, #a855f7)`,
               borderRadius: "4px",
               display: "flex",
             }}

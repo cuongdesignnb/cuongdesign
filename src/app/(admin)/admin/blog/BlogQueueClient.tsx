@@ -31,9 +31,10 @@ interface Task {
 
 interface BlogQueueClientProps {
   initialTasks: Task[];
+  categories: { id: string; name: string }[];
 }
 
-export default function BlogQueueClient({ initialTasks }: BlogQueueClientProps) {
+export default function BlogQueueClient({ initialTasks, categories }: BlogQueueClientProps) {
   const router = useRouter();
   const [tasks, setTasks] = useState<Task[]>(initialTasks);
   const [keywords, setKeywords] = useState("");
@@ -46,16 +47,21 @@ export default function BlogQueueClient({ initialTasks }: BlogQueueClientProps) 
       .slice(0, 16);
   });
   const [gapHours, setGapHours] = useState(24);
+  const [selectedCategoryId, setSelectedCategoryId] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [runningTaskId, setRunningTaskId] = useState<string | null>(null);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!keywords.trim()) return;
+    if (!selectedCategoryId) {
+      alert("Vui lòng chọn chuyên mục cho bài viết.");
+      return;
+    }
 
     setIsSubmitting(true);
     try {
-      const res = await addKeywordsToQueue(keywords, scheduleStart, gapHours);
+      const res = await addKeywordsToQueue(keywords, scheduleStart, gapHours, selectedCategoryId);
       if (res.success) {
         setKeywords("");
         router.refresh();
@@ -157,6 +163,25 @@ export default function BlogQueueClient({ initialTasks }: BlogQueueClientProps) 
                   className="w-full text-sm bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-pink-500/50"
                 />
               </div>
+            </div>
+
+            <div>
+              <label className="block text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">
+                Chuyên mục *
+              </label>
+              <select
+                value={selectedCategoryId}
+                onChange={(e) => setSelectedCategoryId(e.target.value)}
+                required
+                className="w-full text-sm bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-pink-500/50 cursor-pointer"
+              >
+                <option value="" className="bg-[#0a0822]">-- Chọn chuyên mục --</option>
+                {categories.map((cat) => (
+                  <option key={cat.id} value={cat.id} className="bg-[#0a0822]">
+                    {cat.name}
+                  </option>
+                ))}
+              </select>
             </div>
 
             <Button
@@ -261,7 +286,7 @@ export default function BlogQueueClient({ initialTasks }: BlogQueueClientProps) 
                           <div className="flex items-center justify-end gap-2">
                             {task.status === "COMPLETED" && task.generatedPostId && (
                               <a
-                                href={`/bai-viet/${task.generatedPostId}`}
+                                href={`/admin/blog`}
                                 target="_blank"
                                 rel="noreferrer"
                                 className="text-gray-400 hover:text-white p-1 hover:bg-white/5 rounded-lg transition-all"

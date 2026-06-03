@@ -17,6 +17,13 @@ import {
   Search,
 } from "lucide-react";
 
+interface CategoryOption {
+  id: string;
+  name: string;
+  slug: string;
+  color: string | null;
+}
+
 interface PostItem {
   id: string;
   title: string;
@@ -26,6 +33,8 @@ interface PostItem {
   coverImage: string | null;
   status: string;
   publishedAt: string | null;
+  categoryId: string | null;
+  category: CategoryOption | null;
   seoTitle: string | null;
   seoDescription: string | null;
   seoKeywords: string | null;
@@ -35,11 +44,12 @@ interface PostItem {
 
 interface AdminPostsManagerProps {
   initialPosts: PostItem[];
+  categories: CategoryOption[];
 }
 
 type FilterTab = "ALL" | "PUBLISHED" | "DRAFT" | "SCHEDULED";
 
-export default function AdminPostsManager({ initialPosts }: AdminPostsManagerProps) {
+export default function AdminPostsManager({ initialPosts, categories }: AdminPostsManagerProps) {
   const router = useRouter();
   const [filter, setFilter] = useState<FilterTab>("ALL");
   const [editingPost, setEditingPost] = useState<PostItem | null>(null);
@@ -65,6 +75,8 @@ export default function AdminPostsManager({ initialPosts }: AdminPostsManagerPro
     { key: "SCHEDULED", label: "Lên lịch", count: stats.scheduled },
   ];
 
+  const [selectedCategoryId, setSelectedCategoryId] = useState<string>("");
+
   const openEdit = (post: PostItem) => {
     setEditingPost(post);
     setFormData({
@@ -78,11 +90,13 @@ export default function AdminPostsManager({ initialPosts }: AdminPostsManagerPro
       seoDescription: post.seoDescription || "",
       seoKeywords: post.seoKeywords || "",
     });
+    setSelectedCategoryId(post.categoryId || "");
   };
 
   const closeEdit = () => {
     setEditingPost(null);
     setFormData({});
+    setSelectedCategoryId("");
   };
 
   const handleSave = async () => {
@@ -96,6 +110,7 @@ export default function AdminPostsManager({ initialPosts }: AdminPostsManagerPro
         content: formData.content || undefined,
         coverImage: formData.coverImage || undefined,
         status: formData.status as "DRAFT" | "PUBLISHED" | "SCHEDULED" | undefined,
+        categoryId: selectedCategoryId || null,
         seoTitle: formData.seoTitle || undefined,
         seoDescription: formData.seoDescription || undefined,
         seoKeywords: formData.seoKeywords || undefined,
@@ -219,6 +234,7 @@ export default function AdminPostsManager({ initialPosts }: AdminPostsManagerPro
             <thead>
               <tr className="border-b border-white/5 text-gray-500">
                 <th className="py-3 px-4">Tiêu đề</th>
+                <th className="py-3 px-4">Chuyên mục</th>
                 <th className="py-3 px-4">Trạng thái</th>
                 <th className="py-3 px-4">Ngày xuất bản</th>
                 <th className="py-3 px-4">SEO Title</th>
@@ -236,6 +252,19 @@ export default function AdminPostsManager({ initialPosts }: AdminPostsManagerPro
                       <div className="text-[10px] text-gray-500 font-mono mt-0.5">
                         /{post.slug}
                       </div>
+                    </td>
+                    <td className="py-4 px-4">
+                      {post.category ? (
+                        <span className="inline-flex items-center gap-1.5 text-xs">
+                          <span
+                            className="w-2.5 h-2.5 rounded-full shrink-0"
+                            style={{ backgroundColor: post.category.color || '#6b7280' }}
+                          />
+                          <span className="text-gray-300">{post.category.name}</span>
+                        </span>
+                      ) : (
+                        <span className="text-gray-600">—</span>
+                      )}
                     </td>
                     <td className="py-4 px-4">{statusBadge(post.status)}</td>
                     <td className="py-4 px-4 text-gray-400">
@@ -283,7 +312,7 @@ export default function AdminPostsManager({ initialPosts }: AdminPostsManagerPro
                 ))
               ) : (
                 <tr>
-                  <td colSpan={5} className="py-12 text-center text-gray-500">
+                  <td colSpan={6} className="py-12 text-center text-gray-500">
                     <Search className="w-8 h-8 mx-auto mb-2 opacity-30" />
                     Không tìm thấy bài viết nào.
                   </td>
@@ -368,8 +397,8 @@ export default function AdminPostsManager({ initialPosts }: AdminPostsManagerPro
                 />
               </div>
 
-              {/* Cover Image + Status */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {/* Cover Image + Category + Status */}
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div className="space-y-2">
                   <label className="text-xs text-gray-400 font-semibold uppercase tracking-wider block">
                     Ảnh bìa (URL)
@@ -381,6 +410,23 @@ export default function AdminPostsManager({ initialPosts }: AdminPostsManagerPro
                     className="w-full px-4 py-2.5 text-sm rounded-lg bg-white/5 border border-white/10 text-white placeholder-gray-500 focus:outline-none focus:border-pink-500/50 transition-colors"
                     placeholder="https://..."
                   />
+                </div>
+                <div className="space-y-2">
+                  <label className="text-xs text-gray-400 font-semibold uppercase tracking-wider block">
+                    Chuyên mục
+                  </label>
+                  <select
+                    value={selectedCategoryId}
+                    onChange={(e) => setSelectedCategoryId(e.target.value)}
+                    className="w-full px-4 py-2.5 text-sm rounded-lg bg-white/5 border border-white/10 text-white focus:outline-none focus:border-pink-500/50 transition-colors cursor-pointer"
+                  >
+                    <option value="" className="bg-[#0a0822]">-- Chưa phân loại --</option>
+                    {categories.map((cat) => (
+                      <option key={cat.id} value={cat.id} className="bg-[#0a0822]">
+                        {cat.name}
+                      </option>
+                    ))}
+                  </select>
                 </div>
                 <div className="space-y-2">
                   <label className="text-xs text-gray-400 font-semibold uppercase tracking-wider block">

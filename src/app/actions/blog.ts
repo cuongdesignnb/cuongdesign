@@ -6,7 +6,8 @@ import { revalidatePath } from "next/cache";
 export async function addKeywordsToQueue(
   keywordsText: string,
   scheduleStart: string,
-  gapHours: number
+  gapHours: number,
+  categoryId: string
 ) {
   try {
     const keywords = keywordsText
@@ -28,6 +29,7 @@ export async function addKeywordsToQueue(
           keyword,
           scheduleTime,
           status: "PENDING",
+          categoryId: categoryId || null,
         },
       });
     });

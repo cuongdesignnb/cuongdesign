@@ -173,6 +173,20 @@ model Order {
   updatedAt     DateTime    @updatedAt
 }
 
+// Blog Categories
+model Category {
+  id          String   @id @default(cuid())
+  name        String   @unique
+  slug        String   @unique
+  description String?  @db.Text
+  coverImage  String?
+  color       String?  // hex color for UI badge e.g. "#ec4899"
+  order       Int      @default(0)
+  posts       Post[]
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
 // Blog Posts
 model Post {
   id             String     @id @default(cuid())
@@ -183,6 +197,8 @@ model Post {
   coverImage     String?
   status         PostStatus @default(DRAFT)
   publishedAt    DateTime?
+  categoryId     String?
+  category       Category?  @relation(fields: [categoryId], references: [id])
   seoTitle       String?
   seoDescription String?
   seoKeywords    String[]
@@ -198,6 +214,7 @@ model AiTask {
   status         AiTaskStatus @default(PENDING)
   scheduleTime   DateTime     
   generatedPostId String?     
+  categoryId     String?      // Category to assign to generated post
   errorMessage   String?      @db.Text
   createdAt      DateTime     @default(now())
   updatedAt      DateTime     @updatedAt

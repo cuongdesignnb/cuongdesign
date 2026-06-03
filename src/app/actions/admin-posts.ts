@@ -26,6 +26,7 @@ export async function updatePost(
     content?: string;
     coverImage?: string;
     status?: PostStatus;
+    categoryId?: string | null;
     seoTitle?: string;
     seoDescription?: string;
     seoKeywords?: string;

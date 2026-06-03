@@ -16,6 +16,7 @@ import {
   Star,
   MessageSquarePlus,
   Users,
+  FolderOpen,
 } from "lucide-react";
 import Link from "next/link";
 import GradientText from "@/components/ui/GradientText";
@@ -43,6 +44,7 @@ export default async function AdminLayout({ children }: AdminLayoutProps) {
     { label: "Quản lý Sản phẩm", href: "/admin/products", icon: ShoppingBag },
     { label: "Đơn hàng (SePay)", href: "/admin/orders", icon: CreditCard },
     { label: "AI Auto Blog", href: "/admin/blog", icon: Sparkles },
+    { label: "Chuyên mục Blog", href: "/admin/categories", icon: FolderOpen },
     { label: "Quản lý Bài viết", href: "/admin/blog/posts", icon: FileText },
     { label: "Cấu hình Menu", href: "/admin/menu", icon: Menu },
     { label: "Hộp thư Liên hệ", href: "/admin/contacts", icon: Mail },

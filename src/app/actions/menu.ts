@@ -143,15 +143,27 @@ export async function getRouteSuggestions() {
       });
     });
 
-    // 4. Fetch blog posts slugs
+    // 4. Fetch blog posts slugs (with category for new URL pattern)
     const posts = await prisma.post.findMany({
       where: { status: "PUBLISHED" },
-      select: { title: true, slug: true }
+      select: { title: true, slug: true, category: { select: { slug: true } } }
     });
     posts.forEach(post => {
+      const catSlug = post.category?.slug || "chua-phan-loai";
       suggestions.push({
-        label: `Bài viết: ${post.title} (/bai-viet/${post.slug})`,
-        value: `/bai-viet/${post.slug}`
+        label: `Bài viết: ${post.title} (/bai-viet/${catSlug}/${post.slug})`,
+        value: `/bai-viet/${catSlug}/${post.slug}`
+      });
+    });
+
+    // 5. Fetch blog category slugs
+    const blogCategories = await prisma.category.findMany({
+      select: { name: true, slug: true }
+    });
+    blogCategories.forEach(cat => {
+      suggestions.push({
+        label: `Chuyên mục: ${cat.name} (/bai-viet/${cat.slug})`,
+        value: `/bai-viet/${cat.slug}`
       });
     });
 

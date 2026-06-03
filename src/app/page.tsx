@@ -50,6 +50,22 @@ export default async function Home() {
     });
   }
 
+  // Seed default categories if none exist
+  const categoryCount = await prisma.category.count();
+  if (categoryCount === 0) {
+    const defaultCategories = [
+      { name: 'Thiết kế UI/UX', slug: 'thiet-ke-ui-ux', color: '#ec4899', order: 0 },
+      { name: 'Lập trình Web', slug: 'lap-trinh-web', color: '#8b5cf6', order: 1 },
+      { name: 'Next.js & React', slug: 'nextjs-react', color: '#3b82f6', order: 2 },
+      { name: 'SEO & Marketing', slug: 'seo-marketing', color: '#10b981', order: 3 },
+      { name: 'Công nghệ', slug: 'cong-nghe', color: '#f59e0b', order: 4 },
+      { name: 'Chia sẻ kinh nghiệm', slug: 'chia-se-kinh-nghiem', color: '#6366f1', order: 5 },
+    ];
+    for (const cat of defaultCategories) {
+      await prisma.category.upsert({ where: { slug: cat.slug }, update: {}, create: cat });
+    }
+  }
+
   // 1. Self-seeding database check for projects
   let dbProjects = await prisma.project.findMany({ orderBy: { order: "asc" } });
   if (dbProjects.length === 0) {

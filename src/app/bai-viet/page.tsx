@@ -4,7 +4,6 @@ import Footer from "@/components/layout/Footer";
 import Breadcrumbs from "@/components/ui/Breadcrumbs";
 import GlassCard from "@/components/ui/GlassCard";
 import GradientText from "@/components/ui/GradientText";
-import Button from "@/components/ui/Button";
 import { prisma } from "@/lib/db";
 import { BookOpen, Calendar, ArrowRight, Clock } from "lucide-react";
 import Link from "next/link";
@@ -18,11 +17,19 @@ export const metadata = createMetadata({
 });
 
 export default async function BlogListPage() {
-  // Fetch published posts
-  const dbPosts = await prisma.post.findMany({
-    where: { status: "PUBLISHED" },
-    orderBy: { publishedAt: "desc" }
-  });
+  // Fetch categories and published posts
+  const [categories, dbPosts] = await Promise.all([
+    prisma.category.findMany({ orderBy: { order: "asc" } }),
+    prisma.post.findMany({
+      where: { status: "PUBLISHED" },
+      include: {
+        category: {
+          select: { name: true, slug: true, color: true },
+        },
+      },
+      orderBy: { publishedAt: "desc" },
+    }),
+  ]);
 
   // Calculate reading time helper
   const getReadTime = (content: string) => {
@@ -47,13 +54,14 @@ export default async function BlogListPage() {
       "headline": post.title,
       "alternativeHeadline": post.excerpt || "",
       "genre": "Software Development & Design",
-      "url": `https://cuongdesign.com/bai-viet/${post.slug}`,
+      "url": `https://cuongdesign.com/bai-viet/${post.category?.slug || "chua-phan-loai"}/${post.slug}`,
       "datePublished": post.publishedAt || post.createdAt,
       "dateModified": post.updatedAt,
       "author": {
         "@type": "Person",
         "name": "Cường Design"
-      }
+      },
+      ...(post.category?.name && { "articleSection": post.category.name }),
     }))
   };
 
@@ -87,76 +95,139 @@ export default async function BlogListPage() {
             </p>
           </div>
 
+          {/* Category Filter Pills */}
+          {categories.length > 0 && (
+            <div className="flex flex-wrap items-center gap-2">
+              {/* "Tất cả" pill — active on this page */}
+              <Link
+                href="/bai-viet"
+                className="inline-flex items-center gap-1.5 px-4 py-2 rounded-full text-xs font-semibold transition-all duration-200 bg-pink-500/15 text-pink-400 border border-pink-500/30 shadow-[0_0_12px_rgba(236,72,153,0.15)]"
+              >
+                Tất cả
+                <span className="ml-1 text-[10px] bg-pink-500/20 text-pink-300 px-1.5 py-0.5 rounded-full font-mono">
+                  {dbPosts.length}
+                </span>
+              </Link>
+
+              {categories.map((cat) => {
+                const postCount = dbPosts.filter((p) => p.category?.slug === cat.slug).length;
+                return (
+                  <Link
+                    key={cat.id}
+                    href={`/bai-viet/${cat.slug}`}
+                    className="inline-flex items-center gap-1.5 px-4 py-2 rounded-full text-xs font-semibold transition-all duration-200 bg-white/5 text-gray-400 border border-white/10 hover:bg-white/10 hover:text-white hover:border-white/20"
+                  >
+                    {cat.color && (
+                      <span
+                        className="w-2 h-2 rounded-full shrink-0"
+                        style={{ backgroundColor: cat.color }}
+                      />
+                    )}
+                    {cat.name}
+                    {postCount > 0 && (
+                      <span className="ml-1 text-[10px] bg-white/10 text-gray-500 px-1.5 py-0.5 rounded-full font-mono">
+                        {postCount}
+                      </span>
+                    )}
+                  </Link>
+                );
+              })}
+            </div>
+          )}
+
           {/* Posts Grid */}
           {dbPosts.length > 0 ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-              {dbPosts.map((post) => (
-                <GlassCard
-                  key={post.id}
-                  className="group flex flex-col h-full overflow-hidden p-0 border border-white/5 bg-[#0d0b21]/45 hover:border-pink-500/25"
-                >
-                  {/* Article Thumbnail Representation */}
-                  <div className="relative w-full aspect-video bg-gradient-to-br from-purple-950/20 to-pink-950/30 border-b border-white/5 flex items-center justify-center overflow-hidden">
-                    {post.coverImage ? (
-                      <img 
-                        src={post.coverImage} 
-                        alt={post.title}
-                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                      />
-                    ) : (
-                      <div className="w-[70%] h-[70%] bg-gradient-to-br from-indigo-950/60 to-purple-900/50 border border-white/10 rounded-xl shadow-2xl p-4 flex flex-col items-center justify-center space-y-2 group-hover:scale-105 transition-transform duration-300">
-                        <BookOpen className="w-8 h-8 text-pink-500/60" />
-                        <span className="font-mono text-[9px] text-gray-500 select-none">
-                          {post.slug}.md
-                        </span>
+              {dbPosts.map((post) => {
+                const postUrl = `/bai-viet/${post.category?.slug || "chua-phan-loai"}/${post.slug}`;
+                return (
+                  <GlassCard
+                    key={post.id}
+                    className="group flex flex-col h-full overflow-hidden p-0 border border-white/5 bg-[#0d0b21]/45 hover:border-pink-500/25"
+                  >
+                    {/* Article Thumbnail Representation */}
+                    <div className="relative w-full aspect-video bg-gradient-to-br from-purple-950/20 to-pink-950/30 border-b border-white/5 flex items-center justify-center overflow-hidden">
+                      {post.coverImage ? (
+                        <img 
+                          src={post.coverImage} 
+                          alt={post.title}
+                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                        />
+                      ) : (
+                        <div className="w-[70%] h-[70%] bg-gradient-to-br from-indigo-950/60 to-purple-900/50 border border-white/10 rounded-xl shadow-2xl p-4 flex flex-col items-center justify-center space-y-2 group-hover:scale-105 transition-transform duration-300">
+                          <BookOpen className="w-8 h-8 text-pink-500/60" />
+                          <span className="font-mono text-[9px] text-gray-500 select-none">
+                            {post.slug}.md
+                          </span>
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Post Info Area */}
+                    <div className="p-6 flex flex-col grow space-y-4 text-left">
+                      
+                      {/* Category badge + Date and Reading Time row */}
+                      <div className="flex flex-col gap-2.5">
+                        {post.category && (
+                          <Link href={`/bai-viet/${post.category.slug}`}>
+                            <span
+                              className="inline-flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-full w-fit transition-opacity hover:opacity-80"
+                              style={{
+                                backgroundColor: `${post.category.color || "#ec4899"}15`,
+                                color: post.category.color || "#ec4899",
+                                border: `1px solid ${post.category.color || "#ec4899"}30`,
+                              }}
+                            >
+                              <span
+                                className="w-1.5 h-1.5 rounded-full"
+                                style={{ backgroundColor: post.category.color || "#ec4899" }}
+                              />
+                              {post.category.name}
+                            </span>
+                          </Link>
+                        )}
+                        <div className="flex items-center space-x-4 text-[10px] text-gray-500 font-mono">
+                          <span className="flex items-center gap-1">
+                            <Calendar className="w-3.5 h-3.5 text-pink-500" />
+                            <span>
+                              {post.publishedAt 
+                                ? new Date(post.publishedAt).toLocaleDateString("vi-VN") 
+                                : new Date(post.createdAt).toLocaleDateString("vi-VN")}
+                            </span>
+                          </span>
+                          <span className="flex items-center gap-1">
+                            <Clock className="w-3.5 h-3.5 text-purple-500" />
+                            <span>{getReadTime(post.content)}</span>
+                          </span>
+                        </div>
                       </div>
-                    )}
-                  </div>
 
-                  {/* Post Info Area */}
-                  <div className="p-6 flex flex-col grow space-y-4 text-left">
-                    
-                    {/* Date and Reading Time row */}
-                    <div className="flex items-center space-x-4 text-[10px] text-gray-500 font-mono">
-                      <span className="flex items-center gap-1">
-                        <Calendar className="w-3.5 h-3.5 text-pink-500" />
-                        <span>
-                          {post.publishedAt 
-                            ? new Date(post.publishedAt).toLocaleDateString("vi-VN") 
-                            : new Date(post.createdAt).toLocaleDateString("vi-VN")}
-                        </span>
-                      </span>
-                      <span className="flex items-center gap-1">
-                        <Clock className="w-3.5 h-3.5 text-purple-500" />
-                        <span>{getReadTime(post.content)}</span>
-                      </span>
+                      <div className="grow space-y-2">
+                        <Link href={postUrl}>
+                          <h3 className="text-lg font-bold text-white group-hover:text-pink-400 transition-colors duration-200 line-clamp-2">
+                            {post.title}
+                          </h3>
+                        </Link>
+                        <p className="text-gray-400 text-xs md:text-sm leading-relaxed line-clamp-3">
+                          {post.excerpt || "Xem nội dung bài viết chi tiết để tìm hiểu thông tin và chia sẻ cụ thể của tác giả..."}
+                        </p>
+                      </div>
+
+                      {/* Action link */}
+                      <div className="pt-2 border-t border-white/5 mt-auto">
+                        <Link 
+                          href={postUrl}
+                          className="inline-flex items-center gap-1.5 text-xs font-bold text-pink-400 hover:text-pink-300 transition-colors cursor-pointer"
+                        >
+                          <span>Đọc tiếp bài viết</span>
+                          <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform" />
+                        </Link>
+                      </div>
+
                     </div>
-
-                    <div className="grow space-y-2">
-                      <Link href={`/bai-viet/${post.slug}`}>
-                        <h3 className="text-lg font-bold text-white group-hover:text-pink-400 transition-colors duration-200 line-clamp-2">
-                          {post.title}
-                        </h3>
-                      </Link>
-                      <p className="text-gray-400 text-xs md:text-sm leading-relaxed line-clamp-3">
-                        {post.excerpt || "Xem nội dung bài viết chi tiết để tìm hiểu thông tin và chia sẻ cụ thể của tác giả..."}
-                      </p>
-                    </div>
-
-                    {/* Action link */}
-                    <div className="pt-2 border-t border-white/5 mt-auto">
-                      <Link 
-                        href={`/bai-viet/${post.slug}`}
-                        className="inline-flex items-center gap-1.5 text-xs font-bold text-pink-400 hover:text-pink-300 transition-colors cursor-pointer"
-                      >
-                        <span>Đọc tiếp bài viết</span>
-                        <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform" />
-                      </Link>
-                    </div>
-
-                  </div>
-                </GlassCard>
-              ))}
+                  </GlassCard>
+                );
+              })}
             </div>
           ) : (
             <div className="text-center py-20 bg-[#0a0822]/40 rounded-2xl border border-white/5">

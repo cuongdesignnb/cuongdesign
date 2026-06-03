@@ -10,6 +10,11 @@ export default async function AdminBlogPage() {
     orderBy: { scheduleTime: "asc" },
   });
 
+  const categories = await prisma.category.findMany({
+    orderBy: { order: "asc" },
+    select: { id: true, name: true },
+  });
+
   return (
     <div className="space-y-8">
       <div>
@@ -26,7 +31,11 @@ export default async function AdminBlogPage() {
         Quản lý bài viết đã tạo →
       </Link>
 
-      <BlogQueueClient initialTasks={JSON.parse(JSON.stringify(tasks))} />
+      <BlogQueueClient
+        initialTasks={JSON.parse(JSON.stringify(tasks))}
+        categories={JSON.parse(JSON.stringify(categories))}
+      />
     </div>
   );
 }
+
