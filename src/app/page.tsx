@@ -1,4 +1,4 @@
-import SmoothScroll from "@/components/layout/SmoothScroll";
+import MotionProvider from "@/components/motion/MotionProvider";
 import Header from "@/components/layout/Header";
 import HeroSection from "@/components/sections/HeroSection";
 import AboutSection from "@/components/sections/AboutSection";
@@ -130,7 +130,7 @@ export default async function Home() {
   }
 
   return (
-    <SmoothScroll>
+    <MotionProvider>
       <Header />
       <main className="flex-1 bg-[#030014] relative overflow-hidden">
         {/* Decorative Grid Overlay for visual premium structure */}
@@ -156,6 +156,6 @@ export default async function Home() {
         <ContactSection />
       </main>
       <Footer />
-    </SmoothScroll>
+    </MotionProvider>
   );
 }

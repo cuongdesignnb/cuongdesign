@@ -2,15 +2,40 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
 import { ShoppingBag, Eye, X, Send, CheckCircle2, CreditCard } from "lucide-react";
 import { products as staticProducts, ProductItem } from "@/data/products";
 import { formatVND } from "@/lib/utils";
 import { createOrder } from "@/app/actions/orders";
 import GlassCard from "../ui/GlassCard";
-import SectionHeading from "../ui/SectionHeading";
+import AnimatedSectionHeading from "../motion/AnimatedSectionHeading";
+import Stagger from "../motion/Stagger";
 import Badge from "../ui/Badge";
 import Button from "../ui/Button";
+import { fadeUpVariants, hoverDepthVariants, motionTokens } from "@/lib/motion";
+
+const modalOverlayVariants = {
+  hidden: { opacity: 0 },
+  visible: { opacity: 1, transition: { duration: 0.2 } },
+  exit: { opacity: 0, transition: { duration: 0.15 } },
+};
+
+const modalContentVariants = {
+  hidden: { opacity: 0, scale: 0.9, y: 20 },
+  visible: {
+    opacity: 1,
+    scale: 1,
+    y: 0,
+    transition: { type: "spring" as const, stiffness: 300, damping: 20 },
+  },
+  exit: {
+    opacity: 0,
+    scale: 0.95,
+    y: 10,
+    transition: { duration: 0.15 },
+  },
+};
 
 export default function DigitalProductsSection({ initialProducts }: { initialProducts?: any[] }) {
   const products = initialProducts || staticProducts;
@@ -120,149 +145,296 @@ export default function DigitalProductsSection({ initialProducts }: { initialPro
   return (
     <section id="products" className="py-24 relative overflow-hidden bg-[#030014]/50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-        <SectionHeading
+        <AnimatedSectionHeading
           title="Sản phẩm số / Digital Products"
           subtitle="Mua mã nguồn hoặc tải các template/UI kit chất lượng để triển khai dự án nhanh chóng."
         />
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+        <Stagger className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8" stagger={0.12}>
           {products.map((product) => (
-            <GlassCard
-              key={product.id}
-              className="group flex flex-col h-full overflow-hidden p-0 border border-white/5 bg-[#0d0b21]/45 hover:border-pink-500/25"
-            >
-              {/* Product Mockup Representation */}
-              <div className="relative w-full aspect-video bg-gradient-to-br from-purple-950/20 to-indigo-950/40 border-b border-white/5 flex items-center justify-center overflow-hidden">
-                <div className="absolute top-4 left-4 flex flex-wrap gap-1.5 z-10">
-                  <Badge variant="primary">{product.type}</Badge>
-                </div>
+            <motion.div key={product.id} variants={fadeUpVariants}>
+              <motion.div
+                initial="rest"
+                whileHover="hover"
+                variants={hoverDepthVariants}
+                className="h-full"
+              >
+                <GlassCard
+                  className="group flex flex-col h-full overflow-hidden p-0 border border-white/5 bg-[#0d0b21]/45 hover:border-pink-500/25 transition-colors duration-300"
+                >
+                  {/* Product Mockup Representation */}
+                  <div className="relative w-full aspect-video bg-gradient-to-br from-purple-950/20 to-indigo-950/40 border-b border-white/5 flex items-center justify-center overflow-hidden">
+                    <div className="absolute top-4 left-4 flex flex-wrap gap-1.5 z-10">
+                      <Badge variant="primary">{product.type}</Badge>
+                    </div>
 
-                <div className="w-[70%] h-[70%] bg-gradient-to-br from-indigo-950/60 to-purple-900/50 border border-white/10 rounded-xl shadow-2xl p-4 flex flex-col items-center justify-center space-y-2 group-hover:scale-105 transition-transform duration-300">
-                  <ShoppingBag className="w-8 h-8 text-pink-500/60" />
-                  <span className="font-mono text-[9px] text-gray-500 select-none">
-                    {product.slug}.zip
-                  </span>
-                </div>
-              </div>
-
-              {/* Info Area */}
-              <div className="p-6 flex flex-col grow space-y-4">
-                <div className="grow">
-                  <Link href={`/san-pham/${product.slug}`}>
-                    <h3 className="text-xl font-bold text-white group-hover:text-pink-400 transition-colors duration-200">
-                      {product.title}
-                    </h3>
-                  </Link>
-                  <p className="text-gray-400 text-xs md:text-sm mt-2 leading-relaxed line-clamp-3">
-                    {product.descriptionVi || product.description}
-                  </p>
-                </div>
-
-                {/* Tech tags */}
-                <div className="flex flex-wrap gap-1.5">
-                  {product.techStack.map((tech: string) => (
-                    <span key={tech} className="text-[10px] bg-white/5 border border-white/5 rounded-md px-2 py-0.5 text-gray-300 font-mono">
-                      {tech}
-                    </span>
-                  ))}
-                </div>
-
-                {/* Price and Action Row */}
-                <div className="pt-2 border-t border-white/5 flex items-center justify-between gap-4 mt-auto">
-                  <div className="flex flex-col">
-                    <span className="text-[10px] text-gray-500 uppercase tracking-widest">Giá / Price</span>
-                    <span className="text-lg font-bold text-white">
-                      {product.price === 0 ? (
-                        <span className="text-green-400 font-semibold uppercase tracking-wider text-sm">Miễn phí / Free</span>
-                      ) : (
-                        formatVND(product.price)
-                      )}
-                    </span>
+                    <div className="w-[70%] h-[70%] bg-gradient-to-br from-indigo-950/60 to-purple-900/50 border border-white/10 rounded-xl shadow-2xl p-4 flex flex-col items-center justify-center space-y-2 group-hover:scale-105 transition-transform duration-300">
+                      <ShoppingBag className="w-8 h-8 text-pink-500/60" />
+                      <span className="font-mono text-[9px] text-gray-500 select-none">
+                        {product.slug}.zip
+                      </span>
+                    </div>
                   </div>
 
-                  <div className="flex gap-2">
-                    {product.demoUrl && (
-                      <a 
-                        href={product.demoUrl} 
-                        target="_blank" 
-                        rel="noreferrer"
-                        className="inline-flex items-center justify-center font-medium rounded-xl transition-all duration-300 px-3 py-2 text-sm border border-white/15 text-white hover:bg-white/5 hover:border-pink-500/50 hover:shadow-[0_0_15px_rgba(236,72,153,0.15)] cursor-pointer"
-                      >
-                        <Eye className="w-4 h-4" />
-                      </a>
-                    )}
+                  {/* Info Area */}
+                  <div className="p-6 flex flex-col grow space-y-4">
+                    <div className="grow">
+                      <Link href={`/san-pham/${product.slug}`}>
+                        <h3 className="text-xl font-bold text-white group-hover:text-pink-400 transition-colors duration-200">
+                          {product.title}
+                        </h3>
+                      </Link>
+                      <p className="text-gray-400 text-xs md:text-sm mt-2 leading-relaxed line-clamp-3">
+                        {product.descriptionVi || product.description}
+                      </p>
+                    </div>
 
-                    {product.price === 0 ? (
-                      <Button
-                        variant="secondary"
-                        size="sm"
-                        onClick={() => openContactModal(product)}
-                        className="bg-green-500/10 border-green-500/20 text-green-400 hover:bg-green-500/20"
-                      >
-                        Liên hệ nhận code
-                      </Button>
-                    ) : (
-                      <Button
-                        variant="primary"
-                        size="sm"
-                        onClick={() => openCheckoutModal(product)}
-                      >
-                        Mua ngay
-                      </Button>
-                    )}
+                    {/* Tech tags */}
+                    <div className="flex flex-wrap gap-1.5">
+                      {product.techStack.map((tech: string) => (
+                        <span key={tech} className="text-[10px] bg-white/5 border border-white/5 rounded-md px-2 py-0.5 text-gray-300 font-mono">
+                          {tech}
+                        </span>
+                      ))}
+                    </div>
+
+                    {/* Price and Action Row */}
+                    <div className="pt-2 border-t border-white/5 flex items-center justify-between gap-4 mt-auto">
+                      <div className="flex flex-col">
+                        <span className="text-[10px] text-gray-500 uppercase tracking-widest">Giá / Price</span>
+                        <span className="text-lg font-bold text-white">
+                          {product.price === 0 ? (
+                            <span className="text-green-400 font-semibold uppercase tracking-wider text-sm">Miễn phí / Free</span>
+                          ) : (
+                            formatVND(product.price)
+                          )}
+                        </span>
+                      </div>
+
+                      <div className="flex gap-2">
+                        {product.demoUrl && (
+                          <a 
+                            href={product.demoUrl} 
+                            target="_blank" 
+                            rel="noreferrer"
+                            className="inline-flex items-center justify-center font-medium rounded-xl transition-all duration-300 px-3 py-2 text-sm border border-white/15 text-white hover:bg-white/5 hover:border-pink-500/50 hover:shadow-[0_0_15px_rgba(236,72,153,0.15)] cursor-pointer"
+                          >
+                            <Eye className="w-4 h-4" />
+                          </a>
+                        )}
+
+                        {product.price === 0 ? (
+                          <Button
+                            variant="secondary"
+                            size="sm"
+                            onClick={() => openContactModal(product)}
+                            className="bg-green-500/10 border-green-500/20 text-green-400 hover:bg-green-500/20"
+                          >
+                            Liên hệ nhận code
+                          </Button>
+                        ) : (
+                          <Button
+                            variant="primary"
+                            size="sm"
+                            onClick={() => openCheckoutModal(product)}
+                          >
+                            Mua ngay
+                          </Button>
+                        )}
+                      </div>
+                    </div>
+
                   </div>
-                </div>
-
-              </div>
-            </GlassCard>
+                </GlassCard>
+              </motion.div>
+            </motion.div>
           ))}
-        </div>
+        </Stagger>
       </div>
 
       {/* Free Product / Contact Form Modal */}
-      {selectedProduct && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm">
-          <div className="relative w-full max-w-lg overflow-hidden glass-card border border-white/10 p-8 flex flex-col space-y-6 bg-[#0c0a21]/95">
-            {/* Close Button */}
-            <button
-              onClick={() => setSelectedProduct(null)}
-              className="absolute top-6 right-6 text-gray-400 hover:text-white p-2 hover:bg-white/5 rounded-lg transition-colors cursor-pointer"
+      <AnimatePresence>
+        {selectedProduct && (
+          <motion.div
+            className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm"
+            variants={modalOverlayVariants}
+            initial="hidden"
+            animate="visible"
+            exit="exit"
+            onClick={() => setSelectedProduct(null)}
+          >
+            <motion.div
+              className="relative w-full max-w-lg overflow-hidden glass-card border border-white/10 p-8 flex flex-col space-y-6 bg-[#0c0a21]/95"
+              variants={modalContentVariants}
+              initial="hidden"
+              animate="visible"
+              exit="exit"
+              onClick={(e) => e.stopPropagation()}
             >
-              <X className="w-5 h-5" />
-            </button>
+              {/* Close Button */}
+              <button
+                onClick={() => setSelectedProduct(null)}
+                className="absolute top-6 right-6 text-gray-400 hover:text-white p-2 hover:bg-white/5 rounded-lg transition-colors cursor-pointer"
+              >
+                <X className="w-5 h-5" />
+              </button>
 
-            {/* Modal Title */}
-            <div>
-              <h3 className="text-xl md:text-2xl font-bold text-white">Yêu cầu nhận mã nguồn</h3>
-              <p className="text-sm text-gray-400 mt-1">
-                Nhập thông tin bên dưới để nhận source code miễn phí:{" "}
-                <strong className="text-pink-400">{selectedProduct.title}</strong>
-              </p>
-            </div>
-
-            {submitSuccess ? (
-              <div className="flex flex-col items-center justify-center text-center py-8 space-y-4">
-                <CheckCircle2 className="w-16 h-16 text-green-400" />
-                <h4 className="text-lg font-semibold text-white">Gửi yêu cầu thành công!</h4>
-                <p className="text-sm text-gray-400 max-w-sm">
-                  Cảm ơn bạn đã đăng ký. Cường sẽ liên hệ trực tiếp với bạn qua Zalo/Email để hỗ trợ cài đặt và gửi mã nguồn sớm nhất.
+              {/* Modal Title */}
+              <div>
+                <h3 className="text-xl md:text-2xl font-bold text-white">Yêu cầu nhận mã nguồn</h3>
+                <p className="text-sm text-gray-400 mt-1">
+                  Nhập thông tin bên dưới để nhận source code miễn phí:{" "}
+                  <strong className="text-pink-400">{selectedProduct.title}</strong>
                 </p>
-                <Button variant="outline" size="sm" onClick={() => setSelectedProduct(null)}>
-                  Đóng cửa sổ
-                </Button>
               </div>
-            ) : (
-              <form onSubmit={handleSubmit} className="space-y-4 text-left">
+
+              {submitSuccess ? (
+                <motion.div
+                  className="flex flex-col items-center justify-center text-center py-8 space-y-4"
+                  initial={{ opacity: 0, scale: 0.8 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  transition={{ type: "spring", stiffness: 200, damping: 12 }}
+                >
+                  <motion.div
+                    initial={{ scale: 0, rotate: -45 }}
+                    animate={{ scale: 1, rotate: 0 }}
+                    transition={{ type: "spring", stiffness: 300, damping: 10, delay: 0.1 }}
+                  >
+                    <CheckCircle2 className="w-16 h-16 text-green-400" />
+                  </motion.div>
+                  <h4 className="text-lg font-semibold text-white">Gửi yêu cầu thành công!</h4>
+                  <p className="text-sm text-gray-400 max-w-sm">
+                    Cảm ơn bạn đã đăng ký. Cường sẽ liên hệ trực tiếp với bạn qua Zalo/Email để hỗ trợ cài đặt và gửi mã nguồn sớm nhất.
+                  </p>
+                  <Button variant="outline" size="sm" onClick={() => setSelectedProduct(null)}>
+                    Đóng cửa sổ
+                  </Button>
+                </motion.div>
+              ) : (
+                <form onSubmit={handleSubmit} className="space-y-4 text-left">
+                  <div className="space-y-1">
+                    <label className="text-xs text-gray-400 block font-medium">Họ và tên *</label>
+                    <input
+                      type="text"
+                      name="name"
+                      value={formData.name}
+                      onChange={handleInputChange}
+                      required
+                      placeholder="Nguyễn Văn A"
+                      className="glass-input w-full px-4 py-2 text-sm focus:outline-none"
+                    />
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="space-y-1">
+                      <label className="text-xs text-gray-400 block font-medium">Email *</label>
+                      <input
+                        type="email"
+                        name="email"
+                        value={formData.email}
+                        onChange={handleInputChange}
+                        required
+                        placeholder="client@gmail.com"
+                        className="glass-input w-full px-4 py-2 text-sm focus:outline-none"
+                      />
+                    </div>
+                    <div className="space-y-1">
+                      <label className="text-xs text-gray-400 block font-medium">Số điện thoại / Zalo *</label>
+                      <input
+                        type="tel"
+                        name="phone"
+                        value={formData.phone}
+                        onChange={handleInputChange}
+                        required
+                        placeholder="0912345678"
+                        className="glass-input w-full px-4 py-2 text-sm focus:outline-none"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="space-y-1">
+                    <label className="text-xs text-gray-400 block font-medium">Ghi chú yêu cầu (Tùy chọn)</label>
+                    <textarea
+                      name="message"
+                      value={formData.message}
+                      onChange={handleInputChange}
+                      rows={3}
+                      placeholder="Nhập yêu cầu hoặc câu hỏi cụ thể của bạn..."
+                      className="glass-input w-full px-4 py-2 text-sm focus:outline-none resize-none"
+                    />
+                  </div>
+
+                  <Button
+                    type="submit"
+                    disabled={isSubmitting}
+                    className="w-full flex items-center justify-center gap-2 pt-3"
+                  >
+                    {isSubmitting ? (
+                      <span>Đang gửi...</span>
+                    ) : (
+                      <>
+                        <Send className="w-4 h-4" />
+                        <span>Gửi yêu cầu nhận Code</span>
+                      </>
+                    )}
+                  </Button>
+                </form>
+              )}
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Paid Product Checkout Info Modal */}
+      <AnimatePresence>
+        {checkoutProduct && (
+          <motion.div
+            className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm"
+            variants={modalOverlayVariants}
+            initial="hidden"
+            animate="visible"
+            exit="exit"
+            onClick={() => setCheckoutProduct(null)}
+          >
+            <motion.div
+              className="relative w-full max-w-lg overflow-hidden glass-card border border-white/10 p-8 flex flex-col space-y-6 bg-[#0c0a21]/95 rounded-2xl"
+              variants={modalContentVariants}
+              initial="hidden"
+              animate="visible"
+              exit="exit"
+              onClick={(e) => e.stopPropagation()}
+            >
+              {/* Close Button */}
+              <button
+                onClick={() => setCheckoutProduct(null)}
+                className="absolute top-6 right-6 text-gray-400 hover:text-white p-2 hover:bg-white/5 rounded-lg transition-colors cursor-pointer"
+              >
+                <X className="w-5 h-5" />
+              </button>
+
+              {/* Modal Title */}
+              <div>
+                <h3 className="text-xl md:text-2xl font-bold text-white flex items-center gap-2">
+                  <CreditCard className="w-6 h-6 text-pink-500" />
+                  <span>Thông tin thanh toán</span>
+                </h3>
+                <p className="text-sm text-gray-400 mt-1">
+                  Vui lòng điền thông tin để nhận đường dẫn tải mã nguồn{" "}
+                  <strong className="text-pink-400">{checkoutProduct.title}</strong> sau khi hoàn tất thanh toán.
+                </p>
+              </div>
+
+              <form onSubmit={handleCheckoutSubmit} className="space-y-4 text-left">
                 <div className="space-y-1">
                   <label className="text-xs text-gray-400 block font-medium">Họ và tên *</label>
                   <input
                     type="text"
                     name="name"
-                    value={formData.name}
-                    onChange={handleInputChange}
+                    value={checkoutFormData.name}
+                    onChange={handleCheckoutInputChange}
                     required
                     placeholder="Nguyễn Văn A"
-                    className="glass-input w-full px-4 py-2 text-sm focus:outline-none"
+                    className="glass-input w-full px-4 py-2.5 text-sm focus:outline-none"
                   />
                 </div>
 
@@ -272,149 +444,54 @@ export default function DigitalProductsSection({ initialProducts }: { initialPro
                     <input
                       type="email"
                       name="email"
-                      value={formData.email}
-                      onChange={handleInputChange}
+                      value={checkoutFormData.email}
+                      onChange={handleCheckoutInputChange}
                       required
                       placeholder="client@gmail.com"
-                      className="glass-input w-full px-4 py-2 text-sm focus:outline-none"
+                      className="glass-input w-full px-4 py-2.5 text-sm focus:outline-none"
                     />
                   </div>
                   <div className="space-y-1">
-                    <label className="text-xs text-gray-400 block font-medium">Số điện thoại / Zalo *</label>
+                    <label className="text-xs text-gray-400 block font-medium">Số điện thoại / Zalo (Tùy chọn)</label>
                     <input
                       type="tel"
                       name="phone"
-                      value={formData.phone}
-                      onChange={handleInputChange}
-                      required
+                      value={checkoutFormData.phone}
+                      onChange={handleCheckoutInputChange}
                       placeholder="0912345678"
-                      className="glass-input w-full px-4 py-2 text-sm focus:outline-none"
+                      className="glass-input w-full px-4 py-2.5 text-sm focus:outline-none"
                     />
                   </div>
                 </div>
 
-                <div className="space-y-1">
-                  <label className="text-xs text-gray-400 block font-medium">Ghi chú yêu cầu (Tùy chọn)</label>
-                  <textarea
-                    name="message"
-                    value={formData.message}
-                    onChange={handleInputChange}
-                    rows={3}
-                    placeholder="Nhập yêu cầu hoặc câu hỏi cụ thể của bạn..."
-                    className="glass-input w-full px-4 py-2 text-sm focus:outline-none resize-none"
-                  />
+                <div className="pt-2">
+                  <div className="bg-white/5 border border-white/5 rounded-xl p-4 flex items-center justify-between">
+                    <span className="text-xs text-gray-400 font-medium">Tổng thanh toán:</span>
+                    <span className="text-lg font-bold text-pink-400">
+                      {formatVND(checkoutProduct.salePrice !== null && checkoutProduct.salePrice !== undefined ? checkoutProduct.salePrice : checkoutProduct.price)}
+                    </span>
+                  </div>
                 </div>
 
                 <Button
                   type="submit"
-                  disabled={isSubmitting}
-                  className="w-full flex items-center justify-center gap-2 pt-3"
+                  disabled={checkoutSubmitting}
+                  className="w-full flex items-center justify-center gap-2 pt-3 bg-pink-600 hover:bg-pink-500 font-bold"
                 >
-                  {isSubmitting ? (
-                    <span>Đang gửi...</span>
+                  {checkoutSubmitting ? (
+                    <span>Đang xử lý đơn hàng...</span>
                   ) : (
                     <>
-                      <Send className="w-4 h-4" />
-                      <span>Gửi yêu cầu nhận Code</span>
+                      <CreditCard className="w-4 h-4" />
+                      <span>Xác nhận & Lấy mã VietQR</span>
                     </>
                   )}
                 </Button>
               </form>
-            )}
-          </div>
-        </div>
-      )}
-      {/* Paid Product Checkout Info Modal */}
-      {checkoutProduct && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm animate-in fade-in duration-200">
-          <div className="relative w-full max-w-lg overflow-hidden glass-card border border-white/10 p-8 flex flex-col space-y-6 bg-[#0c0a21]/95 rounded-2xl">
-            {/* Close Button */}
-            <button
-              onClick={() => setCheckoutProduct(null)}
-              className="absolute top-6 right-6 text-gray-400 hover:text-white p-2 hover:bg-white/5 rounded-lg transition-colors cursor-pointer"
-            >
-              <X className="w-5 h-5" />
-            </button>
-
-            {/* Modal Title */}
-            <div>
-              <h3 className="text-xl md:text-2xl font-bold text-white flex items-center gap-2">
-                <CreditCard className="w-6 h-6 text-pink-500" />
-                <span>Thông tin thanh toán</span>
-              </h3>
-              <p className="text-sm text-gray-400 mt-1">
-                Vui lòng điền thông tin để nhận đường dẫn tải mã nguồn{" "}
-                <strong className="text-pink-400">{checkoutProduct.title}</strong> sau khi hoàn tất thanh toán.
-              </p>
-            </div>
-
-            <form onSubmit={handleCheckoutSubmit} className="space-y-4 text-left">
-              <div className="space-y-1">
-                <label className="text-xs text-gray-400 block font-medium">Họ và tên *</label>
-                <input
-                  type="text"
-                  name="name"
-                  value={checkoutFormData.name}
-                  onChange={handleCheckoutInputChange}
-                  required
-                  placeholder="Nguyễn Văn A"
-                  className="glass-input w-full px-4 py-2.5 text-sm focus:outline-none"
-                />
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="space-y-1">
-                  <label className="text-xs text-gray-400 block font-medium">Email *</label>
-                  <input
-                    type="email"
-                    name="email"
-                    value={checkoutFormData.email}
-                    onChange={handleCheckoutInputChange}
-                    required
-                    placeholder="client@gmail.com"
-                    className="glass-input w-full px-4 py-2.5 text-sm focus:outline-none"
-                  />
-                </div>
-                <div className="space-y-1">
-                  <label className="text-xs text-gray-400 block font-medium">Số điện thoại / Zalo (Tùy chọn)</label>
-                  <input
-                    type="tel"
-                    name="phone"
-                    value={checkoutFormData.phone}
-                    onChange={handleCheckoutInputChange}
-                    placeholder="0912345678"
-                    className="glass-input w-full px-4 py-2.5 text-sm focus:outline-none"
-                  />
-                </div>
-              </div>
-
-              <div className="pt-2">
-                <div className="bg-white/5 border border-white/5 rounded-xl p-4 flex items-center justify-between">
-                  <span className="text-xs text-gray-400 font-medium">Tổng thanh toán:</span>
-                  <span className="text-lg font-bold text-pink-400">
-                    {formatVND(checkoutProduct.salePrice !== null && checkoutProduct.salePrice !== undefined ? checkoutProduct.salePrice : checkoutProduct.price)}
-                  </span>
-                </div>
-              </div>
-
-              <Button
-                type="submit"
-                disabled={checkoutSubmitting}
-                className="w-full flex items-center justify-center gap-2 pt-3 bg-pink-600 hover:bg-pink-500 font-bold"
-              >
-                {checkoutSubmitting ? (
-                  <span>Đang xử lý đơn hàng...</span>
-                ) : (
-                  <>
-                    <CreditCard className="w-4 h-4" />
-                    <span>Xác nhận & Lấy mã VietQR</span>
-                  </>
-                )}
-              </Button>
-            </form>
-          </div>
-        </div>
-      )}
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </section>
   );
 }
