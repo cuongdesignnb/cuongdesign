@@ -69,7 +69,8 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
   }
 
   // Calculate reading time
-  const getReadTime = (content: string) => {
+  const getReadTime = (content: string | null) => {
+    if (!content) return "1 phút đọc";
     const words = content.replace(/<[^>]*>/g, "").split(/\s+/).length;
     const time = Math.ceil(words / 200);
     return `${time} phút đọc`;
@@ -219,7 +220,7 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
           {/* Article content parsed */}
           <article
             className="prose prose-invert prose-pink max-w-none text-gray-300 leading-relaxed text-sm sm:text-base space-y-6 text-left"
-            dangerouslySetInnerHTML={{ __html: post.content }}
+            dangerouslySetInnerHTML={{ __html: post.content || "" }}
           />
 
           {/* Tags */}

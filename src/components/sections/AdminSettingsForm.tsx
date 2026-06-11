@@ -24,6 +24,12 @@ export default function AdminSettingsForm({ initialSettings }: AdminSettingsForm
     telegram_chat_id: initialSettings.telegram_chat_id || "",
     ai_chat_prompt: initialSettings.ai_chat_prompt || "",
     ai_writer_prompt: initialSettings.ai_writer_prompt || "",
+    contact_email: initialSettings.contact_email || "",
+    contact_phone: initialSettings.contact_phone || "",
+    contact_zalo: initialSettings.contact_zalo || "",
+    contact_location: initialSettings.contact_location || "",
+    contact_facebook: initialSettings.contact_facebook || "",
+    contact_github: initialSettings.contact_github || "",
   });
 
   const [loading, setLoading] = useState(false);
@@ -244,7 +250,88 @@ export default function AdminSettingsForm({ initialSettings }: AdminSettingsForm
               rows={4}
               className="glass-input w-full px-4 py-2 text-sm focus:outline-none resize-y"
             />
-            <span className="text-[10px] text-gray-500 block">Dùng để ghi đè prompt mặc định khi sinh bài viết tự động.</span>
+            <span className="text-[10px] text-gray-500 block">Dùng để hướng dẫn AI khi chi tiết bài viết sinh tự động.</span>
+          </div>
+        </div>
+      </GlassCard>
+
+      {/* Contact Info Settings */}
+      <GlassCard className="p-6 border-white/5 bg-[#0a0822]/60 space-y-4">
+        <h3 className="text-lg font-bold text-white">5. Cấu hình Thông tin liên hệ</h3>
+        <p className="text-xs text-gray-500">Thiết lập các thông tin liên hệ hiển thị ở chân trang (Footer), trang liên hệ, nút Zalo, và các vị trí khác.</p>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="space-y-1">
+            <label className="text-xs text-gray-400 block font-medium">Email liên hệ</label>
+            <input
+              type="email"
+              name="contact_email"
+              value={settings.contact_email}
+              onChange={handleChange}
+              placeholder="contact@cuongdesign.com"
+              className="glass-input w-full px-4 py-2 text-sm focus:outline-none"
+            />
+          </div>
+          <div className="space-y-1">
+            <label className="text-xs text-gray-400 block font-medium">Số điện thoại / Hotline</label>
+            <input
+              type="text"
+              name="contact_phone"
+              value={settings.contact_phone}
+              onChange={handleChange}
+              placeholder="0963.456.789"
+              className="glass-input w-full px-4 py-2 text-sm focus:outline-none"
+            />
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="space-y-1">
+            <label className="text-xs text-gray-400 block font-medium">Đường dẫn Zalo</label>
+            <input
+              type="text"
+              name="contact_zalo"
+              value={settings.contact_zalo}
+              onChange={handleChange}
+              placeholder="https://zalo.me/0963456789"
+              className="glass-input w-full px-4 py-2 text-sm focus:outline-none"
+            />
+          </div>
+          <div className="space-y-1">
+            <label className="text-xs text-gray-400 block font-medium">Địa chỉ / Vị trí</label>
+            <input
+              type="text"
+              name="contact_location"
+              value={settings.contact_location}
+              onChange={handleChange}
+              placeholder="Hồ Chí Minh City, Vietnam"
+              className="glass-input w-full px-4 py-2 text-sm focus:outline-none"
+            />
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="space-y-1">
+            <label className="text-xs text-gray-400 block font-medium">Đường dẫn Facebook</label>
+            <input
+              type="text"
+              name="contact_facebook"
+              value={settings.contact_facebook}
+              onChange={handleChange}
+              placeholder="https://facebook.com/cuongdesign"
+              className="glass-input w-full px-4 py-2 text-sm focus:outline-none"
+            />
+          </div>
+          <div className="space-y-1">
+            <label className="text-xs text-gray-400 block font-medium">Đường dẫn GitHub</label>
+            <input
+              type="text"
+              name="contact_github"
+              value={settings.contact_github}
+              onChange={handleChange}
+              placeholder="https://github.com/cuongdesignnb"
+              className="glass-input w-full px-4 py-2 text-sm focus:outline-none"
+            />
           </div>
         </div>
       </GlassCard>

@@ -13,6 +13,8 @@ export default async function AdminPostsPage() {
     select: { id: true, name: true, slug: true, color: true },
   });
 
+  const mediaLibrary = await prisma.media.findMany({ orderBy: { createdAt: 'desc' } });
+
   return (
     <div className="space-y-8">
       <div>
@@ -24,6 +26,7 @@ export default async function AdminPostsPage() {
       <AdminPostsManager
         initialPosts={JSON.parse(JSON.stringify(posts))}
         categories={JSON.parse(JSON.stringify(categories))}
+        mediaLibrary={JSON.parse(JSON.stringify(mediaLibrary))}
       />
     </div>
   );

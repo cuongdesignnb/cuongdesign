@@ -4,6 +4,7 @@ import React, { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useToast } from "@/components/ui/Toast";
 import { upsertPage, deletePage } from "@/app/actions/pages";
+import { slugify } from "@/lib/utils";
 import GlassCard from "@/components/ui/GlassCard";
 import Button from "@/components/ui/Button";
 import RichTextEditor from "@/components/ui/RichTextEditor";
@@ -25,17 +26,7 @@ interface AdminPagesManagerProps {
   initialPages: PageItem[];
 }
 
-function slugify(text: string) {
-  return text
-    .toString()
-    .toLowerCase()
-    .normalize("NFD")
-    .replace(/[\u0300-\u036f]/g, "") // Remove accents
-    .replace(/[^a-z0-9\s-]/g, "")
-    .trim()
-    .replace(/\s+/g, "-")
-    .replace(/-+/g, "-");
-}
+
 
 export default function AdminPagesManager({ initialPages }: AdminPagesManagerProps) {
   const router = useRouter();
@@ -140,11 +131,7 @@ export default function AdminPagesManager({ initialPages }: AdminPagesManagerPro
                   const val = e.target.value;
                   setEditingPage((prev) => {
                     if (!prev) return null;
-                    const next = { ...prev, title: val };
-                    if (!prev.id) {
-                      next.slug = slugify(val);
-                    }
-                    return next;
+                    return { ...prev, title: val, slug: slugify(val) };
                   });
                 }}
                 placeholder="Ví dụ: Chính sách bảo mật"

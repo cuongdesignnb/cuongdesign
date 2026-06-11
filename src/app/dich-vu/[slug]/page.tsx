@@ -16,6 +16,8 @@ import Breadcrumbs from "@/components/ui/Breadcrumbs";
 import GlassCard from "@/components/ui/GlassCard";
 import Button from "@/components/ui/Button";
 
+import { prisma } from "@/lib/db";
+
 // ─── Static Params ──────────────────────────────────────
 export function generateStaticParams() {
   return servicesDetail.map((s) => ({ slug: s.slug }));
@@ -42,6 +44,12 @@ export default async function ServiceDetailPage({ params }: Props) {
   const { slug } = await params;
   const service = servicesDetail.find((s) => s.slug === slug);
   if (!service) notFound();
+
+  // Query database settings for contact info
+  const zaloSetting = await prisma.setting.findUnique({
+    where: { key: "contact_zalo" },
+  });
+  const zaloUrl = zaloSetting?.value || siteConfig.contact.zalo;
 
   // JSON-LD: Service + FAQPage
   const serviceSchema = {
@@ -252,7 +260,7 @@ export default async function ServiceDetailPage({ params }: Props) {
                     </Button>
                   </Link>
                   <a
-                    href={siteConfig.contact.zalo}
+                    href={zaloUrl}
                     target="_blank"
                     rel="noreferrer"
                   >

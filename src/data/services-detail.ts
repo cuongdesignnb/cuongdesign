@@ -624,4 +624,106 @@ export const servicesDetail: ServiceDetail[] = [
     ],
     ctaText: "Tối ưu SEO & tốc độ website ngay",
   },
+  {
+    slug: "automation-doanh-nghiep",
+    title: "Tự động hóa Quy trình Doanh nghiệp (Enterprise Automation)",
+    metaTitle:
+      "Tự động hóa Quy trình Doanh nghiệp — Giải pháp RPA, CRM & Tool Tối ưu Vận hành",
+    description:
+      "Dịch vụ thiết kế và lập trình hệ thống tự động hóa quy trình (RPA), liên kết dữ liệu CRM, ERP, Auto-bot Telegram/Email giúp doanh nghiệp giảm 80% tác vụ thủ công.",
+    keywords: [
+      "tự động hóa doanh nghiệp",
+      "workflow automation",
+      "rpa cho doanh nghiệp",
+      "tự động hóa quy trình",
+      "tích hợp crm erp",
+      "automation developer",
+      "tự động hóa quy trình nghiệp vụ",
+      "Telegram bot báo cáo",
+    ],
+    heroDescription:
+      "Tối ưu hóa nguồn lực và loại bỏ các sai sót thủ công bằng hệ thống tự động hóa quy trình doanh nghiệp. Tôi phát triển các giải pháp kết nối dữ liệu tự động giữa các nền tảng (CRM, ERP, Google Sheets, Telegram, Email), tự động hóa các tác vụ lặp đi lặp lại và xây dựng các bot báo cáo dữ liệu thông minh theo thời gian thực.",
+    features: [
+      {
+        title: "Tích hợp API đa nền tảng",
+        description:
+          "Kết nối liền mạch các công cụ doanh nghiệp của bạn (CRM, ERP, Google Sheets, Gmail, Facebook Lead Ads, Zalo) để đồng bộ dữ liệu tự động.",
+      },
+      {
+        title: "Tự động hóa Quy trình (RPA)",
+        description:
+          "Thiết kế và triển khai robot phần mềm (RPA) mô phỏng hành vi con người để xử lý các tác vụ lặp đi lặp lại như nhập liệu, kiểm tra đối chiếu.",
+      },
+      {
+        title: "Telegram / Email Alert Bot",
+        description:
+          "Xây dựng các bot tự động gửi thông báo real-time khi phát sinh lỗi, đơn hàng mới, hoặc báo cáo doanh thu định kỳ theo ngày/tuần/tháng.",
+      },
+      {
+        title: "Quản lý luồng công việc",
+        description:
+          "Thiết lập chuỗi hành động tự động hóa dựa trên điều kiện (Ví dụ: Khách điền form -> Tự tạo lead trên CRM -> Gửi mail cảm ơn -> Nhắn Telegram cho sale).",
+      },
+      {
+        title: "Xây dựng tool/script tùy chỉnh",
+        description:
+          "Viết các script tự động (Python, Node.js) chạy định kỳ hoặc theo sự kiện để cào dữ liệu, xử lý file Excel/PDF lớn hoặc đồng bộ hóa database.",
+      },
+    ],
+    process: [
+      {
+        step: 1,
+        title: "Khảo sát & Phân tích quy trình",
+        description:
+          "Tìm hiểu kỹ luồng công việc hiện tại của doanh nghiệp, xác định các nút thắt cổ chai và đánh giá khả năng tự động hóa.",
+      },
+      {
+        step: 2,
+        title: "Lên giải pháp & Thiết kế sơ đồ luồng",
+        description:
+          "Vẽ sơ đồ luồng dữ liệu (workflow diagram), lựa chọn công cụ phù hợp (Make, Zapier, Custom Script) để tối ưu chi phí và tính ổn định.",
+      },
+      {
+        step: 3,
+        title: "Lập trình & Kết nối các API",
+        description:
+          "Thực hiện lập trình, cấu hình các webhook, kết nối API và viết kịch bản tự động hóa cho các công cụ hoạt động nhịp nhàng.",
+      },
+      {
+        step: 4,
+        title: "Kiểm thử kịch bản & Xử lý ngoại lệ",
+        description:
+          "Chạy thử nghiệm trên môi trường sandbox, giả định mọi trường hợp lỗi (mất mạng, dữ liệu sai định dạng) để thiết lập cơ chế tự động báo lỗi.",
+      },
+      {
+        step: 5,
+        title: "Bàn giao & Hướng dẫn vận hành",
+        description:
+          "Bàn giao tài liệu hướng dẫn, cấu hình tài khoản, bàn giao mã nguồn (nếu code custom) và bảo hành, bảo trì luồng tự động hóa.",
+      },
+    ],
+    faqs: [
+      {
+        question: "Nên chọn nền tảng như Make/Zapier hay viết Code custom?",
+        answer:
+          "Tùy vào nhu cầu của bạn. Nền tảng no-code/low-code (Make, Zapier) giúp triển khai cực kỳ nhanh và dễ chỉnh sửa luồng sau này, phù hợp với các tác vụ kết nối phổ biến. Viết code custom (Node.js/Python) thì tối ưu chi phí vận hành hàng tháng (không mất phí theo tác vụ) và xử lý được các logic cực kỳ phức tạp hoặc bảo mật nội bộ. Tôi sẽ tư vấn phương án tối ưu nhất sau khi khảo sát.",
+      },
+      {
+        question: "Hệ thống tự động hóa có an toàn bảo mật không?",
+        answer:
+          "Hoàn toàn an toàn. Tôi sử dụng các chuẩn bảo mật API Key, OAuth 2.0, mã hóa dữ liệu nhạy cảm và tuân thủ các quy tắc bảo mật của từng nền tảng. Dữ liệu chỉ được truyền trực tiếp giữa các công cụ của bạn chứ không lưu trữ trung gian ở bất kỳ bên nào khác.",
+      },
+      {
+        question: "Chi phí vận hành hệ thống tự động hóa hàng tháng là bao nhiêu?",
+        answer:
+          "Chi phí này phụ thuộc vào số lượng tác vụ (tasks/operations) chạy mỗi tháng. Nhiều kịch bản có thể chạy hoàn toàn miễn phí hoặc chỉ mất khoảng $9 - $29/tháng trên Make/Zapier. Nếu chạy bằng script custom trên máy chủ riêng (VPS) thì chi phí chỉ từ $5/tháng để thuê server và không giới hạn số lượng tác vụ.",
+      },
+      {
+        question: "Khi các API của bên thứ ba thay đổi thì luồng có bị lỗi không?",
+        answer:
+          "Có khả năng các API thay đổi phiên bản (deprecated) hoặc cấu trúc dữ liệu bị đổi dẫn đến lỗi. Để giải quyết, tôi luôn lập trình sẵn cơ chế 'Error Handling' — tự động phát hiện lỗi và gửi tin nhắn cảnh báo ngay lập tức vào Telegram của bạn. Tôi cũng cung cấp gói bảo trì định kỳ để cập nhật luồng kịp thời.",
+      },
+    ],
+    ctaText: "Thiết lập hệ thống tự động hóa quy trình ngay",
+  },
 ];

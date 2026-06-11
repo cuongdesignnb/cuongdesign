@@ -6,8 +6,14 @@ import { siteConfig } from "@/data/site";
 import GlassCard from "../ui/GlassCard";
 import Button from "../ui/Button";
 import { faqs } from "@/data/faqs";
+import { useSettings } from "@/components/ui/SettingsContext";
 
 export default function ContactPageClient() {
+  const settings = useSettings();
+  const email = settings.contact_email || siteConfig.contact.email;
+  const phone = settings.contact_phone || siteConfig.contact.phone;
+  const location = settings.contact_location || siteConfig.contact.location;
+
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -74,8 +80,8 @@ export default function ContactPageClient() {
                 </div>
                 <div>
                   <span className="text-[10px] text-gray-500 uppercase tracking-widest block font-medium">Email</span>
-                  <a href={`mailto:${siteConfig.contact.email}`} className="text-sm text-white hover:text-pink-400 transition-colors">
-                    {siteConfig.contact.email}
+                  <a href={`mailto:${email}`} className="text-sm text-white hover:text-pink-400 transition-colors">
+                    {email}
                   </a>
                 </div>
               </div>
@@ -86,8 +92,8 @@ export default function ContactPageClient() {
                 </div>
                 <div>
                   <span className="text-[10px] text-gray-500 uppercase tracking-widest block font-medium">Zalo / SĐT</span>
-                  <a href={`tel:${siteConfig.contact.phone}`} className="text-sm text-white hover:text-pink-400 transition-colors">
-                    {siteConfig.contact.phone}
+                  <a href={`tel:${phone}`} className="text-sm text-white hover:text-pink-400 transition-colors">
+                    {phone}
                   </a>
                 </div>
               </div>
@@ -98,7 +104,7 @@ export default function ContactPageClient() {
                 </div>
                 <div>
                   <span className="text-[10px] text-gray-500 uppercase tracking-widest block font-medium">Vị trí</span>
-                  <span className="text-sm text-white">{siteConfig.contact.location}</span>
+                  <span className="text-sm text-white">{location}</span>
                 </div>
               </div>
             </div>
@@ -222,7 +228,7 @@ export default function ContactPageClient() {
           <p className="text-xs text-gray-500 mt-1">Giải đáp nhanh các thắc mắc phổ biến của khách hàng về dịch vụ và cài đặt mã nguồn.</p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-start">
           {faqs.map((faq, idx) => (
             <GlassCard 
               key={idx} 

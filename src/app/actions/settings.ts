@@ -15,9 +15,8 @@ export async function updateSettings(data: Record<string, string>) {
 
     await Promise.all(promises);
     
-    // Clear and refresh route caches
-    revalidatePath("/");
-    revalidatePath("/admin/settings");
+    // Clear and refresh route caches sitewide
+    revalidatePath("/", "layout");
     
     return { success: true };
   } catch (error: any) {

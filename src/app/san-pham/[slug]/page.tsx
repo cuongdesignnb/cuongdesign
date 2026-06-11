@@ -7,6 +7,7 @@ import Footer from "@/components/layout/Footer";
 import Breadcrumbs from "@/components/ui/Breadcrumbs";
 import ProductDetailClient from "./ProductDetailClient";
 import { Metadata } from "next";
+import { createMetadata, JsonLd } from "@/lib/seo";
 
 interface ProductPageProps {
   params: Promise<{ slug: string }>;
@@ -22,25 +23,15 @@ export async function generateMetadata({ params }: ProductPageProps): Promise<Me
     return {};
   }
 
-  return {
-    title: `${product.title} - Mua mã nguồn | Cường Design`,
+  return createMetadata({
+    title: `${product.title} - Mua mã nguồn`,
     description: product.description,
+    path: `/san-pham/${slug}`,
     keywords: product.techStack,
     openGraph: {
-      title: product.title,
-      description: product.description,
       images: [{ url: product.coverImage }],
     },
-    twitter: {
-      card: "summary_large_image",
-      title: `${product.title} - Mua mã nguồn | Cường Design`,
-      description: product.description,
-      images: [product.coverImage],
-    },
-    alternates: {
-      canonical: `https://cuongdesign.com/san-pham/${slug}`,
-    },
-  };
+  });
 }
 
 export default async function ProductDetailPage({ params }: ProductPageProps) {
@@ -124,10 +115,7 @@ export default async function ProductDetailPage({ params }: ProductPageProps) {
 
   return (
     <div className="min-h-screen bg-[#030014] text-gray-200 flex flex-col">
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
-      />
+      <JsonLd data={jsonLd} />
 
       <Header />
 
@@ -155,12 +143,12 @@ export default async function ProductDetailPage({ params }: ProductPageProps) {
           </div>
 
           {/* Cover Art Banner */}
-          <div className="relative aspect-video w-full rounded-2xl overflow-hidden border border-white/10 shadow-2xl bg-white/5">
+          <div className="relative aspect-video w-full rounded-2xl overflow-hidden border border-white/10 shadow-2xl bg-white/5 group">
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
               src={product.coverImage}
               alt={product.title}
-              className="w-full h-full object-cover"
+              className="w-full h-full object-cover object-top transition-all duration-[3s] ease-in-out group-hover:duration-[8s] group-hover:object-bottom"
             />
           </div>
 

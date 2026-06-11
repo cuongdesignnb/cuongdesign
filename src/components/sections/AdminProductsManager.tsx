@@ -5,7 +5,7 @@ import { upsertProduct, deleteProduct } from "@/app/actions/products";
 import GlassCard from "@/components/ui/GlassCard";
 import Button from "@/components/ui/Button";
 import { Plus, Edit2, Trash2, X, Image as ImageIcon, Check } from "lucide-react";
-import { formatVND } from "@/lib/utils";
+import { formatVND, slugify } from "@/lib/utils";
 
 interface AdminProductsManagerProps {
   initialProducts: any[];
@@ -96,12 +96,12 @@ export default function AdminProductsManager({
     
     setForm((prev) => {
       const updated = { ...prev, [name]: val };
-      // Auto slugify if title changes and we are creating
-      if (name === "title" && !prev.id) {
-        updated.slug = value
-          .toLowerCase()
-          .replace(/[^a-z0-9]+/g, "-")
-          .replace(/(^-|-$)+/g, "");
+      // Auto slugify if title changes (handles both creation and update)
+      if (name === "title") {
+        updated.slug = slugify(value);
+      } else if (name === "slug") {
+        // Enforce valid slug formatting if they manually edit it
+        updated.slug = slugify(value);
       }
       return updated;
     });

@@ -145,26 +145,37 @@ export default function FeaturedProjectsSection({ initialProjects }: { initialPr
                       className="group flex flex-col h-full overflow-hidden p-0 border border-white/5 bg-[#0d0b21]/45 hover:border-pink-500/25 transition-colors duration-300"
                     >
                       {/* Showcase Mockup Header */}
-                      <div className="relative w-full aspect-video bg-gradient-to-br from-purple-950/40 to-pink-950/20 border-b border-white/5 flex items-center justify-center overflow-hidden">
-                        <div className="absolute inset-0 bg-black/10 group-hover:bg-black/0 transition-colors duration-300" />
-                        
-                        {/* Floating Tech Badges */}
+                      <Link href={`/du-an/${project.slug}`} className="block relative w-full aspect-video border-b border-white/5 overflow-hidden group/img">
+                        {project.coverImage ? (
+                          <img 
+                            src={project.coverImage} 
+                            alt={project.title} 
+                            className="w-full h-full object-cover object-top transition-all duration-[3s] ease-in-out group-hover/img:duration-[8s] group-hover/img:object-bottom" 
+                          />
+                        ) : (
+                          <div className="w-full h-full bg-gradient-to-br from-purple-950/40 to-pink-950/20 flex items-center justify-center">
+                            <div className="w-[80%] h-[75%] bg-[#080718]/90 border border-white/10 rounded-lg shadow-2xl p-4 flex flex-col space-y-2">
+                              <div className="flex items-center space-x-1.5 pb-1.5 border-b border-white/5">
+                                <span className="w-1.5 h-1.5 rounded-full bg-red-500/80" />
+                                <span className="w-1.5 h-1.5 rounded-full bg-yellow-500/80" />
+                                <span className="w-1.5 h-1.5 rounded-full bg-green-500/80" />
+                              </div>
+                              <div className="grow flex items-center justify-center font-mono text-[10px] text-gray-500 select-none">
+                                {project.slug}.html
+                              </div>
+                            </div>
+                          </div>
+                        )}
                         <div className="absolute top-4 left-4 flex flex-wrap gap-1.5 z-10">
                           <Badge variant="primary">{project.category}</Badge>
                         </div>
-
-                        {/* Project Representation Panel Layout */}
-                        <div className="w-[80%] h-[75%] bg-[#080718]/90 border border-white/10 rounded-lg shadow-2xl p-4 flex flex-col space-y-2 group-hover:scale-[1.03] transition-transform duration-300">
-                          <div className="flex items-center space-x-1.5 pb-1.5 border-b border-white/5">
-                            <span className="w-1.5 h-1.5 rounded-full bg-red-500/80" />
-                            <span className="w-1.5 h-1.5 rounded-full bg-yellow-500/80" />
-                            <span className="w-1.5 h-1.5 rounded-full bg-green-500/80" />
-                          </div>
-                          <div className="grow flex items-center justify-center font-mono text-[10px] text-gray-500 select-none">
-                            {project.slug}.html
-                          </div>
+                        {/* Hover Overlay */}
+                        <div className="absolute inset-0 bg-black/45 opacity-0 group-hover/img:opacity-100 flex items-center justify-center transition-opacity duration-300">
+                          <span className="px-4 py-2 rounded-xl bg-pink-500/90 text-white font-bold text-xs shadow-lg backdrop-blur-sm transform translate-y-2 group-hover/img:translate-y-0 transition-all duration-300">
+                            Xem chi tiết
+                          </span>
                         </div>
-                      </div>
+                      </Link>
 
                       {/* Content */}
                       <div className="p-6 flex flex-col grow space-y-4">
@@ -187,24 +198,23 @@ export default function FeaturedProjectsSection({ initialProjects }: { initialPr
                         </div>
 
                         {/* Actions */}
-                        <div className="flex items-center gap-3 pt-2 mt-auto">
+                        <div className={`pt-2 mt-auto w-full ${project.demoUrl ? "grid grid-cols-2 gap-3" : ""}`}>
                           <Link 
                             href={`/du-an/${project.slug}`} 
-                            className="grow inline-flex items-center justify-center font-medium rounded-xl transition-all duration-300 px-4 py-2 text-sm border border-white/15 text-white hover:bg-white/5 hover:border-pink-500/50 hover:shadow-[0_0_15px_rgba(236,72,153,0.15)] flex items-center justify-center gap-1 cursor-pointer"
+                            className="inline-flex items-center justify-center font-semibold rounded-xl transition-all duration-300 px-3 py-2.5 text-xs border border-white/10 text-white bg-white/5 hover:bg-white/10 hover:border-pink-500/50 hover:shadow-[0_0_15px_rgba(236,72,153,0.15)] gap-1.5 cursor-pointer w-full text-center"
                           >
-                            <Info className="w-3.5 h-3.5" />
-                            <span>Chi tiết / Info</span>
+                            <Info className="w-3.5 h-3.5 text-pink-400 shrink-0" />
+                            <span className="truncate">Chi tiết / Info</span>
                           </Link>
                           {project.demoUrl && (
-                            <a 
-                              href={project.demoUrl} 
+                            <Link 
+                              href={`/preview/${project.slug}`} 
                               target="_blank" 
-                              rel="noreferrer" 
-                              className="grow inline-flex items-center justify-center font-medium rounded-xl transition-all duration-300 px-4 py-2 text-sm bg-gradient-to-r from-pink-500 via-purple-600 to-indigo-600 text-white shadow-[0_4px_20px_rgba(236,72,153,0.2)] hover:shadow-[0_4px_25px_rgba(236,72,153,0.45)] hover:scale-[1.02] flex items-center justify-center gap-1 cursor-pointer"
+                              className="inline-flex items-center justify-center font-semibold rounded-xl transition-all duration-300 px-3 py-2.5 text-xs bg-gradient-to-r from-pink-500 via-purple-600 to-indigo-600 text-white shadow-[0_4px_15px_rgba(236,72,153,0.2)] hover:shadow-[0_4px_22px_rgba(236,72,153,0.45)] hover:scale-[1.02] gap-1.5 cursor-pointer w-full text-center"
                             >
-                              <ExternalLink className="w-3.5 h-3.5" />
-                              <span>Demo / Preview</span>
-                            </a>
+                              <ExternalLink className="w-3.5 h-3.5 shrink-0" />
+                              <span className="truncate">Demo / Preview</span>
+                            </Link>
                           )}
                         </div>
                       </div>

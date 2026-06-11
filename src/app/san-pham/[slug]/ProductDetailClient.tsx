@@ -418,12 +418,12 @@ export default function ProductDetailClient({
           )}
 
           {product.demoUrl && (
-            <a href={product.demoUrl} target="_blank" rel="noreferrer" className="block">
+            <Link href={`/preview/${product.slug}`} target="_blank" className="block">
               <Button variant="outline" className="w-full font-semibold py-3.5 flex items-center justify-center gap-2 rounded-xl text-sm">
                 <Eye className="w-4 h-4" />
                 <span>Xem Demo Thực Tế</span>
               </Button>
-            </a>
+            </Link>
           )}
         </div>
       </div>

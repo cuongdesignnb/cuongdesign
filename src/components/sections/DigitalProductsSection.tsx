@@ -163,18 +163,33 @@ export default function DigitalProductsSection({ initialProducts }: { initialPro
                   className="group flex flex-col h-full overflow-hidden p-0 border border-white/5 bg-[#0d0b21]/45 hover:border-pink-500/25 transition-colors duration-300"
                 >
                   {/* Product Mockup Representation */}
-                  <div className="relative w-full aspect-video bg-gradient-to-br from-purple-950/20 to-indigo-950/40 border-b border-white/5 flex items-center justify-center overflow-hidden">
+                  <Link href={`/san-pham/${product.slug}`} className="block relative w-full aspect-video border-b border-white/5 overflow-hidden group/img">
+                    {product.coverImage ? (
+                      <img 
+                        src={product.coverImage} 
+                        alt={product.title} 
+                        className="w-full h-full object-cover object-top transition-all duration-[3s] ease-in-out group-hover/img:duration-[8s] group-hover/img:object-bottom" 
+                      />
+                    ) : (
+                      <div className="w-full h-full bg-gradient-to-br from-purple-950/20 to-indigo-950/40 flex items-center justify-center">
+                        <div className="w-[70%] h-[70%] bg-gradient-to-br from-indigo-950/60 to-purple-900/50 border border-white/10 rounded-xl shadow-2xl p-4 flex flex-col items-center justify-center space-y-2">
+                          <ShoppingBag className="w-8 h-8 text-pink-500/60" />
+                          <span className="font-mono text-[9px] text-gray-500 select-none">
+                            {product.slug}.zip
+                          </span>
+                        </div>
+                      </div>
+                    )}
                     <div className="absolute top-4 left-4 flex flex-wrap gap-1.5 z-10">
                       <Badge variant="primary">{product.type}</Badge>
                     </div>
-
-                    <div className="w-[70%] h-[70%] bg-gradient-to-br from-indigo-950/60 to-purple-900/50 border border-white/10 rounded-xl shadow-2xl p-4 flex flex-col items-center justify-center space-y-2 group-hover:scale-105 transition-transform duration-300">
-                      <ShoppingBag className="w-8 h-8 text-pink-500/60" />
-                      <span className="font-mono text-[9px] text-gray-500 select-none">
-                        {product.slug}.zip
+                    {/* Hover Overlay */}
+                    <div className="absolute inset-0 bg-black/45 opacity-0 group-hover/img:opacity-100 flex items-center justify-center transition-opacity duration-300">
+                      <span className="px-4 py-2 rounded-xl bg-pink-500/90 text-white font-bold text-xs shadow-lg backdrop-blur-sm transform translate-y-2 group-hover/img:translate-y-0 transition-all duration-300">
+                        Xem chi tiết
                       </span>
                     </div>
-                  </div>
+                  </Link>
 
                   {/* Info Area */}
                   <div className="p-6 flex flex-col grow space-y-4">
@@ -199,47 +214,57 @@ export default function DigitalProductsSection({ initialProducts }: { initialPro
                     </div>
 
                     {/* Price and Action Row */}
-                    <div className="pt-2 border-t border-white/5 flex items-center justify-between gap-4 mt-auto">
-                      <div className="flex flex-col">
-                        <span className="text-[10px] text-gray-500 uppercase tracking-widest">Giá / Price</span>
-                        <span className="text-lg font-bold text-white">
-                          {product.price === 0 ? (
-                            <span className="text-green-400 font-semibold uppercase tracking-wider text-sm">Miễn phí / Free</span>
-                          ) : (
-                            formatVND(product.price)
-                          )}
-                        </span>
+                    <div className="pt-3 border-t border-white/5 flex flex-col gap-3 mt-auto w-full">
+                      {/* Price & Demo Link Row */}
+                      <div className="flex items-center justify-between gap-3">
+                        <div className="flex flex-col text-left">
+                          <span className="text-[10px] text-gray-500 uppercase tracking-widest font-semibold">Giá / Price</span>
+                          <span className="text-base font-extrabold text-white">
+                            {product.price === 0 ? (
+                              <span className="bg-gradient-to-r from-green-400 to-emerald-500 bg-clip-text text-transparent font-bold uppercase tracking-wider text-xs sm:text-sm">
+                                Miễn phí / Free
+                              </span>
+                            ) : (
+                              formatVND(product.price)
+                            )}
+                          </span>
+                        </div>
+
+                        {product.demoUrl && (
+                          <Link 
+                            href={`/preview/${product.slug}`} 
+                            target="_blank" 
+                            className="inline-flex items-center justify-center gap-1.5 font-semibold rounded-xl transition-all duration-300 px-3 py-1.5 text-xs border border-white/10 text-white bg-white/5 hover:bg-white/10 hover:border-pink-500/50 hover:shadow-[0_0_12px_rgba(236,72,153,0.15)] cursor-pointer"
+                            title="Xem Demo"
+                          >
+                            <Eye className="w-3.5 h-3.5 text-pink-400 shrink-0" />
+                            <span>Xem Demo</span>
+                          </Link>
+                        )}
                       </div>
 
-                      <div className="flex gap-2">
-                        {product.demoUrl && (
-                          <a 
-                            href={product.demoUrl} 
-                            target="_blank" 
-                            rel="noreferrer"
-                            className="inline-flex items-center justify-center font-medium rounded-xl transition-all duration-300 px-3 py-2 text-sm border border-white/15 text-white hover:bg-white/5 hover:border-pink-500/50 hover:shadow-[0_0_15px_rgba(236,72,153,0.15)] cursor-pointer"
-                          >
-                            <Eye className="w-4 h-4" />
-                          </a>
-                        )}
+                      {/* Core Action Buttons Row */}
+                      <div className="grid grid-cols-2 gap-2.5 w-full">
+                        <Link href={`/san-pham/${product.slug}`} className="w-full">
+                          <button className="w-full inline-flex items-center justify-center font-semibold rounded-xl transition-all duration-300 px-3 py-2.5 text-xs border border-white/10 text-white bg-white/5 hover:bg-white/10 hover:border-pink-500/50 hover:shadow-[0_0_12px_rgba(236,72,153,0.15)] cursor-pointer text-center">
+                            Chi tiết
+                          </button>
+                        </Link>
 
                         {product.price === 0 ? (
-                          <Button
-                            variant="secondary"
-                            size="sm"
+                          <button
                             onClick={() => openContactModal(product)}
-                            className="bg-green-500/10 border-green-500/20 text-green-400 hover:bg-green-500/20"
+                            className="w-full inline-flex items-center justify-center font-semibold rounded-xl transition-all duration-300 px-3 py-2.5 text-xs bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 hover:bg-emerald-500/20 hover:border-emerald-500/40 cursor-pointer text-center"
                           >
-                            Liên hệ nhận code
-                          </Button>
+                            Nhận code
+                          </button>
                         ) : (
-                          <Button
-                            variant="primary"
-                            size="sm"
+                          <button
                             onClick={() => openCheckoutModal(product)}
+                            className="w-full inline-flex items-center justify-center font-bold rounded-xl transition-all duration-300 px-3 py-2.5 text-xs bg-gradient-to-r from-pink-500 via-purple-600 to-indigo-600 text-white shadow-[0_4px_15px_rgba(236,72,153,0.25)] hover:shadow-[0_4px_22px_rgba(236,72,153,0.45)] hover:scale-[1.02] cursor-pointer text-center"
                           >
                             Mua ngay
-                          </Button>
+                          </button>
                         )}
                       </div>
                     </div>

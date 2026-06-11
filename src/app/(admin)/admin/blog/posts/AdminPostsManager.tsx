@@ -3,7 +3,9 @@
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
 import { createPost, updatePost, deletePost, togglePostStatus } from "@/app/actions/admin-posts";
+import RichTextEditor from "@/components/admin/RichTextEditor";
 import { useToast } from "@/components/ui/Toast";
+import { slugify } from "@/lib/utils";
 import {
   FileText,
   Edit2,
@@ -17,6 +19,11 @@ import {
   PenLine,
   Search,
   Plus,
+  Image,
+  Wand2,
+  Loader2,
+  Check,
+  Upload,
 } from "lucide-react";
 
 interface CategoryOption {
@@ -44,14 +51,24 @@ interface PostItem {
   updatedAt: string;
 }
 
+interface MediaItem {
+  id: string;
+  name: string;
+  url: string;
+  size: number;
+  width: number | null;
+  height: number | null;
+}
+
 interface AdminPostsManagerProps {
   initialPosts: PostItem[];
   categories: CategoryOption[];
+  mediaLibrary: MediaItem[];
 }
 
 type FilterTab = "ALL" | "PUBLISHED" | "DRAFT" | "SCHEDULED";
 
-export default function AdminPostsManager({ initialPosts, categories }: AdminPostsManagerProps) {
+export default function AdminPostsManager({ initialPosts, categories, mediaLibrary }: AdminPostsManagerProps) {
   const router = useRouter();
   const toast = useToast();
   const [filter, setFilter] = useState<FilterTab>("ALL");
@@ -59,6 +76,9 @@ export default function AdminPostsManager({ initialPosts, categories }: AdminPos
   const [isCreateMode, setIsCreateMode] = useState(false);
   const [formData, setFormData] = useState<Partial<PostItem>>({});
   const [saving, setSaving] = useState(false);
+  const [mediaTarget, setMediaTarget] = useState<"cover" | null>(null);
+  const [isGenerating, setIsGenerating] = useState(false);
+  const [uploadingImage, setUploadingImage] = useState(false);
 
   const filteredPosts =
     filter === "ALL"
@@ -185,6 +205,66 @@ export default function AdminPostsManager({ initialPosts, categories }: AdminPos
       }
     } catch (err: any) {
       toast.error("Lỗi", err.message);
+    }
+  };
+
+  const handleUploadImage = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setUploadingImage(true);
+    try {
+      const formDataUpload = new FormData();
+      formDataUpload.append('file', file);
+      const res = await fetch('/api/admin/media/upload', { method: 'POST', body: formDataUpload });
+      const data = await res.json();
+      if (res.ok) {
+        setFormData(prev => ({ ...prev, coverImage: data.url }));
+        toast.success('Thành công', 'Đã upload hình ảnh.');
+      } else {
+        toast.error('Lỗi', data.error);
+      }
+    } catch (err: any) {
+      toast.error('Lỗi', err.message);
+    } finally {
+      setUploadingImage(false);
+    }
+  };
+
+  const handleAiGenerate = async () => {
+    if (!formData.title?.trim()) {
+      toast.warning('Cảnh báo', 'Vui lòng nhập tiêu đề trước khi sinh nội dung AI.');
+      return;
+    }
+    setIsGenerating(true);
+    try {
+      const res = await fetch('/api/admin/blog/ai-generate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          title: formData.title,
+          categoryId: selectedCategoryId || undefined,
+          generateImage: !formData.coverImage,
+        }),
+      });
+      const data = await res.json();
+      if (data.success) {
+        setFormData(prev => ({
+          ...prev,
+          content: data.content,
+          excerpt: data.excerpt || prev.excerpt,
+          coverImage: data.coverImage || prev.coverImage,
+          seoTitle: data.seoTitle || prev.seoTitle,
+          seoDescription: data.seoDescription || prev.seoDescription,
+          seoKeywords: data.seoKeywords?.join(', ') || prev.seoKeywords,
+        }));
+        toast.success('AI đã sinh nội dung', 'Nội dung, SEO và ảnh bìa đã được tạo tự động.');
+      } else {
+        toast.error('Lỗi AI', data.error);
+      }
+    } catch (err: any) {
+      toast.error('Lỗi', err.message);
+    } finally {
+      setIsGenerating(false);
     }
   };
 
@@ -368,7 +448,7 @@ export default function AdminPostsManager({ initialPosts, categories }: AdminPos
       {/* Edit Modal */}
       {editingPost && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm">
-          <div className="w-full max-w-3xl max-h-[90vh] overflow-y-auto rounded-2xl border border-white/10 bg-[#0a0822] p-6 space-y-6 shadow-2xl mx-4">
+          <div className="w-full max-w-5xl max-h-[90vh] overflow-y-auto rounded-2xl border border-white/10 bg-[#0a0822] p-6 space-y-6 shadow-2xl mx-4">
             <div className="flex items-center justify-between border-b border-white/5 pb-4">
               <h3 className="text-lg font-bold text-white flex items-center gap-2">
                 <FileText className="w-5 h-5 text-pink-500" />
@@ -392,7 +472,10 @@ export default function AdminPostsManager({ initialPosts, categories }: AdminPos
                   <input
                     type="text"
                     value={formData.title || ""}
-                    onChange={(e) => setFormData((prev) => ({ ...prev, title: e.target.value }))}
+                    onChange={(e) => {
+                      const val = e.target.value;
+                      setFormData((prev) => ({ ...prev, title: val, slug: slugify(val) }));
+                    }}
                     className="w-full px-4 py-2.5 text-sm rounded-lg bg-white/5 border border-white/10 text-white placeholder-gray-500 focus:outline-none focus:border-pink-500/50 transition-colors"
                     placeholder="Tiêu đề bài viết"
                   />
@@ -404,7 +487,10 @@ export default function AdminPostsManager({ initialPosts, categories }: AdminPos
                   <input
                     type="text"
                     value={formData.slug || ""}
-                    onChange={(e) => setFormData((prev) => ({ ...prev, slug: e.target.value }))}
+                    onChange={(e) => {
+                      const val = e.target.value;
+                      setFormData((prev) => ({ ...prev, slug: slugify(val) }));
+                    }}
                     className="w-full px-4 py-2.5 text-sm rounded-lg bg-white/5 border border-white/10 text-pink-400 font-mono placeholder-gray-500 focus:outline-none focus:border-pink-500/50 transition-colors"
                     placeholder="tieu-de-bai-viet"
                   />
@@ -427,32 +513,72 @@ export default function AdminPostsManager({ initialPosts, categories }: AdminPos
 
               {/* Content */}
               <div className="space-y-2">
-                <label className="text-xs text-gray-400 font-semibold uppercase tracking-wider block">
-                  Nội dung
-                </label>
-                <textarea
-                  rows={8}
-                  value={formData.content || ""}
-                  onChange={(e) => setFormData((prev) => ({ ...prev, content: e.target.value }))}
-                  className="w-full px-4 py-3 text-sm rounded-lg bg-white/5 border border-white/10 text-white placeholder-gray-500 focus:outline-none focus:border-pink-500/50 transition-colors resize-y font-mono"
-                  placeholder="Nội dung bài viết (HTML)..."
+                <div className="flex items-center justify-between">
+                  <label className="text-xs text-gray-400 font-semibold uppercase tracking-wider block">
+                    Nội dung
+                  </label>
+                  <button
+                    type="button"
+                    onClick={handleAiGenerate}
+                    disabled={isGenerating}
+                    className="px-3 py-1.5 rounded-lg text-xs font-semibold bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white flex items-center gap-1.5 transition-all disabled:opacity-50 cursor-pointer"
+                  >
+                    {isGenerating ? (
+                      <><Loader2 className="w-3.5 h-3.5 animate-spin" /> Đang sinh nội dung...</>
+                    ) : (
+                      <><Wand2 className="w-3.5 h-3.5" /> AI Sinh nội dung + Ảnh</>
+                    )}
+                  </button>
+                </div>
+                <RichTextEditor
+                  content={formData.content || ""}
+                  onChange={(html) => setFormData(prev => ({ ...prev, content: html }))}
+                  placeholder="Bắt đầu viết nội dung bài viết..."
                 />
               </div>
 
-              {/* Cover Image + Category + Status */}
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div className="space-y-2">
-                  <label className="text-xs text-gray-400 font-semibold uppercase tracking-wider block">
-                    Ảnh bìa (URL)
+              {/* Cover Image */}
+              <div className="space-y-2">
+                <label className="text-xs text-gray-400 font-semibold uppercase tracking-wider block">
+                  Ảnh bìa
+                </label>
+                {formData.coverImage ? (
+                  <div className="relative aspect-video w-full rounded-xl overflow-hidden border border-white/10 bg-white/5">
+                    <img src={formData.coverImage} alt="Cover" className="w-full h-full object-cover" />
+                    <button
+                      type="button"
+                      onClick={() => setFormData(prev => ({ ...prev, coverImage: '' }))}
+                      className="absolute top-2 right-2 p-1.5 bg-black/60 rounded-lg text-white hover:bg-red-500/80 transition cursor-pointer"
+                    >
+                      <X className="w-4 h-4" />
+                    </button>
+                  </div>
+                ) : (
+                  <div className="aspect-video w-full rounded-xl border-2 border-dashed border-white/10 bg-white/5 flex items-center justify-center">
+                    <span className="text-gray-500 text-sm">Chưa có ảnh bìa</span>
+                  </div>
+                )}
+                <div className="flex gap-2">
+                  <button
+                    type="button"
+                    onClick={() => setMediaTarget('cover')}
+                    className="px-3 py-1.5 rounded-lg text-xs font-semibold bg-white/5 border border-white/10 text-gray-300 hover:bg-white/10 flex items-center gap-1.5 transition cursor-pointer"
+                  >
+                    <Image className="w-3.5 h-3.5" /> Thư viện
+                  </button>
+                  <label className="px-3 py-1.5 rounded-lg text-xs font-semibold bg-white/5 border border-white/10 text-gray-300 hover:bg-white/10 flex items-center gap-1.5 transition cursor-pointer">
+                    {uploadingImage ? (
+                      <><Loader2 className="w-3.5 h-3.5 animate-spin" /> Đang upload...</>
+                    ) : (
+                      <><Upload className="w-3.5 h-3.5" /> Upload</>
+                    )}
+                    <input type="file" accept="image/*" onChange={handleUploadImage} className="hidden" />
                   </label>
-                  <input
-                    type="text"
-                    value={formData.coverImage || ""}
-                    onChange={(e) => setFormData((prev) => ({ ...prev, coverImage: e.target.value }))}
-                    className="w-full px-4 py-2.5 text-sm rounded-lg bg-white/5 border border-white/10 text-white placeholder-gray-500 focus:outline-none focus:border-pink-500/50 transition-colors"
-                    placeholder="https://..."
-                  />
                 </div>
+              </div>
+
+              {/* Category + Status */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <label className="text-xs text-gray-400 font-semibold uppercase tracking-wider block">
                     Chuyên mục
@@ -554,6 +680,40 @@ export default function AdminPostsManager({ initialPosts, categories }: AdminPos
                   </>
                 )}
               </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Media Library Picker Modal */}
+      {mediaTarget && (
+        <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/90 backdrop-blur-sm">
+          <div className="relative w-full max-w-3xl overflow-hidden rounded-2xl border border-white/10 p-6 flex flex-col space-y-4 bg-[#0c0a21]/95 max-h-[80vh]">
+            <div className="flex items-center justify-between">
+              <h3 className="text-lg font-bold text-white">Thư viện hình ảnh</h3>
+              <button onClick={() => setMediaTarget(null)} className="text-gray-400 hover:text-white p-1 cursor-pointer">
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+            <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-3 overflow-y-auto grow p-1">
+              {mediaLibrary.length > 0 ? (
+                mediaLibrary.map((media) => (
+                  <div
+                    key={media.id}
+                    onClick={() => { setFormData(prev => ({ ...prev, coverImage: media.url })); setMediaTarget(null); }}
+                    className="relative aspect-square rounded-lg overflow-hidden border border-white/10 cursor-pointer group hover:border-pink-500/50"
+                  >
+                    <img src={media.url} alt={media.name} className="object-cover w-full h-full" />
+                    <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity">
+                      <Check className="w-6 h-6 text-pink-400" />
+                    </div>
+                  </div>
+                ))
+              ) : (
+                <div className="col-span-full py-12 text-center text-gray-500 text-sm">
+                  Thư viện ảnh trống. Bạn có thể tải ảnh lên ở mục Thư viện Media trước.
+                </div>
+              )}
             </div>
           </div>
         </div>

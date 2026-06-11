@@ -3,6 +3,7 @@
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useToast } from "@/components/ui/Toast";
+import { slugify } from "@/lib/utils";
 import {
   upsertCategory,
   deleteCategory,
@@ -37,19 +38,7 @@ interface AdminCategoriesManagerProps {
   initialCategories: CategoryItem[];
 }
 
-function slugify(text: string): string {
-  return text
-    .toString()
-    .toLowerCase()
-    .normalize("NFD")
-    .replace(/[\u0300-\u036f]/g, "")
-    .replace(/đ/g, "d")
-    .replace(/Đ/g, "d")
-    .replace(/[^a-z0-9\s-]/g, "")
-    .trim()
-    .replace(/\s+/g, "-")
-    .replace(/-+/g, "-");
-}
+
 
 export default function AdminCategoriesManager({
   initialCategories,
@@ -100,7 +89,7 @@ export default function AdminCategoriesManager({
     setFormData((prev) => ({
       ...prev,
       name,
-      slug: editingId ? prev.slug : slugify(name),
+      slug: slugify(name),
     }));
   };
 
@@ -320,7 +309,10 @@ export default function AdminCategoriesManager({
                 <input
                   type="text"
                   value={formData.slug}
-                  onChange={(e) => setFormData((prev) => ({ ...prev, slug: e.target.value }))}
+                  onChange={(e) => {
+                    const val = e.target.value;
+                    setFormData((prev) => ({ ...prev, slug: slugify(val) }));
+                  }}
                   className="w-full px-4 py-2.5 text-sm rounded-lg bg-white/5 border border-white/10 text-pink-400 font-mono placeholder-gray-500 focus:outline-none focus:border-pink-500/50 transition-colors"
                   placeholder="ten-chuyen-muc"
                 />

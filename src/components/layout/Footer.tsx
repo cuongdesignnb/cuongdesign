@@ -3,8 +3,18 @@
 import { Terminal, Send } from "lucide-react";
 import { siteConfig } from "@/data/site";
 import GradientText from "../ui/GradientText";
+import { useSettings } from "@/components/ui/SettingsContext";
 
 export default function Footer() {
+  const settings = useSettings();
+  
+  const email = settings.contact_email || siteConfig.contact.email;
+  const phone = settings.contact_phone || siteConfig.contact.phone;
+  const zalo = settings.contact_zalo || siteConfig.contact.zalo;
+  const location = settings.contact_location || siteConfig.contact.location;
+  const facebook = settings.contact_facebook || siteConfig.contact.facebook;
+  const github = settings.contact_github || siteConfig.contact.github;
+
   return (
     <footer className="bg-[#030014] border-t border-white/5 pt-16 pb-8 z-10 relative">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -22,7 +32,7 @@ export default function Footer() {
             </p>
             <div className="flex space-x-4">
               <a
-                href={siteConfig.contact.facebook}
+                href={facebook}
                 target="_blank"
                 rel="noreferrer"
                 className="text-gray-400 hover:text-white p-2 bg-white/5 hover:bg-pink-500/20 hover:text-pink-500 rounded-lg transition-all duration-300"
@@ -32,7 +42,7 @@ export default function Footer() {
                 </svg>
               </a>
               <a
-                href={siteConfig.contact.github}
+                href={github}
                 target="_blank"
                 rel="noreferrer"
                 className="text-gray-400 hover:text-white p-2 bg-white/5 hover:bg-pink-500/20 hover:text-pink-500 rounded-lg transition-all duration-300"
@@ -42,7 +52,7 @@ export default function Footer() {
                 </svg>
               </a>
               <a
-                href={siteConfig.contact.github} // Fallback to GitHub / LinkedIn
+                href={zalo}
                 target="_blank"
                 rel="noreferrer"
                 className="text-gray-400 hover:text-white p-2 bg-white/5 hover:bg-pink-500/20 hover:text-pink-500 rounded-lg transition-all duration-300"
@@ -101,19 +111,19 @@ export default function Footer() {
             <ul className="space-y-3 text-sm text-gray-400">
               <li>
                 <span className="block text-white font-medium text-xs uppercase text-gray-500">Email</span>
-                <a href={`mailto:${siteConfig.contact.email}`} className="hover:text-white transition-colors">
-                  {siteConfig.contact.email}
+                <a href={`mailto:${email}`} className="hover:text-white transition-colors">
+                  {email}
                 </a>
               </li>
               <li>
                 <span className="block text-white font-medium text-xs uppercase text-gray-500">Zalo / SĐT</span>
-                <a href={`tel:${siteConfig.contact.phone}`} className="hover:text-white transition-colors">
-                  {siteConfig.contact.phone}
+                <a href={`tel:${phone}`} className="hover:text-white transition-colors">
+                  {phone}
                 </a>
               </li>
               <li>
                 <span className="block text-white font-medium text-xs uppercase text-gray-500">Vị trí</span>
-                <span>{siteConfig.contact.location}</span>
+                <span>{location}</span>
               </li>
             </ul>
           </div>

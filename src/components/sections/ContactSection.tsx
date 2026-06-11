@@ -10,6 +10,7 @@ import Reveal from "../motion/Reveal";
 import Button from "../ui/Button";
 import MagneticButton from "../motion/MagneticButton";
 import { motionTokens, fadeUpVariants } from "@/lib/motion";
+import { useSettings } from "@/components/ui/SettingsContext";
 
 const formFieldVariants = {
   hidden: { opacity: 0, y: 20, filter: `blur(${motionTokens.blur.sm})` },
@@ -34,7 +35,22 @@ const successVariants = {
   exit: { opacity: 0, scale: 0.8, transition: { duration: 0.2 } },
 };
 
+const iconPopVariants = {
+  hidden: { opacity: 0, scale: 0.5 },
+  visible: {
+    opacity: 1,
+    scale: 1,
+    transition: { type: "spring" as const, stiffness: 200, damping: 12 },
+  },
+  exit: { opacity: 0, scale: 0.8, transition: { duration: 0.2 } },
+};
+
 export default function ContactSection() {
+  const settings = useSettings();
+  const email = settings.contact_email || siteConfig.contact.email;
+  const phone = settings.contact_phone || siteConfig.contact.phone;
+  const location = settings.contact_location || siteConfig.contact.location;
+
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -125,8 +141,8 @@ export default function ContactSection() {
                   </div>
                   <div>
                     <span className="text-[10px] text-gray-500 uppercase tracking-widest block font-medium">Email</span>
-                    <a href={`mailto:${siteConfig.contact.email}`} className="text-sm text-white hover:text-pink-400 transition-colors">
-                      {siteConfig.contact.email}
+                    <a href={`mailto:${email}`} className="text-sm text-white hover:text-pink-400 transition-colors">
+                      {email}
                     </a>
                   </div>
                 </motion.div>
@@ -137,8 +153,8 @@ export default function ContactSection() {
                   </div>
                   <div>
                     <span className="text-[10px] text-gray-500 uppercase tracking-widest block font-medium">Zalo / SĐT</span>
-                    <a href={`tel:${siteConfig.contact.phone}`} className="text-sm text-white hover:text-pink-400 transition-colors">
-                      {siteConfig.contact.phone}
+                    <a href={`tel:${phone}`} className="text-sm text-white hover:text-pink-400 transition-colors">
+                      {phone}
                     </a>
                   </div>
                 </motion.div>
@@ -149,7 +165,7 @@ export default function ContactSection() {
                   </div>
                   <div>
                     <span className="text-[10px] text-gray-500 uppercase tracking-widest block font-medium">Vị trí</span>
-                    <span className="text-sm text-white">{siteConfig.contact.location}</span>
+                    <span className="text-sm text-white">{location}</span>
                   </div>
                 </motion.div>
               </motion.div>

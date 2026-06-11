@@ -61,7 +61,8 @@ export default async function CategoryPage({ params }: CategoryPageProps) {
   ]);
 
   // Calculate reading time helper
-  const getReadTime = (content: string) => {
+  const getReadTime = (content: string | null) => {
+    if (!content) return "1 phút đọc";
     const words = content.replace(/<[^>]*>/g, "").split(/\s+/).length;
     const time = Math.ceil(words / 200);
     return `${time} phút đọc`;

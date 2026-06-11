@@ -112,12 +112,12 @@ export default async function ProjectDetailPage({ params }: ProjectPageProps) {
 
           {/* Main Visual: Big Image + Gallery */}
           <div className="space-y-4">
-            <div className="relative aspect-video w-full rounded-2xl overflow-hidden border border-white/10 shadow-2xl bg-white/5">
+            <div className="relative aspect-video w-full rounded-2xl overflow-hidden border border-white/10 shadow-2xl bg-white/5 group">
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
                 src={project.coverImage}
                 alt={project.title}
-                className="w-full h-full object-cover"
+                className="w-full h-full object-cover object-top transition-all duration-[3s] ease-in-out group-hover:duration-[8s] group-hover:object-bottom"
               />
             </div>
 
@@ -203,12 +203,12 @@ export default async function ProjectDetailPage({ params }: ProjectPageProps) {
               {/* Action Buttons */}
               <div className="space-y-3">
                 {project.demoUrl && (
-                  <a href={project.demoUrl} target="_blank" rel="noreferrer" className="block">
+                  <Link href={`/preview/${project.slug}`} target="_blank" className="block">
                     <Button className="w-full bg-pink-600 hover:bg-pink-500 text-white font-bold py-3.5 flex items-center justify-center gap-2 rounded-xl text-sm">
                       <Globe className="w-4 h-4" />
                       <span>Trải nghiệm Live Demo</span>
                     </Button>
-                  </a>
+                  </Link>
                 )}
 
                 {project.githubUrl && (

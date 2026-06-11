@@ -5,7 +5,7 @@ import Breadcrumbs from "@/components/ui/Breadcrumbs";
 import GlassCard from "@/components/ui/GlassCard";
 import GradientText from "@/components/ui/GradientText";
 import Button from "@/components/ui/Button";
-import { Layout, Globe, Target, ShoppingBag, BarChart3, Zap, Code, ArrowRight, ShieldCheck, CheckCircle2 } from "lucide-react";
+import { Layout, Globe, Target, ShoppingBag, BarChart3, Zap, Code, ArrowRight, ShieldCheck, CheckCircle2, Cpu } from "lucide-react";
 import Link from "next/link";
 import { createMetadata, JsonLd } from "@/lib/seo";
 
@@ -20,6 +20,7 @@ export default function ServicesPage() {
   const serviceDetails = [
     {
       id: "ui-ux",
+      slug: "thiet-ke-ui-ux",
       title: "Thiết kế UI/UX Chuyên Sâu",
       subtitle: "UI/UX Design & Prototyping",
       icon: Layout,
@@ -37,6 +38,7 @@ export default function ServicesPage() {
     },
     {
       id: "web-corp",
+      slug: "website-doanh-nghiep",
       title: "Lập trình Website Doanh nghiệp",
       subtitle: "Corporate Website Development",
       icon: Globe,
@@ -54,6 +56,7 @@ export default function ServicesPage() {
     },
     {
       id: "landing-page",
+      slug: "landing-page",
       title: "Landing Page Tối Ưu Chuyển Đổi",
       subtitle: "High-Converting Landing Page",
       icon: Target,
@@ -71,6 +74,7 @@ export default function ServicesPage() {
     },
     {
       id: "ecommerce",
+      slug: "e-commerce",
       title: "Hệ thống TMĐT & Bán Hàng Số",
       subtitle: "E-commerce System",
       icon: ShoppingBag,
@@ -88,6 +92,7 @@ export default function ServicesPage() {
     },
     {
       id: "dashboard",
+      slug: "dashboard-saas",
       title: "Dashboard & Phần mềm Quản trị",
       subtitle: "Admin Panel & SaaS Systems",
       icon: BarChart3,
@@ -105,6 +110,7 @@ export default function ServicesPage() {
     },
     {
       id: "seo-speed",
+      slug: "seo-toi-uu-toc-do",
       title: "Tối ưu SEO & Tăng Tốc Website",
       subtitle: "SEO & Speed Audit & Optimization",
       icon: Zap,
@@ -119,6 +125,24 @@ export default function ServicesPage() {
       techs: ["Lighthouse", "Web Vitals Audit", "Sharp Image Optimizer"],
       price: "Từ 4.000.000 VNĐ",
       duration: "3 - 5 ngày làm việc"
+    },
+    {
+      id: "automation",
+      slug: "automation-doanh-nghiep",
+      title: "Tự động hóa Quy trình Doanh nghiệp",
+      subtitle: "Workflow Automation & RPA",
+      icon: Cpu,
+      color: "from-violet-500 to-fuchsia-500",
+      desc: "Tối ưu hóa năng suất doanh nghiệp, loại bỏ 80% tác vụ thủ công lặp đi lặp lại. Đồng bộ dữ liệu tự động giữa CRM, ERP, Google Sheets và thiết lập bot cảnh báo real-time qua Telegram/Email.",
+      features: [
+        "Kết nối API và Webhook liên hoàn đa hệ thống",
+        "Triển khai robot phần mềm (RPA) nhập liệu tự động",
+        "Bot Telegram/Email báo cáo doanh số, cảnh báo lỗi tức thì",
+        "Cấu hình kịch bản tự động hóa no-code/low-code & custom script"
+      ],
+      techs: ["Make (Integromat)", "Zapier", "Python / Node.js", "Webhook API"],
+      price: "Từ 10.000.000 VNĐ",
+      duration: "7 - 15 ngày làm việc"
     }
   ];
 
@@ -247,10 +271,15 @@ export default function ServicesPage() {
                         </div>
                       </div>
 
-                      <div className="pt-4 border-t border-white/5">
-                        <Link href="/lien-he">
+                      <div className="pt-4 border-t border-white/5 flex flex-col sm:flex-row gap-3">
+                        <Link href={`/dich-vu/${service.slug}`} className="flex-1">
+                          <Button variant="outline" className="w-full text-white font-semibold flex items-center justify-center gap-2">
+                            <span>Xem chi tiết</span>
+                          </Button>
+                        </Link>
+                        <Link href="/lien-he" className="flex-1">
                           <Button className="w-full bg-gradient-to-r from-pink-500 to-purple-600 hover:from-pink-600 hover:to-purple-700 text-white font-bold flex items-center justify-center gap-2">
-                            <span>Yêu cầu báo giá dịch vụ</span>
+                            <span>Báo giá ngay</span>
                             <ArrowRight className="w-4 h-4" />
                           </Button>
                         </Link>

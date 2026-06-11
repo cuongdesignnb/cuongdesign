@@ -85,7 +85,7 @@ export default function Header() {
     <header
       className={`fixed top-0 left-0 w-full z-50 transition-all duration-300 ${
         scrolled
-          ? "bg-[#030014]/90 backdrop-blur-md border-b border-white/5 py-4"
+          ? "bg-[#030014]/80 backdrop-blur-md py-4"
           : "bg-transparent py-6"
       }`}
     >
@@ -207,6 +207,13 @@ export default function Header() {
           </div>
         </div>
       )}
+      
+      {/* Smooth Gradient Border Bottom */}
+      <div
+        className={`absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-pink-500/20 via-white/10 via-purple-500/20 to-transparent transition-opacity duration-300 pointer-events-none ${
+          scrolled ? "opacity-100" : "opacity-0"
+        }`}
+      />
     </header>
   );
 }
