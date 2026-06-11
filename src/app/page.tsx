@@ -21,6 +21,8 @@ import { products as staticProducts } from "@/data/products";
 import { testimonials as staticTestimonials } from "@/data/testimonials";
 import bcrypt from "bcryptjs";
 
+export const dynamic = "force-dynamic";
+
 export const metadata = createMetadata({
   titleAbsolute: "Cuong Design — Freelancer Developer & Thiết kế UI/UX Website",
   description:

@@ -4,6 +4,8 @@ import { prisma } from "@/lib/db";
 import { addKeywordsToQueue, deleteAiTask } from "@/app/actions/blog";
 import BlogQueueClient from "./BlogQueueClient";
 
+export const dynamic = "force-dynamic";
+
 export default async function AdminBlogPage() {
   // Fetch queue from database
   const tasks = await prisma.aiTask.findMany({

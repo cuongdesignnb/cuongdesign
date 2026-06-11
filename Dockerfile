@@ -1,6 +1,6 @@
 # Stage 1: Install dependencies
 FROM node:20-alpine AS deps
-RUN apk add --no-cache libc6-compat
+RUN apk add --no-cache libc6-compat openssl
 WORKDIR /app
 COPY package.json package-lock.json ./
 COPY prisma ./prisma/
@@ -8,7 +8,9 @@ RUN npm ci --legacy-peer-deps
 
 # Stage 2: Rebuild the source code only when needed
 FROM node:20-alpine AS builder
+RUN apk add --no-cache openssl
 WORKDIR /app
+ENV PRISMA_QUERY_ENGINE_LIBRARY=/app/node_modules/.prisma/client/libquery_engine-linux-musl-openssl-3.0.x.so.node
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 # Generate Prisma Client
@@ -19,7 +21,9 @@ RUN npm run build
 
 # Stage 3: Runner
 FROM node:20-alpine AS runner
+RUN apk add --no-cache openssl
 WORKDIR /app
+ENV PRISMA_QUERY_ENGINE_LIBRARY=/app/node_modules/.prisma/client/libquery_engine-linux-musl-openssl-3.0.x.so.node
 ENV NODE_ENV=production
 ENV PORT=3000
 ENV HOSTNAME="0.0.0.0"

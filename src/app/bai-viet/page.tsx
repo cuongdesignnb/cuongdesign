@@ -9,6 +9,8 @@ import { BookOpen, Calendar, ArrowRight, Clock } from "lucide-react";
 import Link from "next/link";
 import { createMetadata, JsonLd } from "@/lib/seo";
 
+export const dynamic = "force-dynamic";
+
 export const metadata = createMetadata({
   title: "Blog — Bài viết & Chia sẻ kiến thức",
   description: "Đọc các bài viết chia sẻ kinh nghiệm lập trình Next.js, React, Node.js, kiến thức thiết kế giao diện UI/UX Figma và tin tức xu hướng công nghệ mới từ Cường Design.",
