@@ -46,9 +46,14 @@ export default async function ServiceDetailPage({ params }: Props) {
   if (!service) notFound();
 
   // Query database settings for contact info
-  const zaloSetting = await prisma.setting.findUnique({
-    where: { key: "contact_zalo" },
-  });
+  let zaloSetting = null;
+  try {
+    zaloSetting = await prisma.setting.findUnique({
+      where: { key: "contact_zalo" },
+    });
+  } catch (error) {
+    console.warn("Database connection failed during build for service details page.");
+  }
   const zaloUrl = zaloSetting?.value || siteConfig.contact.zalo;
 
   // JSON-LD: Service + FAQPage

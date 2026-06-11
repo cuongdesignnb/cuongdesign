@@ -19,10 +19,15 @@ export const metadata = createMetadata({
 
 export default async function TestimonialsListPage() {
   // Fetch only published testimonials from database
-  let dbTestimonials = await prisma.testimonial.findMany({
-    where: { isPublished: true },
-    orderBy: { order: "asc" }
-  });
+  let dbTestimonials: any[] = [];
+  try {
+    dbTestimonials = await prisma.testimonial.findMany({
+      where: { isPublished: true },
+      orderBy: { order: "asc" }
+    });
+  } catch (error) {
+    console.warn("Database connection failed during build for testimonials page.");
+  }
 
   // Unified testimonials list mapping to avoid type mismatches between DB schema and static mock data structures
   const testimonials = (dbTestimonials.length > 0 ? dbTestimonials : staticTestimonials).map((t) => ({

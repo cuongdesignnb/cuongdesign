@@ -72,7 +72,12 @@ export default async function RootLayout({
   children: React.ReactNode;
 }>) {
   // Fetch system configuration settings
-  const dbSettings = await prisma.setting.findMany();
+  let dbSettings: any[] = [];
+  try {
+    dbSettings = await prisma.setting.findMany();
+  } catch (error) {
+    console.warn("Database connection failed during build, using default settings.");
+  }
   const settings: Record<string, string> = {};
   dbSettings.forEach((s) => {
     settings[s.key] = s.value;
