@@ -1,16 +1,32 @@
 services:
   postgres:
     image: postgres:15-alpine
-    container_name: cuongdesign-db-local
+    container_name: cuongdesign-db
     restart: always
     environment:
       POSTGRES_USER: cuongdesign_user
       POSTGRES_PASSWORD: cuongdesign_password
       POSTGRES_DB: cuongdesign_db
     ports:
-      - "5433:5432"
+      - "5432:5432"
     volumes:
       - postgres_design_data:/var/lib/postgresql/data
+
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: cuongdesign-web
+    restart: always
+    ports:
+      - "3000:3000"
+    environment:
+      - DATABASE_URL=postgresql://cuongdesign_user:cuongdesign_password@postgres:5432/cuongdesign_db?schema=public
+      - NEXTAUTH_SECRET=your_nextauth_secret_here
+      - NEXTAUTH_URL=https://cuongdesign.com
+      # Thêm các biến môi trường khác vào đây (Zalo, Telegram, Mailer...)
+    depends_on:
+      - postgres
 
 volumes:
   postgres_design_data:
