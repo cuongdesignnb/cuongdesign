@@ -19,7 +19,7 @@ services:
     container_name: cuongdesign-web
     restart: always
     ports:
-      - "3000:3000"
+      - "13000:3000"
     environment:
       - DATABASE_URL=postgresql://cuongdesign_user:cuongdesign_password@postgres:5432/cuongdesign_db?schema=public
       - NEXTAUTH_SECRET=your_nextauth_secret_here
