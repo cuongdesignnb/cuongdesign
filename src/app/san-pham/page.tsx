@@ -7,6 +7,8 @@ import { prisma } from "@/lib/db";
 import { createMetadata, JsonLd } from "@/lib/seo";
 import { siteConfig } from "@/data/site";
 
+export const dynamic = "force-dynamic";
+
 export const metadata = createMetadata({
   title: "Sản phẩm số — Mua mã nguồn & Template",
   description: "Khám phá cửa hàng sản phẩm số của Cường Design. Mua mã nguồn website Next.js, React chất lượng cao, UI kit và template chuyên nghiệp tối ưu SEO.",
@@ -16,9 +18,14 @@ export const metadata = createMetadata({
 
 export default async function ProductsListPage() {
   // Fetch active products from database
-  const dbProducts = await prisma.product.findMany({
-    orderBy: { order: "asc" }
-  });
+  let dbProducts: any[] = [];
+  try {
+    dbProducts = await prisma.product.findMany({
+      orderBy: { order: "asc" }
+    });
+  } catch (error) {
+    console.warn("Database connection failed during build for products page.");
+  }
 
   // CollectionPage JSON-LD schema
   const collectionSchema = {

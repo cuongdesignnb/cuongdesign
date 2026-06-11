@@ -10,6 +10,8 @@ import { testimonials as staticTestimonials } from "@/data/testimonials";
 import { Star, Quote, MessageSquare } from "lucide-react";
 import { createMetadata, JsonLd, buildProfessionalServiceSchema } from "@/lib/seo";
 
+export const dynamic = "force-dynamic";
+
 export const metadata = createMetadata({
   title: "Đánh giá & Nhận xét từ khách hàng",
   description: "Đọc các nhận xét, phản hồi thực tế từ các đối tác, khách hàng đã hợp tác thiết kế UI/UX và lập trình website cùng Cường Design. Gửi đánh giá của riêng bạn.",

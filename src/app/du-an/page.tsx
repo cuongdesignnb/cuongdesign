@@ -7,6 +7,8 @@ import { prisma } from "@/lib/db";
 import { createMetadata, JsonLd } from "@/lib/seo";
 import { siteConfig } from "@/data/site";
 
+export const dynamic = "force-dynamic";
+
 export const metadata = createMetadata({
   title: "Dự án thực tế",
   description: "Chiêm ngưỡng bộ sưu tập các dự án thiết kế UI/UX Figma chuyên nghiệp, lập trình Web App Next.js/React chuẩn SEO tối ưu tốc độ của Cường Design.",
@@ -16,9 +18,14 @@ export const metadata = createMetadata({
 
 export default async function ProjectsListPage() {
   // Fetch active projects from database
-  const dbProjects = await prisma.project.findMany({
-    orderBy: { order: "asc" }
-  });
+  let dbProjects: any[] = [];
+  try {
+    dbProjects = await prisma.project.findMany({
+      orderBy: { order: "asc" }
+    });
+  } catch (error) {
+    console.warn("Database connection failed during build for projects page.");
+  }
 
   // CollectionPage JSON-LD schema
   const collectionSchema = {
