@@ -3,6 +3,10 @@
 import { Check, ImageIcon, Search, X } from "lucide-react";
 import Image from "next/image";
 import { useEffect, useMemo, useState } from "react";
+import {
+  ADMIN_ASSETS_ENDPOINT,
+  adminApiRequest,
+} from "@/lib/client/admin-api";
 import MediaUploadButton from "./MediaUploadButton";
 import type { MediaRecord } from "./media-types";
 
@@ -30,12 +34,8 @@ export default function MediaPickerDialog({
     if (!open) return;
     setSelection(selected);
     setLoading(true);
-    fetch("/api/admin/media")
-      .then(async (response) => {
-        const result = await response.json();
-        if (!response.ok) throw new Error(result.error);
-        setItems(result);
-      })
+    adminApiRequest<MediaRecord[]>(ADMIN_ASSETS_ENDPOINT)
+      .then(setItems)
       .catch((error) => window.alert(error.message))
       .finally(() => setLoading(false));
   }, [open, selected]);

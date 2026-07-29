@@ -2,6 +2,10 @@
 
 import MediaUploadButton from "@/components/admin/content/MediaUploadButton";
 import type { MediaRecord } from "@/components/admin/content/media-types";
+import {
+  ADMIN_ASSETS_ENDPOINT,
+  adminApiRequest,
+} from "@/lib/client/admin-api";
 import { Copy, ImageIcon, Save, Search, Trash2 } from "lucide-react";
 import Image from "next/image";
 import { useCallback, useEffect, useMemo, useState } from "react";
@@ -13,9 +17,7 @@ export default function MediaLibraryManager() {
   const [selected, setSelected] = useState<MediaRecord | null>(null);
 
   const load = useCallback(async () => {
-    const response = await fetch("/api/admin/media");
-    const result = await response.json();
-    if (!response.ok) throw new Error(result.error);
+    const result = await adminApiRequest<MediaRecord[]>(ADMIN_ASSETS_ENDPOINT);
     setItems(result);
   }, []);
 
@@ -38,22 +40,27 @@ export default function MediaLibraryManager() {
 
   async function save() {
     if (!selected) return;
-    const response = await fetch("/api/admin/media", {
-      method: "PATCH",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(selected),
-    });
-    const result = await response.json();
-    if (!response.ok) return window.alert(result.error);
-    await load();
+    try {
+      await adminApiRequest<MediaRecord>(ADMIN_ASSETS_ENDPOINT, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(selected),
+      });
+      await load();
+    } catch (error) {
+      window.alert(error instanceof Error ? error.message : "Save failed.");
+    }
   }
 
   async function remove(item: MediaRecord) {
     if (!window.confirm(`Xóa "${item.name}"?`)) return;
-    const response = await fetch(`/api/admin/media?id=${item.id}`, { method: "DELETE" });
-    const result = await response.json();
-    if (!response.ok) {
-      return window.alert(`${result.error}${result.usage?.locations?.length ? `\n${result.usage.locations.join("\n")}` : ""}`);
+    try {
+      await adminApiRequest<{ success: boolean }>(
+        `${ADMIN_ASSETS_ENDPOINT}?id=${item.id}`,
+        { method: "DELETE" },
+      );
+    } catch (error) {
+      return window.alert(error instanceof Error ? error.message : "Delete failed.");
     }
     if (selected?.id === item.id) setSelected(null);
     await load();

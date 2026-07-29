@@ -2,6 +2,10 @@
 
 import { Upload } from "lucide-react";
 import { useRef, useState } from "react";
+import {
+  ADMIN_ASSETS_ENDPOINT,
+  adminApiRequest,
+} from "@/lib/client/admin-api";
 import type { MediaRecord } from "./media-types";
 
 interface MediaUploadButtonProps {
@@ -22,9 +26,10 @@ export default function MediaUploadButton({
     try {
       const body = new FormData();
       Array.from(files).forEach((file) => body.append("files", file));
-      const response = await fetch("/api/admin/media", { method: "POST", body });
-      const result = await response.json();
-      if (!response.ok) throw new Error(result.error || "Upload failed.");
+      const result = await adminApiRequest<MediaRecord | MediaRecord[]>(
+        ADMIN_ASSETS_ENDPOINT,
+        { method: "POST", body },
+      );
       onUploaded(Array.isArray(result) ? result : [result]);
     } catch (error) {
       window.alert(error instanceof Error ? error.message : "Upload failed.");
