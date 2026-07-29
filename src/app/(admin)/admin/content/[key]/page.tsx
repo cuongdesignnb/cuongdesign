@@ -4,6 +4,16 @@ import { requireAdmin } from "@/lib/auth/require-admin";
 import { prisma } from "@/lib/db";
 import type { Prisma } from "@prisma/client";
 import { notFound } from "next/navigation";
+import {
+  globalContentDefaults,
+  type GlobalContent,
+} from "@/content/defaults/global";
+import { globalContentSchema } from "@/content/schemas";
+import {
+  applyGlobalSettings,
+  GLOBAL_SETTING_KEYS,
+} from "@/lib/content/global-settings";
+import { mergeContentDefaults } from "@/lib/content/merge-defaults";
 
 export const dynamic = "force-dynamic";
 
@@ -26,6 +36,19 @@ export default async function ContentDocumentPage({
       draftData: entry.defaultData as Prisma.InputJsonValue,
     },
   });
+  let initialData: unknown = document.draftData;
+  if (key === "global") {
+    const settings = await prisma.setting.findMany({
+      where: { key: { in: [...GLOBAL_SETTING_KEYS] } },
+      select: { key: true, value: true },
+    });
+    const parsed = globalContentSchema.safeParse(
+      mergeContentDefaults(globalContentDefaults, document.draftData),
+    );
+    if (parsed.success) {
+      initialData = applyGlobalSettings(parsed.data as GlobalContent, settings);
+    }
+  }
 
   return (
     <ContentDocumentForm
@@ -33,7 +56,7 @@ export default async function ContentDocumentPage({
       name={entry.name}
       route={entry.route}
       documentId={document.id}
-      initialData={JSON.parse(JSON.stringify(document.draftData))}
+      initialData={JSON.parse(JSON.stringify(initialData))}
       publishedAt={document.publishedAt?.toISOString() ?? null}
     />
   );

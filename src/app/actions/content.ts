@@ -8,6 +8,8 @@ import { sanitizeContentTree } from "@/lib/content/sanitize";
 import { revalidateContentKey } from "@/lib/content/revalidate";
 import type { Prisma } from "@prisma/client";
 import { revalidatePath } from "next/cache";
+import { globalContentToSettings } from "@/lib/content/global-settings";
+import type { GlobalContent } from "@/content/defaults/global";
 
 function message(error: unknown) {
   return error instanceof Error ? error.message : "Unknown error";
@@ -98,7 +100,7 @@ export async function publishContentDocument(
           createdById: admin.id,
         },
       });
-      return tx.contentDocument.update({
+      const published = await tx.contentDocument.update({
         where: { id: document.id },
         data: {
           publishedData: parsed.data as Prisma.InputJsonValue,
@@ -107,6 +109,19 @@ export async function publishContentDocument(
           updatedById: admin.id,
         },
       });
+      if (key === "global") {
+        const settings = globalContentToSettings(parsed.data as GlobalContent);
+        await Promise.all(
+          Object.entries(settings).map(([settingKey, value]) =>
+            tx.setting.upsert({
+              where: { key: settingKey },
+              update: { value },
+              create: { key: settingKey, value },
+            }),
+          ),
+        );
+      }
+      return published;
     });
 
     revalidateContentKey(key as ContentKey);

@@ -7,6 +7,7 @@ import { siteConfig } from "@/data/site";
 import { JsonLd, buildSitewideGraph } from "@/lib/seo";
 import { prisma } from "@/lib/db";
 import { SettingsProvider } from "@/components/ui/SettingsContext";
+import { getPublishedContent } from "@/lib/content/get-content";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -72,6 +73,7 @@ export default async function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const globalContentPromise = getPublishedContent("global");
   // Fetch system configuration settings
   let dbSettings: any[] = [];
   try {
@@ -86,6 +88,7 @@ export default async function RootLayout({
 
   const primaryColor = settings.theme_primary_color || "#ec4899";
   const secondaryColor = settings.theme_secondary_color || "#8b5cf6";
+  const globalContent = await globalContentPromise;
 
   return (
     <html
@@ -108,7 +111,7 @@ export default async function RootLayout({
       <body className="min-h-full flex flex-col" suppressHydrationWarning>
         <DraftPreviewBanner />
         <SettingsProvider settings={settings}>
-          <JsonLd data={buildSitewideGraph()} />
+          <JsonLd data={buildSitewideGraph(globalContent)} />
           {children}
           <ChatWidget />
         </SettingsProvider>

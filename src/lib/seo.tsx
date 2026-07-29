@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { siteConfig } from "@/data/site";
+import type { GlobalContent } from "@/content/defaults/global";
 
 // ─── Types ──────────────────────────────────────────────
 interface CreateMetadataOptions {
@@ -128,34 +129,60 @@ export function JsonLd({ data }: { data: Record<string, unknown> | Record<string
 // ─── Schema Builders ────────────────────────────────────
 
 /** WebSite schema with SearchAction */
-export function buildWebSiteSchema() {
+function publicIdentity(global?: GlobalContent) {
+  const websiteUrl = global?.brand.websiteUrl || siteConfig.url;
+  return {
+    websiteUrl,
+    legalName: global?.brand.legalName || siteConfig.legalName,
+    description: global?.seo.description || siteConfig.description,
+    language: global?.structuredData.language || siteConfig.language,
+    authorName: global?.author.name || siteConfig.author.name,
+    alternateName: global?.author.alternateName || siteConfig.author.alternateName,
+    authorImage: global?.author.avatarMedia || siteConfig.author.image,
+    jobTitle: global?.author.jobTitle || siteConfig.author.jobTitle,
+    email: global?.contact.email || siteConfig.contact.email,
+    phone: global?.contact.phone || siteConfig.contact.phone,
+    address: global?.contact.address || "Ho Chi Minh, Vietnam",
+    foundingDate: global?.structuredData.foundingDate || siteConfig.foundingDate,
+    areaServed: global
+      ? global.contact.serviceArea.split(",").map((area) => area.trim()).filter(Boolean)
+      : siteConfig.areaServed,
+    socialLinks: global
+      ? [global.social.facebook, global.social.github, global.social.linkedin].filter(Boolean)
+      : siteConfig.sameAs,
+  };
+}
+
+export function buildWebSiteSchema(global?: GlobalContent) {
+  const identity = publicIdentity(global);
   return {
     "@type": "WebSite",
-    "@id": `${siteConfig.url}/#website`,
-    url: siteConfig.url,
-    name: siteConfig.legalName,
-    description: siteConfig.description,
-    inLanguage: siteConfig.language,
-    publisher: { "@id": `${siteConfig.url}/#person` },
+    "@id": `${identity.websiteUrl}/#website`,
+    url: identity.websiteUrl,
+    name: identity.legalName,
+    description: identity.description,
+    inLanguage: identity.language,
+    publisher: { "@id": `${identity.websiteUrl}/#person` },
   };
 }
 
 /** Person schema for the author */
-export function buildPersonSchema() {
+export function buildPersonSchema(global?: GlobalContent) {
+  const identity = publicIdentity(global);
   return {
     "@type": "Person",
-    "@id": `${siteConfig.url}/#person`,
-    name: siteConfig.author.name,
-    alternateName: siteConfig.author.alternateName,
-    url: siteConfig.author.url,
-    image: siteConfig.author.image,
-    jobTitle: siteConfig.author.jobTitle,
-    sameAs: siteConfig.sameAs,
-    email: siteConfig.contact.email,
-    telephone: siteConfig.contact.phone,
+    "@id": `${identity.websiteUrl}/#person`,
+    name: identity.authorName,
+    alternateName: identity.alternateName,
+    url: identity.websiteUrl,
+    image: identity.authorImage,
+    jobTitle: identity.jobTitle,
+    sameAs: identity.socialLinks,
+    email: identity.email,
+    telephone: identity.phone,
     address: {
       "@type": "PostalAddress",
-      addressLocality: "Hồ Chí Minh",
+      addressLocality: identity.address,
       addressCountry: "VN",
     },
   };
@@ -165,17 +192,18 @@ export function buildPersonSchema() {
 export function buildProfessionalServiceSchema(extra?: {
   aggregateRating?: Record<string, unknown>;
   review?: Record<string, unknown>[];
-}) {
+}, global?: GlobalContent) {
+  const identity = publicIdentity(global);
   return {
     "@type": "ProfessionalService",
-    "@id": `${siteConfig.url}/#business`,
-    name: siteConfig.legalName,
-    url: siteConfig.url,
-    image: siteConfig.author.image,
-    description: siteConfig.description,
-    founder: { "@id": `${siteConfig.url}/#person` },
-    foundingDate: siteConfig.foundingDate,
-    areaServed: siteConfig.areaServed.map((area) => ({
+    "@id": `${identity.websiteUrl}/#business`,
+    name: identity.legalName,
+    url: identity.websiteUrl,
+    image: identity.authorImage,
+    description: identity.description,
+    founder: { "@id": `${identity.websiteUrl}/#person` },
+    foundingDate: identity.foundingDate,
+    areaServed: identity.areaServed.map((area) => ({
       "@type": "City",
       name: area,
     })),
@@ -187,12 +215,12 @@ export function buildProfessionalServiceSchema(extra?: {
     ],
     contactPoint: {
       "@type": "ContactPoint",
-      telephone: siteConfig.contact.phone,
-      email: siteConfig.contact.email,
+      telephone: identity.phone,
+      email: identity.email,
       contactType: "customer service",
       availableLanguage: ["Vietnamese", "English"],
     },
-    sameAs: siteConfig.sameAs,
+    sameAs: identity.socialLinks,
     ...(extra?.aggregateRating && {
       aggregateRating: extra.aggregateRating,
     }),
@@ -201,13 +229,13 @@ export function buildProfessionalServiceSchema(extra?: {
 }
 
 /** Build the sitewide @graph array for root layout */
-export function buildSitewideGraph() {
+export function buildSitewideGraph(global?: GlobalContent) {
   return {
     "@context": "https://schema.org",
     "@graph": [
-      buildWebSiteSchema(),
-      buildPersonSchema(),
-      buildProfessionalServiceSchema(),
+      buildWebSiteSchema(global),
+      buildPersonSchema(global),
+      buildProfessionalServiceSchema(undefined, global),
     ],
   };
 }

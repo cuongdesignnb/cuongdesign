@@ -5,6 +5,7 @@ import Breadcrumbs from "@/components/ui/Breadcrumbs";
 import GlassCard from "@/components/ui/GlassCard";
 import GradientText from "@/components/ui/GradientText";
 import TestimonialForm from "@/components/ui/TestimonialForm";
+import PublicAvatar from "@/components/ui/PublicAvatar";
 import { prisma } from "@/lib/db";
 import { testimonials as staticTestimonials } from "@/data/testimonials";
 import { Star, Quote, MessageSquare } from "lucide-react";
@@ -137,10 +138,7 @@ export default async function TestimonialsListPage() {
                     </div>
 
                     <div className="flex items-center space-x-4 pt-4 border-t border-white/5 mt-6 text-left">
-                      {/* Avatar initial text representation to match footer layout */}
-                      <div className="w-10 h-10 rounded-full bg-gradient-to-tr from-pink-500 to-purple-600 flex items-center justify-center font-bold text-white text-xs select-none shadow-md">
-                        {t.name.charAt(0).toUpperCase()}
-                      </div>
+                      <PublicAvatar name={t.name} src={t.avatar} />
                       <div>
                         <h4 className="text-sm font-bold text-white">{t.name}</h4>
                         <p className="text-[10px] text-gray-500 mt-0.5">

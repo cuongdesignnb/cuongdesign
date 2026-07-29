@@ -7,6 +7,11 @@ import { connection } from "next/server";
 import { cache } from "react";
 import { mergeContentDefaults } from "./merge-defaults";
 import { sanitizeContentTree } from "./sanitize";
+import {
+  applyGlobalSettings,
+  GLOBAL_SETTING_KEYS,
+} from "./global-settings";
+import type { GlobalContent } from "@/content/defaults/global";
 
 async function readDocument(key: ContentKey, preview: boolean) {
   const entry = contentRegistry[key];
@@ -24,7 +29,16 @@ async function readDocument(key: ContentKey, preview: boolean) {
       return entry.defaultData;
     }
 
-    return sanitizeContentTree(parsed.data);
+    const content = sanitizeContentTree(parsed.data);
+    if (key === "global") {
+      const settings = await prisma.setting.findMany({
+        where: { key: { in: [...GLOBAL_SETTING_KEYS] } },
+        select: { key: true, value: true },
+      });
+      return applyGlobalSettings(content as GlobalContent, settings);
+    }
+
+    return content;
   } catch (error) {
     console.error(`[Content Hub] Could not resolve "${key}", using defaults.`, error);
     return entry.defaultData;

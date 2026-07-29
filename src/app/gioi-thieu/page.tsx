@@ -7,6 +7,7 @@ import GradientText from "@/components/ui/GradientText";
 import Button from "@/components/ui/Button";
 import { User, Calendar, Briefcase, Award, ArrowRight, ShieldCheck, Mail, Phone, MapPin } from "lucide-react";
 import Link from "next/link";
+import Image from "next/image";
 import { createMetadata, JsonLd } from "@/lib/seo";
 import { getPublishedContent } from "@/lib/content/get-content";
 
@@ -25,27 +26,32 @@ export default async function AboutPage() {
     getPublishedContent("about"),
     getPublishedContent("global"),
   ]);
+  const avatarUrl = content.hero.avatarMedia || global.author.avatarMedia;
   // Schema.org Person & AboutPage Structured Metadata
   const personSchema = {
     "@context": "https://schema.org",
     "@type": "AboutPage",
     "mainEntity": {
       "@type": "Person",
-      "name": "Nguyễn Văn Cường",
-      "alternateName": "Cường Design / Cuong Design",
-      "jobTitle": "Senior Fullstack Web Developer & UI/UX Architect",
+      "name": global.author.name || content.profile.name,
+      "alternateName": global.author.alternateName,
+      "jobTitle": global.author.jobTitle || content.profile.jobTitle,
+      "image": avatarUrl,
       "worksFor": {
         "@type": "Organization",
         "name": "Freelancer",
       },
-      "url": "https://cuongdesign.com",
+      "url": global.brand.websiteUrl,
       "sameAs": [
-        "https://github.com/cuongdesign",
-        "https://linkedin.com/in/cuongdesign"
-      ],
+        global.social.facebook,
+        global.social.github,
+        global.social.linkedin,
+      ].filter(Boolean),
+      "email": global.contact.email,
+      "telephone": global.contact.phone,
       "address": {
         "@type": "PostalAddress",
-        "addressLocality": "Hà Nội",
+        "addressLocality": global.contact.address,
         "addressCountry": "Việt Nam",
       },
       "knowsAbout": [
@@ -187,6 +193,17 @@ export default async function AboutPage() {
                   <div className="w-full h-full rounded-full bg-gradient-to-tr from-pink-500/20 to-purple-600/30 flex items-center justify-center font-bold text-pink-400 text-3xl font-mono">
                     CD
                   </div>
+                  {avatarUrl && (
+                    <Image
+                      src={avatarUrl}
+                      alt={content.profile.name}
+                      fill
+                      sizes="128px"
+                      className="z-10 rounded-full object-cover"
+                      unoptimized
+                      priority
+                    />
+                  )}
                 </div>
                 <div>
                   <h2 className="text-xl font-bold text-white">{content.profile.name}</h2>

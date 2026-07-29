@@ -1,6 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
+import Image from "next/image";
 import { Award, Briefcase, Users, Code2 } from "lucide-react";
 import GlassCard from "../ui/GlassCard";
 import AnimatedSectionHeading from "../motion/AnimatedSectionHeading";
@@ -32,6 +33,16 @@ export default function AboutSection({
               <div className="absolute -inset-1 bg-gradient-to-r from-pink-500 to-purple-600 rounded-3xl blur opacity-30 group-hover:opacity-75 transition duration-500" />
               
               <div className="relative w-full h-full rounded-2xl bg-gradient-to-br from-purple-900/60 to-pink-900/40 border border-white/5 flex items-center justify-center overflow-hidden">
+                {content.profileMedia && (
+                  <Image
+                    src={content.profileMedia}
+                    alt={content.name}
+                    fill
+                    sizes="(min-width: 768px) 320px, 256px"
+                    className="z-10 object-cover"
+                    unoptimized
+                  />
+                )}
                 <div className="absolute inset-0 bg-[radial-gradient(ellipse_80%_80%_at_50%_-20%,rgba(120,119,198,0.3),rgba(255,255,255,0))]" />
                 <div className="text-white text-center p-6 space-y-4">
                   <div className="w-20 h-20 mx-auto rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-4xl shadow-inner animate-pulse">

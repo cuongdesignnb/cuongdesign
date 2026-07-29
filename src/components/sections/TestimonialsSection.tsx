@@ -6,6 +6,7 @@ import { testimonials as staticTestimonials } from "@/data/testimonials";
 import GlassCard from "../ui/GlassCard";
 import AnimatedSectionHeading from "../motion/AnimatedSectionHeading";
 import Stagger from "../motion/Stagger";
+import PublicAvatar from "../ui/PublicAvatar";
 import { fadeUpVariants, hoverDepthVariants } from "@/lib/motion";
 import { homeContentDefaults, type HomeContent } from "@/content/defaults/home";
 
@@ -69,9 +70,7 @@ export default function TestimonialsSection({
 
                   {/* Client Info */}
                   <div className="flex items-center space-x-4 pt-6 border-t border-white/5 mt-6">
-                    <div className="w-10 h-10 rounded-full bg-gradient-to-tr from-pink-500 to-purple-600 flex items-center justify-center font-bold text-white text-xs select-none">
-                      {t.name[0]}
-                    </div>
+                    <PublicAvatar name={t.name} src={t.avatar} />
                     <div>
                       <h4 className="text-sm font-bold text-white">{t.name}</h4>
                       <p className="text-[10px] text-gray-500 mt-0.5">
