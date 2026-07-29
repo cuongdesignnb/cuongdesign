@@ -2,17 +2,42 @@
 
 import React, { useState } from "react";
 import { Mail, Phone, MapPin, Send, CheckCircle2, AlertTriangle, ChevronDown, ChevronUp } from "lucide-react";
-import { siteConfig } from "@/data/site";
 import GlassCard from "../ui/GlassCard";
 import Button from "../ui/Button";
-import { faqs } from "@/data/faqs";
-import { useSettings } from "@/components/ui/SettingsContext";
 
-export default function ContactPageClient() {
-  const settings = useSettings();
-  const email = settings.contact_email || siteConfig.contact.email;
-  const phone = settings.contact_phone || siteConfig.contact.phone;
-  const location = settings.contact_location || siteConfig.contact.location;
+interface ContactPageClientProps {
+  contact: {
+    introduction: { title: string; content: string };
+    cards: { email: string; phone: string; address: string };
+    form: {
+      nameLabel: string;
+      namePlaceholder: string;
+      emailLabel: string;
+      emailPlaceholder: string;
+      phoneLabel: string;
+      phonePlaceholder: string;
+      subjectLabel: string;
+      subjectPlaceholder: string;
+      messageLabel: string;
+      messagePlaceholder: string;
+      submitLabel: string;
+      loadingLabel: string;
+      successTitle: string;
+      successMessage: string;
+      resetLabel: string;
+      errorMessage: string;
+    };
+    faqHeading: string;
+    faqIntro: string;
+    faqs: { question: string; answer: string }[];
+  };
+  globalContact: { email: string; phone: string; address: string };
+}
+
+export default function ContactPageClient({
+  contact,
+  globalContact,
+}: ContactPageClientProps) {
 
   const [formData, setFormData] = useState({
     name: "",
@@ -68,9 +93,9 @@ export default function ContactPageClient() {
         {/* Left Column Contact Info (5 cols) */}
         <div className="lg:col-span-5 space-y-6 text-left">
           <GlassCard className="p-8 border-white/5 bg-[#0a0822]/60 space-y-6">
-            <h3 className="text-xl font-bold text-white">Thông tin liên lạc</h3>
+            <h3 className="text-xl font-bold text-white">{contact.introduction.title}</h3>
             <p className="text-gray-400 text-sm leading-relaxed">
-              Bạn có thể gửi yêu cầu trực tiếp qua form bên cạnh hoặc liên lạc qua email, số điện thoại Zalo. Cường sẽ phản hồi lại bạn sớm nhất trong vòng 24 giờ.
+              {contact.introduction.content}
             </p>
 
             <div className="space-y-4 pt-4 border-t border-white/5">
@@ -79,9 +104,9 @@ export default function ContactPageClient() {
                   <Mail className="w-5 h-5" />
                 </div>
                 <div>
-                  <span className="text-[10px] text-gray-500 uppercase tracking-widest block font-medium">Email</span>
-                  <a href={`mailto:${email}`} className="text-sm text-white hover:text-pink-400 transition-colors">
-                    {email}
+                  <span className="text-[10px] text-gray-500 uppercase tracking-widest block font-medium">{contact.cards.email}</span>
+                  <a href={`mailto:${globalContact.email}`} className="text-sm text-white hover:text-pink-400 transition-colors">
+                    {globalContact.email}
                   </a>
                 </div>
               </div>
@@ -91,9 +116,9 @@ export default function ContactPageClient() {
                   <Phone className="w-5 h-5" />
                 </div>
                 <div>
-                  <span className="text-[10px] text-gray-500 uppercase tracking-widest block font-medium">Zalo / SĐT</span>
-                  <a href={`tel:${phone}`} className="text-sm text-white hover:text-pink-400 transition-colors">
-                    {phone}
+                  <span className="text-[10px] text-gray-500 uppercase tracking-widest block font-medium">{contact.cards.phone}</span>
+                  <a href={`tel:${globalContact.phone}`} className="text-sm text-white hover:text-pink-400 transition-colors">
+                    {globalContact.phone}
                   </a>
                 </div>
               </div>
@@ -103,8 +128,8 @@ export default function ContactPageClient() {
                   <MapPin className="w-5 h-5" />
                 </div>
                 <div>
-                  <span className="text-[10px] text-gray-500 uppercase tracking-widest block font-medium">Vị trí</span>
-                  <span className="text-sm text-white">{location}</span>
+                  <span className="text-[10px] text-gray-500 uppercase tracking-widest block font-medium">{contact.cards.address}</span>
+                  <span className="text-sm text-white">{globalContact.address}</span>
                 </div>
               </div>
             </div>
@@ -117,38 +142,38 @@ export default function ContactPageClient() {
             {submitStatus === "success" ? (
               <div className="flex flex-col items-center justify-center text-center py-10 space-y-4">
                 <CheckCircle2 className="w-16 h-16 text-green-400" />
-                <h4 className="text-xl font-bold text-white">Gửi liên hệ thành công!</h4>
+                <h4 className="text-xl font-bold text-white">{contact.form.successTitle}</h4>
                 <p className="text-sm text-gray-400 max-w-md">
-                  Cảm ơn bạn đã nhắn tin. Cường sẽ xem xét thông tin yêu cầu và phản hồi lại bạn sớm nhất.
+                  {contact.form.successMessage}
                 </p>
                 <Button variant="outline" size="sm" onClick={() => setSubmitStatus("idle")}>
-                  Gửi tin nhắn khác
+                  {contact.form.resetLabel}
                 </Button>
               </div>
             ) : (
               <form onSubmit={handleSubmit} className="space-y-4 text-left">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="space-y-1">
-                    <label className="text-xs text-gray-400 block font-medium">Họ và tên *</label>
+                    <label className="text-xs text-gray-400 block font-medium">{contact.form.nameLabel}</label>
                     <input
                       type="text"
                       name="name"
                       value={formData.name}
                       onChange={handleInputChange}
                       required
-                      placeholder="Nguyễn Văn A"
+                      placeholder={contact.form.namePlaceholder}
                       className="glass-input w-full px-4 py-2.5 text-sm focus:outline-none"
                     />
                   </div>
                   <div className="space-y-1">
-                    <label className="text-xs text-gray-400 block font-medium">Email liên hệ *</label>
+                    <label className="text-xs text-gray-400 block font-medium">{contact.form.emailLabel}</label>
                     <input
                       type="email"
                       name="email"
                       value={formData.email}
                       onChange={handleInputChange}
                       required
-                      placeholder="client@example.com"
+                      placeholder={contact.form.emailPlaceholder}
                       className="glass-input w-full px-4 py-2.5 text-sm focus:outline-none"
                     />
                   </div>
@@ -156,39 +181,39 @@ export default function ContactPageClient() {
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="space-y-1">
-                    <label className="text-xs text-gray-400 block font-medium">Số điện thoại / Zalo</label>
+                    <label className="text-xs text-gray-400 block font-medium">{contact.form.phoneLabel}</label>
                     <input
                       type="tel"
                       name="phone"
                       value={formData.phone}
                       onChange={handleInputChange}
-                      placeholder="0912345678"
+                      placeholder={contact.form.phonePlaceholder}
                       className="glass-input w-full px-4 py-2.5 text-sm focus:outline-none"
                     />
                   </div>
                   <div className="space-y-1">
-                    <label className="text-xs text-gray-400 block font-medium">Chủ đề cần tư vấn *</label>
+                    <label className="text-xs text-gray-400 block font-medium">{contact.form.subjectLabel}</label>
                     <input
                       type="text"
                       name="subject"
                       value={formData.subject}
                       onChange={handleInputChange}
                       required
-                      placeholder="Tư vấn lập trình Next.js..."
+                      placeholder={contact.form.subjectPlaceholder}
                       className="glass-input w-full px-4 py-2.5 text-sm focus:outline-none"
                     />
                   </div>
                 </div>
 
                 <div className="space-y-1">
-                  <label className="text-xs text-gray-400 block font-medium">Nội dung yêu cầu chi tiết *</label>
+                  <label className="text-xs text-gray-400 block font-medium">{contact.form.messageLabel}</label>
                   <textarea
                     name="message"
                     value={formData.message}
                     onChange={handleInputChange}
                     required
                     rows={5}
-                    placeholder="Mô tả tóm tắt ý tưởng, yêu cầu tính năng hoặc câu hỏi của bạn..."
+                    placeholder={contact.form.messagePlaceholder}
                     className="glass-input w-full px-4 py-2.5 text-sm focus:outline-none resize-none"
                   />
                 </div>
@@ -196,7 +221,7 @@ export default function ContactPageClient() {
                 {submitStatus === "error" && (
                   <div className="flex items-center space-x-2 text-red-400 bg-red-500/10 border border-red-500/20 p-3 rounded-xl text-xs font-semibold">
                     <AlertTriangle className="w-4 h-4 shrink-0" />
-                    <span>Có lỗi xảy ra khi gửi tin nhắn. Bạn vui lòng thử lại hoặc nhắn trực tiếp qua Zalo/Email.</span>
+                    <span>{contact.form.errorMessage}</span>
                   </div>
                 )}
 
@@ -206,11 +231,11 @@ export default function ContactPageClient() {
                   className="w-full flex items-center justify-center gap-2 pt-3 bg-pink-600 hover:bg-pink-500 font-bold"
                 >
                   {isSubmitting ? (
-                    <span>Đang gửi thông tin...</span>
+                    <span>{contact.form.loadingLabel}</span>
                   ) : (
                     <>
                       <Send className="w-4 h-4" />
-                      <span>Gửi thông tin liên hệ</span>
+                      <span>{contact.form.submitLabel}</span>
                     </>
                   )}
                 </Button>
@@ -224,12 +249,12 @@ export default function ContactPageClient() {
       {/* FAQs Accordion list */}
       <div className="pt-8 border-t border-white/5 space-y-6 text-left">
         <div className="max-w-2xl">
-          <h2 className="text-2xl font-bold text-white">Câu hỏi thường gặp (FAQ)</h2>
-          <p className="text-xs text-gray-500 mt-1">Giải đáp nhanh các thắc mắc phổ biến của khách hàng về dịch vụ và cài đặt mã nguồn.</p>
+          <h2 className="text-2xl font-bold text-white">{contact.faqHeading}</h2>
+          <p className="text-xs text-gray-500 mt-1">{contact.faqIntro}</p>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-start">
-          {faqs.map((faq, idx) => (
+          {contact.faqs.map((faq, idx) => (
             <GlassCard 
               key={idx} 
               className="p-5 border-white/5 bg-[#0a0822]/60 cursor-pointer hover:border-white/10"

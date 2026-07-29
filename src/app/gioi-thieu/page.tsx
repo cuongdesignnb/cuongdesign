@@ -8,16 +8,23 @@ import Button from "@/components/ui/Button";
 import { User, Calendar, Briefcase, Award, ArrowRight, ShieldCheck, Mail, Phone, MapPin } from "lucide-react";
 import Link from "next/link";
 import { createMetadata, JsonLd } from "@/lib/seo";
+import { getPublishedContent } from "@/lib/content/get-content";
 
-export const metadata = createMetadata({
-  title: "Giới thiệu — Nguyễn Văn Cường",
-  description: "Tìm hiểu tiểu sử, kỹ năng, kinh nghiệm và hành trình lập trình của Cường Design. Chuyên thiết kế UI/UX Figma và lập trình web Next.js, React, Node.js.",
-  path: "/gioi-thieu",
-  openGraph: { type: "profile" },
-  keywords: ["giới thiệu", "Nguyễn Văn Cường", "portfolio developer", "Giới thiệu Cường Design", "Hồ sơ Cường Design", "Kỹ năng lập trình", "Senior Fullstack Developer Việt Nam"],
-});
+export async function generateMetadata() {
+  const content = await getPublishedContent("about");
+  return createMetadata({
+    title: content.metadata.title,
+    description: content.metadata.description,
+    path: "/gioi-thieu",
+    keywords: content.metadata.keywords.split(",").map((item) => item.trim()).filter(Boolean),
+  });
+}
 
-export default function AboutPage() {
+export default async function AboutPage() {
+  const [content, global] = await Promise.all([
+    getPublishedContent("about"),
+    getPublishedContent("global"),
+  ]);
   // Schema.org Person & AboutPage Structured Metadata
   const personSchema = {
     "@context": "https://schema.org",
@@ -47,7 +54,7 @@ export default function AboutPage() {
     }
   };
 
-  const careerTimeline = [
+  const defaultCareerTimeline = [
     {
       period: "2024 - Hiện tại",
       role: "Freelance Solution Architect & Fullstack Engineer",
@@ -74,7 +81,7 @@ export default function AboutPage() {
     },
   ];
 
-  const skillCategories = [
+  const defaultSkillCategories = [
     {
       title: "Frontend Engineering",
       skills: [
@@ -104,11 +111,52 @@ export default function AboutPage() {
     },
   ];
 
-  const credentials = [
+  const defaultCredentials = [
     { title: "Chứng chỉ AWS Certified Solutions Architect", organization: "Amazon Web Services (AWS)", date: "2024" },
     { title: "Advanced User Experience Design", organization: "Interaction Design Foundation (IxDF)", date: "2023" },
     { title: "Chứng nhận Fullstack Web Master", organization: "FPT Aptech Vietnam", date: "2020" },
   ];
+  const configuredTimeline = content.timeline as Array<{
+    period?: string;
+    role?: string;
+    title?: string;
+    company?: string;
+    desc?: string;
+    description?: string;
+  }>;
+  const configuredSkills = content.skills as Array<{
+    title?: string;
+    name?: string;
+    skills?: Array<{ name: string; level: number }>;
+  }>;
+  const configuredCredentials = content.certificates as Array<{
+    title?: string;
+    organization?: string;
+    issuer?: string;
+    date?: string;
+    year?: string;
+  }>;
+  const careerTimeline = configuredTimeline.length
+    ? configuredTimeline.map((item) => ({
+        period: item.period || "",
+        role: item.role || item.title || "",
+        company: item.company || "",
+        desc: item.desc || item.description || "",
+      }))
+    : defaultCareerTimeline;
+  const skillCategories = configuredSkills.length
+    ? configuredSkills.map((category) => ({
+        title: category.title || category.name || "",
+        skills: category.skills || [],
+      }))
+    : defaultSkillCategories;
+  const credentials = configuredCredentials.length
+    ? configuredCredentials.map((credential) => ({
+        title: credential.title || "",
+        organization: credential.organization || credential.issuer || "",
+        date: credential.date || credential.year || "",
+      }))
+    : defaultCredentials;
 
   return (
     <div className="min-h-screen bg-[#030014] text-gray-200 flex flex-col">
@@ -127,7 +175,7 @@ export default function AboutPage() {
 
         <div className="max-w-5xl mx-auto relative z-10 space-y-10 mt-8">
           {/* Breadcrumb Trail */}
-          <Breadcrumbs items={[{ label: "Giới thiệu bản thân", href: "/gioi-thieu" }]} />
+          <Breadcrumbs items={[{ label: content.hero.breadcrumb, href: "/gioi-thieu" }]} />
 
           {/* Profile Header section */}
           <section className="grid grid-cols-1 md:grid-cols-12 gap-8 items-center">
@@ -141,22 +189,22 @@ export default function AboutPage() {
                   </div>
                 </div>
                 <div>
-                  <h2 className="text-xl font-bold text-white">Cường Design</h2>
-                  <span className="text-[10px] text-gray-500 font-mono tracking-widest block uppercase mt-0.5">Solution Architect</span>
+                  <h2 className="text-xl font-bold text-white">{content.profile.name}</h2>
+                  <span className="text-[10px] text-gray-500 font-mono tracking-widest block uppercase mt-0.5">{content.profile.jobTitle}</span>
                 </div>
                 
                 <div className="space-y-2 border-t border-white/5 pt-4 text-left text-xs text-gray-400">
                   <div className="flex items-center gap-2">
                     <Mail className="w-3.5 h-3.5 text-pink-500 shrink-0" />
-                    <span className="truncate">contact@cuongdesign.com</span>
+                    <span className="truncate">{global.contact.email}</span>
                   </div>
                   <div className="flex items-center gap-2">
                     <Phone className="w-3.5 h-3.5 text-purple-500 shrink-0" />
-                    <span>+84 987 654 321</span>
+                    <span>{global.contact.phone}</span>
                   </div>
                   <div className="flex items-center gap-2">
                     <MapPin className="w-3.5 h-3.5 text-pink-500 shrink-0" />
-                    <span>Hà Nội, Việt Nam</span>
+                    <span>{global.contact.address}</span>
                   </div>
                 </div>
               </GlassCard>
@@ -164,26 +212,17 @@ export default function AboutPage() {
 
             {/* Biography details - Right (8 cols) */}
             <div className="md:col-span-8 space-y-4 text-left">
-              <span className="text-[10px] text-pink-500 font-mono font-bold tracking-widest uppercase block">Chào mừng bạn đến với hồ sơ của tôi</span>
+              <span className="text-[10px] text-pink-500 font-mono font-bold tracking-widest uppercase block">{content.hero.badge}</span>
               <h1 className="text-3xl md:text-4xl font-extrabold text-white tracking-tight leading-none">
-                Tôi kiến tạo <GradientText>sản phẩm số</GradientText> hiệu năng vượt trội.
+                {content.hero.prefix} <GradientText>{content.hero.highlight}</GradientText> {content.hero.suffix}
               </h1>
               
-              <div className="text-sm md:text-base text-gray-400 space-y-4 leading-relaxed font-sans">
-                <p>
-                  Tôi tên đầy đủ là <strong>Nguyễn Văn Cường</strong>, được cộng đồng biết đến nhiều hơn dưới nghệ danh <strong>Cường Design</strong> hoặc <strong>Cường Design</strong>. 
-                  Với hơn 6 năm tích lũy kinh nghiệm trong lĩnh vực thiết kế giao diện UI/UX và lập trình Fullstack, mục tiêu của tôi là xóa nhòa ranh giới giữa bản vẽ thiết kế Figma và mã nguồn chạy thực tế.
-                </p>
-                <p>
-                  Tôi tin rằng một website xuất sắc không chỉ nằm ở vẻ ngoài lộng lẫy (Premium visual aesthetics) mà còn phải cực kỳ tối ưu về mặt trải nghiệm mượt mà, cấu trúc SEO chuẩn chỉnh và khả năng tự động hóa thanh toán. 
-                  Mọi dự án tôi làm đều được áp dụng quy trình kiểm soát nghiêm ngặt, sử dụng những công nghệ hiện đại nhất như Next.js, React, Node.js, Prisma, PostgreSQL và Docker.
-                </p>
-              </div>
+              <div className="text-sm md:text-base text-gray-400 space-y-4 leading-relaxed font-sans" dangerouslySetInnerHTML={{ __html: content.profile.biography }} />
 
               <div className="pt-2 flex flex-wrap gap-3">
-                <Link href="/#contact">
+                <Link href={content.profile.ctaUrl}>
                   <Button className="bg-pink-600 hover:bg-pink-500 text-white font-bold flex items-center gap-1.5 px-6">
-                    <span>Liên hệ hợp tác</span>
+                    <span>{content.profile.ctaLabel}</span>
                     <ArrowRight className="w-4 h-4" />
                   </Button>
                 </Link>

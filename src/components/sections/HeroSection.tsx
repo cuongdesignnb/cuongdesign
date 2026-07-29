@@ -10,6 +10,7 @@ import Badge from "../ui/Badge";
 import CountUp from "../motion/CountUp";
 import MagneticButton from "../motion/MagneticButton";
 import { motionTokens } from "@/lib/motion";
+import { homeContentDefaults, type HomeContent } from "@/content/defaults/home";
 
 const containerVariants = {
   hidden: {},
@@ -49,7 +50,11 @@ const floatCardVariants = {
   },
 };
 
-export default function HeroSection() {
+export default function HeroSection({
+  content = homeContentDefaults.hero,
+}: {
+  content?: HomeContent["hero"];
+}) {
   return (
     <section
       id="home"
@@ -98,32 +103,32 @@ export default function HeroSection() {
               className="inline-flex items-center space-x-2 bg-white/5 border border-white/10 rounded-full px-3 py-1 text-xs text-gray-300"
             >
               <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
-              <span>Freelancer Developer</span>
+              <span>{content.badge}</span>
               <span className="text-gray-600">•</span>
-              <span className="text-pink-400">Available for work</span>
+              <span className="text-pink-400">{content.availableText}</span>
             </motion.div>
 
             <motion.h1
               variants={fadeUpItem}
               className="text-4xl sm:text-5xl md:text-6xl font-bold tracking-tight text-white leading-tight"
             >
-              Freelancer Developer <br />
-              tạo ra website đẹp, <br />
-              nhanh, <GradientText>tối ưu chuyển đổi</GradientText>
+              {content.headlinePrefix} <br />
+              <GradientText>{content.headlineHighlight}</GradientText>
+              {content.headlineSuffix && <> {content.headlineSuffix}</>}
             </motion.h1>
 
             <motion.p
               variants={fadeUpItem}
               className="text-lg md:text-xl text-gray-300 font-medium max-w-xl"
             >
-              Modern websites, web apps and digital products that convert.
+              {content.subtitle}
             </motion.p>
 
             <motion.p
               variants={fadeUpItem}
               className="text-gray-400 text-sm md:text-base leading-relaxed max-w-xl"
             >
-              Tôi chuyên thiết kế UI/UX hiện đại và lập trình website, web app tối ưu hiệu năng, chuẩn SEO và mang lại trải nghiệm người dùng tuyệt vời. Nhận dự án theo yêu cầu &amp; bán source code chất lượng cao.
+              <span dangerouslySetInnerHTML={{ __html: content.description }} />
             </motion.p>
 
             {/* CTAs */}
@@ -131,22 +136,22 @@ export default function HeroSection() {
               variants={fadeUpItem}
               className="flex flex-wrap gap-4 pt-2"
             >
-              <MagneticButton>
-                <a href="#projects">
+              {content.primaryCta.enabled && <MagneticButton>
+                <a href={content.primaryCta.url}>
                   <Button variant="primary" className="flex items-center gap-2">
                     <Eye className="w-4 h-4" />
-                    <span>Xem dự án / View Projects</span>
+                    <span>{content.primaryCta.label}</span>
                   </Button>
                 </a>
-              </MagneticButton>
-              <MagneticButton>
-                <a href="#products">
+              </MagneticButton>}
+              {content.secondaryCta.enabled && <MagneticButton>
+                <a href={content.secondaryCta.url}>
                   <Button variant="outline" className="flex items-center gap-2">
                     <ShoppingBag className="w-4 h-4" />
-                    <span>Mua source code / Buy Source Code</span>
+                    <span>{content.secondaryCta.label}</span>
                   </Button>
                 </a>
-              </MagneticButton>
+              </MagneticButton>}
             </motion.div>
 
             {/* Metrics with CountUp */}
@@ -154,24 +159,14 @@ export default function HeroSection() {
               variants={fadeUpItem}
               className="grid grid-cols-3 gap-6 pt-8 border-t border-white/5 max-w-md"
             >
-              <div>
-                <div className="text-2xl md:text-3xl font-bold text-white">
-                  <CountUp to={50} suffix="+" />
+              {content.metrics.map((metric) => (
+                <div key={metric.label}>
+                  <div className="text-2xl md:text-3xl font-bold text-white">
+                    <CountUp to={metric.value} suffix={metric.suffix} />
+                  </div>
+                  <div className="text-xs text-gray-500 mt-1 uppercase tracking-wider">{metric.label}</div>
                 </div>
-                <div className="text-xs text-gray-500 mt-1 uppercase tracking-wider">Dự án hoàn thành</div>
-              </div>
-              <div>
-                <div className="text-2xl md:text-3xl font-bold text-white">
-                  <CountUp to={100} suffix="+" duration={2.5} />
-                </div>
-                <div className="text-xs text-gray-500 mt-1 uppercase tracking-wider">Khách hàng hài lòng</div>
-              </div>
-              <div>
-                <div className="text-2xl md:text-3xl font-bold text-white">
-                  <CountUp to={3} suffix="+" duration={1.5} />
-                </div>
-                <div className="text-xs text-gray-500 mt-1 uppercase tracking-wider">Năm kinh nghiệm</div>
-              </div>
+              ))}
             </motion.div>
           </motion.div>
 
@@ -205,7 +200,7 @@ export default function HeroSection() {
                     <span className="w-3 h-3 rounded-full bg-yellow-500/80" />
                     <span className="w-3 h-3 rounded-full bg-green-500/80" />
                   </div>
-                  <div className="text-xs font-mono text-gray-500">developer.ts</div>
+                  <div className="text-xs font-mono text-gray-500">{content.developerCard.filename}</div>
                   <Terminal className="w-4 h-4 text-gray-600" />
                 </div>
 
@@ -215,18 +210,18 @@ export default function HeroSection() {
                     <span className="text-purple-400">const</span> developer <span className="text-white">=</span> <span className="text-yellow-400">{"{"}</span>
                   </div>
                   <div className="pl-4">
-                    <span className="text-gray-400">name:</span> <span className="text-green-300">&quot;Cường Design&quot;</span>,
+                    <span className="text-gray-400">name:</span> <span className="text-green-300">&quot;{content.developerCard.name}&quot;</span>,
                   </div>
                   <div className="pl-4">
-                    <span className="text-gray-400">passion:</span> <span className="text-green-300">&quot;Clean Code&quot;</span>,
+                    <span className="text-gray-400">passion:</span> <span className="text-green-300">&quot;{content.developerCard.passion}&quot;</span>,
                   </div>
                   <div className="pl-4">
                     <span className="text-gray-400">focus:</span> <span className="text-yellow-400">{"["}</span>
-                    <span className="text-green-300">&quot;UI/UX&quot;</span>, <span className="text-green-300">&quot;Performance&quot;</span>, <span className="text-green-300">&quot;SEO&quot;</span>
+                    <span className="text-green-300">&quot;{content.developerCard.focus}&quot;</span>
                     <span className="text-yellow-400">{"]"}</span>,
                   </div>
                   <div className="pl-4">
-                    <span className="text-gray-400">available:</span> <span className="text-amber-400">true</span>
+                    <span className="text-gray-400">available:</span> <span className="text-amber-400">{String(content.developerCard.available)}</span>
                   </div>
                   <div className="text-yellow-400">{"}"}</div>
                   
@@ -239,16 +234,16 @@ export default function HeroSection() {
                 <div className="mt-auto border-t border-white/10 bg-[#080718] p-4 flex items-center justify-between">
                   <div className="flex items-center space-x-3">
                     <div className="w-10 h-10 rounded-full border-4 border-green-500 flex items-center justify-center font-bold text-green-400 text-xs shadow-[0_0_15px_rgba(34,197,94,0.3)]">
-                      98
+                      {content.lighthouseScore}
                     </div>
                     <div>
-                      <div className="text-xs text-white font-semibold">Lighthouse Performance</div>
+                      <div className="text-xs text-white font-semibold">{content.lighthouseLabel}</div>
                       <div className="text-[10px] text-gray-500">Core Web Vitals Optimized</div>
                     </div>
                   </div>
                   <Badge variant="primary" className="flex items-center gap-1 font-mono text-[10px]">
                     <Code2 className="w-3 h-3" />
-                    <span>Next.js 16</span>
+                    <span>{content.technologyBadge}</span>
                   </Badge>
                 </div>
               </GlassCard>

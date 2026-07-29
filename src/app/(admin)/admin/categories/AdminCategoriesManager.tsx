@@ -4,6 +4,7 @@ import React, { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useToast } from "@/components/ui/Toast";
 import { slugify } from "@/lib/utils";
+import MediaField from "@/components/admin/content/MediaField";
 import {
   upsertCategory,
   deleteCategory,
@@ -332,19 +333,13 @@ export default function AdminCategoriesManager({
                 />
               </div>
 
-              {/* Cover Image */}
-              <div className="space-y-2">
-                <label className="text-xs text-gray-400 font-semibold uppercase tracking-wider block">
-                  Ảnh bìa (URL)
-                </label>
-                <input
-                  type="text"
-                  value={formData.coverImage}
-                  onChange={(e) => setFormData((prev) => ({ ...prev, coverImage: e.target.value }))}
-                  className="w-full px-4 py-2.5 text-sm rounded-lg bg-white/5 border border-white/10 text-white placeholder-gray-500 focus:outline-none focus:border-pink-500/50 transition-colors"
-                  placeholder="https://..."
-                />
-              </div>
+              <MediaField
+                label="Ảnh bìa"
+                value={formData.coverImage}
+                onChange={(coverImage) =>
+                  setFormData((prev) => ({ ...prev, coverImage }))
+                }
+              />
 
               {/* Color + Order */}
               <div className="grid grid-cols-2 gap-4">

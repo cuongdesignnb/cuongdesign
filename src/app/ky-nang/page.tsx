@@ -9,16 +9,21 @@ import { Cpu, Layout, Server, Database, Settings, Sparkles, ArrowRight, ShieldCh
 import Link from "next/link";
 import { createMetadata, JsonLd } from "@/lib/seo";
 import { siteConfig } from "@/data/site";
+import { getPublishedContent } from "@/lib/content/get-content";
 
-export const metadata = createMetadata({
-  title: "Kỹ năng & Công nghệ sử dụng",
-  description: "Xem chi tiết hệ sinh thái kỹ năng lập trình Fullstack (Next.js, React, TypeScript, Node.js, Prisma, PostgreSQL), thiết kế UI/UX Figma và tối ưu hóa hệ thống Web App của Cường Design.",
-  path: "/ky-nang",
-  keywords: ["Kỹ năng lập trình", "Chuyên gia Next.js", "Lập trình viên Fullstack", "Thiết kế Figma UI/UX"],
-});
+export async function generateMetadata() {
+  const content = await getPublishedContent("skills");
+  return createMetadata({
+    title: content.metadata.title,
+    description: content.metadata.description,
+    path: "/ky-nang",
+    keywords: content.metadata.keywords.split(",").map((item) => item.trim()).filter(Boolean),
+  });
+}
 
-export default function SkillsPage() {
-  const skillGroups = [
+export default async function SkillsPage() {
+  const content = await getPublishedContent("skills");
+  const defaultSkillGroups = [
     {
       category: "Frontend Engineering",
       icon: Layout,
@@ -91,6 +96,43 @@ export default function SkillsPage() {
       ]
     }
   ];
+  const iconMap = { Cpu, Layout, Server, Database, Settings, Sparkles };
+  const configuredCategories = content.categories as Array<{
+    name?: string;
+    category?: string;
+    description?: string;
+    desc?: string;
+    iconKey?: keyof typeof iconMap;
+  }>;
+  const configuredTechnologies = content.technologies as Array<{
+    name?: string;
+    category?: string;
+    level?: number;
+    years?: string;
+    experience?: string;
+    description?: string;
+    desc?: string;
+    visible?: boolean;
+  }>;
+  const skillGroups = configuredCategories.length
+    ? configuredCategories.map((category, index) => {
+        const categoryName = category.name || category.category || `Nhóm ${index + 1}`;
+        return {
+          category: categoryName,
+          icon: iconMap[category.iconKey || "Layout"] || Layout,
+          color: defaultSkillGroups[index % defaultSkillGroups.length].color,
+          desc: category.description || category.desc || "",
+          skills: configuredTechnologies
+            .filter((technology) => technology.visible !== false && technology.category === categoryName)
+            .map((technology) => ({
+              name: technology.name || "",
+              level: technology.level || 0,
+              exp: technology.years || technology.experience || "",
+              desc: technology.description || technology.desc || "",
+            })),
+        };
+      })
+    : defaultSkillGroups;
 
   // WebPage + ItemList JSON-LD schema for skill categories
   const skillsSchema = {
@@ -125,17 +167,16 @@ export default function SkillsPage() {
         <div className="absolute bottom-1/4 right-1/4 translate-x-1/2 translate-y-1/2 w-96 h-96 bg-purple-500/10 rounded-full blur-[120px] pointer-events-none" />
 
         <div className="max-w-6xl mx-auto relative z-10 space-y-10">
-          <Breadcrumbs items={[{ label: "Năng lực công nghệ", href: "/ky-nang" }]} />
+          <Breadcrumbs items={[{ label: content.hero.title, href: "/ky-nang" }]} />
 
           {/* Heading */}
           <div className="text-left space-y-4 max-w-3xl">
             <span className="text-[10px] text-pink-500 font-mono font-bold tracking-widest uppercase block">Technical Expertise</span>
             <h1 className="text-3xl md:text-5xl font-extrabold text-white tracking-tight leading-none">
-              Năng lực công nghệ & <br className="hidden md:inline" />
-              <GradientText>Kỹ năng lập trình chuyên sâu</GradientText>
+              <GradientText>{content.hero.title}</GradientText>
             </h1>
             <p className="text-gray-400 text-sm md:text-base leading-relaxed">
-              Tổng hợp bộ kỹ năng, kinh nghiệm thực chiến và mức độ làm chủ công nghệ được chia chi tiết theo từng mảng chuyên môn trong quy trình phát triển sản phẩm số.
+              {content.hero.intro}
             </p>
           </div>
 

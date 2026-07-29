@@ -2,6 +2,8 @@
 
 import { prisma } from "@/lib/db";
 import { revalidatePath } from "next/cache";
+import { requireAdmin } from "@/lib/auth/require-admin";
+import { sanitizeRichHtml } from "@/lib/content/sanitize";
 
 export async function upsertPage(data: {
   id?: string;
@@ -13,12 +15,13 @@ export async function upsertPage(data: {
   seoDescription?: string;
 }) {
   try {
+    await requireAdmin();
     const page = await prisma.page.upsert({
       where: { id: data.id || "new-page" },
       update: {
         title: data.title,
         slug: data.slug,
-        content: data.content,
+        content: sanitizeRichHtml(data.content),
         isPublished: data.isPublished,
         seoTitle: data.seoTitle || null,
         seoDescription: data.seoDescription || null,
@@ -26,7 +29,7 @@ export async function upsertPage(data: {
       create: {
         title: data.title,
         slug: data.slug,
-        content: data.content,
+        content: sanitizeRichHtml(data.content),
         isPublished: data.isPublished,
         seoTitle: data.seoTitle || null,
         seoDescription: data.seoDescription || null,
@@ -44,6 +47,7 @@ export async function upsertPage(data: {
 
 export async function deletePage(id: string) {
   try {
+    await requireAdmin();
     const page = await prisma.page.delete({
       where: { id },
     });

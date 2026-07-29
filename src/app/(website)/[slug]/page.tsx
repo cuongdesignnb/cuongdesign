@@ -1,6 +1,7 @@
 import React from "react";
 import { notFound } from "next/navigation";
 import { prisma } from "@/lib/db";
+import { sanitizeRichHtml } from "@/lib/content/sanitize";
 import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
 import { Metadata } from "next";
@@ -77,7 +78,7 @@ export default async function PolicyPage({ params }: PolicyPageProps) {
           {/* Render policy html contents (generated via TipTap editor) */}
           <article 
             className="prose prose-invert prose-pink max-w-none text-gray-300 leading-relaxed text-sm sm:text-base space-y-6"
-            dangerouslySetInnerHTML={{ __html: page.content }}
+            dangerouslySetInnerHTML={{ __html: sanitizeRichHtml(page.content) }}
           />
         </div>
       </main>

@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import ChatWidget from "@/components/ui/ChatWidget";
+import DraftPreviewBanner from "@/components/admin/content/DraftPreviewBanner";
 import { siteConfig } from "@/data/site";
 import { JsonLd, buildSitewideGraph } from "@/lib/seo";
 import { prisma } from "@/lib/db";
@@ -105,6 +106,7 @@ export default async function RootLayout({
         />
       </head>
       <body className="min-h-full flex flex-col" suppressHydrationWarning>
+        <DraftPreviewBanner />
         <SettingsProvider settings={settings}>
           <JsonLd data={buildSitewideGraph()} />
           {children}

@@ -9,17 +9,22 @@ import { prisma } from "@/lib/db";
 import { testimonials as staticTestimonials } from "@/data/testimonials";
 import { Star, Quote, MessageSquare } from "lucide-react";
 import { createMetadata, JsonLd, buildProfessionalServiceSchema } from "@/lib/seo";
+import { getPublishedContent } from "@/lib/content/get-content";
 
 export const dynamic = "force-dynamic";
 
-export const metadata = createMetadata({
-  title: "Đánh giá & Nhận xét từ khách hàng",
-  description: "Đọc các nhận xét, phản hồi thực tế từ các đối tác, khách hàng đã hợp tác thiết kế UI/UX và lập trình website cùng Cường Design. Gửi đánh giá của riêng bạn.",
-  path: "/danh-gia",
-  keywords: ["Đánh giá Cường Design", "Nhận xét khách hàng", "Testimonials freelancer", "Thiết kế website uy tín"],
-});
+export async function generateMetadata() {
+  const content = await getPublishedContent("reviews");
+  return createMetadata({
+    title: content.metadata.title,
+    description: content.metadata.description,
+    path: "/danh-gia",
+    keywords: content.metadata.keywords.split(",").map((item) => item.trim()).filter(Boolean),
+  });
+}
 
 export default async function TestimonialsListPage() {
+  const content = await getPublishedContent("reviews");
   // Fetch only published testimonials from database
   let dbTestimonials: any[] = [];
   try {
@@ -87,17 +92,16 @@ export default async function TestimonialsListPage() {
         <div className="absolute bottom-1/4 right-1/4 translate-x-1/2 translate-y-1/2 w-96 h-96 bg-purple-500/10 rounded-full blur-[120px] pointer-events-none" />
 
         <div className="max-w-6xl mx-auto relative z-10 space-y-10">
-          <Breadcrumbs items={[{ label: "Đánh giá của đối tác", href: "/danh-gia" }]} />
+          <Breadcrumbs items={[{ label: content.hero.title, href: "/danh-gia" }]} />
 
           {/* Heading */}
           <div className="text-left space-y-4 max-w-3xl">
             <span className="text-[10px] text-pink-500 font-mono font-bold tracking-widest uppercase block">Testimonials & Feedback</span>
             <h1 className="text-3xl md:text-5xl font-extrabold text-white tracking-tight leading-none">
-              Khách hàng nói gì về <br className="hidden md:inline" />
-              <GradientText>Cường Design</GradientText>?
+              <GradientText>{content.hero.title}</GradientText>
             </h1>
             <p className="text-gray-400 text-sm md:text-base leading-relaxed">
-              Những nhận xét, phản hồi thực tế từ các doanh nghiệp, lập trình viên và đối tác đã trực tiếp làm việc, mua sản phẩm số hoặc hợp tác dự án cùng Cường.
+              {content.hero.intro}
             </p>
           </div>
 

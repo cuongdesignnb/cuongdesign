@@ -1,6 +1,7 @@
 "use server";
 
 import { prisma } from "@/lib/db";
+import { requireAdmin } from "@/lib/auth/require-admin";
 
 export async function createTestimonial(data: {
   name: string;
@@ -12,6 +13,7 @@ export async function createTestimonial(data: {
   order?: number;
 }) {
   try {
+    await requireAdmin();
     const testimonial = await prisma.testimonial.create({
       data: {
         name: data.name,
@@ -33,6 +35,7 @@ export async function createTestimonial(data: {
 
 export async function getTestimonials() {
   try {
+    await requireAdmin();
     const testimonials = await prisma.testimonial.findMany({
       orderBy: [{ order: "asc" }, { createdAt: "desc" }],
     });
@@ -45,6 +48,7 @@ export async function getTestimonials() {
 
 export async function toggleTestimonialPublish(id: string) {
   try {
+    await requireAdmin();
     const testimonial = await prisma.testimonial.findUnique({ where: { id } });
     if (!testimonial) {
       return { success: false, error: "Testimonial not found" };
@@ -73,6 +77,7 @@ export async function updateTestimonial(
   }
 ) {
   try {
+    await requireAdmin();
     const updated = await prisma.testimonial.update({
       where: { id },
       data,
@@ -86,6 +91,7 @@ export async function updateTestimonial(
 
 export async function deleteTestimonial(id: string) {
   try {
+    await requireAdmin();
     await prisma.testimonial.delete({ where: { id } });
     return { success: true };
   } catch (error: any) {

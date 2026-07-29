@@ -1,36 +1,82 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Cuong Design
 
-## Getting Started
+Portfolio, cửa hàng sản phẩm số và hệ thống quản trị nội dung xây dựng bằng Next.js 16, PostgreSQL, Prisma và Auth.js.
 
-First, run the development server:
+## Chạy bằng Docker
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+docker compose up -d --build
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Ứng dụng: `http://localhost:13000`
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+PostgreSQL: `localhost:5439`
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+Container `web` tự chạy `prisma migrate deploy` trước khi khởi động. Ảnh upload được giữ trong volume `media_uploads`, database được giữ trong volume `postgres_design_data`.
 
-## Learn More
+## Khởi tạo dữ liệu
 
-To learn more about Next.js, take a look at the following resources:
+Chỉ chạy seed sau khi migrate database. Seed dùng `upsert`, tạo admin mặc định, dữ liệu collection ban đầu và 13 Content Document.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+```powershell
+$env:DATABASE_URL="postgresql://cuongdesign_user:cuongdesign_password@localhost:5439/cuongdesign_db"
+npx prisma migrate deploy
+npm run seed
+```
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+Chỉ seed Content Hub và dịch vụ:
 
-## Deploy on Vercel
+```powershell
+npm run seed:content
+```
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+Public routes không thực hiện seed hoặc ghi dữ liệu.
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## Admin
+
+Trang đăng nhập: `http://localhost:13000/login`
+
+Tài khoản development được tạo bởi seed:
+
+```text
+admin@cuongdesign.com
+adminpassword
+```
+
+Đổi mật khẩu và các giá trị `AUTH_SECRET`/`NEXTAUTH_SECRET` trước khi triển khai production.
+
+## Content Hub
+
+Content Hub nằm tại `/admin/content` và gồm các tab Global, Home, About, Services, Process, Skills, Projects, Products, Blog, Reviews, Contact, Footer và System Copy.
+
+Quy trình nội dung:
+
+1. `Save draft` chỉ cập nhật `draftData`.
+2. `Preview` bật Draft Mode cho admin đang đăng nhập.
+3. `Publish` tạo revision, cập nhật `publishedData` và revalidate route/cache tag.
+4. `Lịch sử` cho phép khôi phục một revision về bản nháp.
+
+Mọi field ảnh dùng Media Library chung tại `/admin/media`. Nội dung HTML dùng TipTap `ContentEditor` và được sanitize ở server.
+
+## Deploy database hiện có
+
+Nên backup trước mỗi lần migrate:
+
+```bash
+pg_dump -Fc -h localhost -p 5439 -U cuongdesign_user cuongdesign_db > backup.dump
+npx prisma migrate deploy
+```
+
+Không chạy `prisma migrate reset` trên database có dữ liệu. File backup SQL không được đưa vào Docker image nhờ `.dockerignore`.
+
+## Kiểm tra
+
+```bash
+npx tsc --noEmit
+npm run lint
+npm run build
+docker compose ps
+docker compose logs web --tail 100
+```
+
+Inventory nguồn nội dung và trạng thái migration nằm tại `docs/content-hardcode-inventory.md`.

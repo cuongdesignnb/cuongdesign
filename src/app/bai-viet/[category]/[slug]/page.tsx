@@ -1,6 +1,7 @@
 import React from "react";
 import { notFound } from "next/navigation";
 import { prisma } from "@/lib/db";
+import { sanitizeRichHtml } from "@/lib/content/sanitize";
 import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
 import Breadcrumbs from "@/components/ui/Breadcrumbs";
@@ -220,7 +221,7 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
           {/* Article content parsed */}
           <article
             className="prose prose-invert prose-pink max-w-none text-gray-300 leading-relaxed text-sm sm:text-base space-y-6 text-left"
-            dangerouslySetInnerHTML={{ __html: post.content || "" }}
+            dangerouslySetInnerHTML={{ __html: sanitizeRichHtml(post.content || "") }}
           />
 
           {/* Tags */}

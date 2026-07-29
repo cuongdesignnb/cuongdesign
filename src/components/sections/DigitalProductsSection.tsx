@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
 import { ShoppingBag, Eye, X, Send, CheckCircle2, CreditCard } from "lucide-react";
-import { products as staticProducts, ProductItem } from "@/data/products";
+import type { ProductItem } from "@/data/products";
 import { formatVND } from "@/lib/utils";
 import { createOrder } from "@/app/actions/orders";
 import GlassCard from "../ui/GlassCard";
@@ -14,6 +14,7 @@ import Stagger from "../motion/Stagger";
 import Badge from "../ui/Badge";
 import Button from "../ui/Button";
 import { fadeUpVariants, hoverDepthVariants, motionTokens } from "@/lib/motion";
+import { homeContentDefaults, type HomeContent } from "@/content/defaults/home";
 
 const modalOverlayVariants = {
   hidden: { opacity: 0 },
@@ -37,8 +38,14 @@ const modalContentVariants = {
   },
 };
 
-export default function DigitalProductsSection({ initialProducts }: { initialProducts?: any[] }) {
-  const products = initialProducts || staticProducts;
+export default function DigitalProductsSection({
+  initialProducts = [],
+  content = homeContentDefaults.products,
+}: {
+  initialProducts?: any[];
+  content?: HomeContent["products"];
+}) {
+  const products = initialProducts;
   const [selectedProduct, setSelectedProduct] = useState<ProductItem | null>(null);
   const [formData, setFormData] = useState({
     name: "",
@@ -146,12 +153,12 @@ export default function DigitalProductsSection({ initialProducts }: { initialPro
     <section id="products" className="py-24 relative overflow-hidden bg-[#030014]/50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         <AnimatedSectionHeading
-          title="Sản phẩm số / Digital Products"
-          subtitle="Mua mã nguồn hoặc tải các template/UI kit chất lượng để triển khai dự án nhanh chóng."
+          title={content.title}
+          subtitle={content.subtitle}
         />
 
         <Stagger className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8" stagger={0.12}>
-          {products.map((product) => (
+          {products.slice(0, content.displayLimit).map((product) => (
             <motion.div key={product.id} variants={fadeUpVariants}>
               <motion.div
                 initial="rest"

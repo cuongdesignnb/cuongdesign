@@ -20,13 +20,20 @@ services:
     restart: always
     ports:
       - "13000:3000"
+    command: sh -c "npx prisma migrate deploy && node server.js"
     environment:
       - DATABASE_URL=postgresql://cuongdesign_user:cuongdesign_password@postgres:5432/cuongdesign_db?schema=public
       - NEXTAUTH_SECRET=your_nextauth_secret_here
-      - NEXTAUTH_URL=https://cuongdesign.com
+      - AUTH_SECRET=your_nextauth_secret_here
+      - NEXTAUTH_URL=http://localhost:13000
+      - AUTH_URL=http://localhost:13000
+      - AUTH_TRUST_HOST=true
       # Thêm các biến môi trường khác vào đây (Zalo, Telegram, Mailer...)
     depends_on:
       - postgres
+    volumes:
+      - media_uploads:/app/public/uploads
 
 volumes:
   postgres_design_data:
+  media_uploads:

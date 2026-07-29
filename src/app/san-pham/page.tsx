@@ -6,17 +6,22 @@ import DigitalProductsSection from "@/components/sections/DigitalProductsSection
 import { prisma } from "@/lib/db";
 import { createMetadata, JsonLd } from "@/lib/seo";
 import { siteConfig } from "@/data/site";
+import { getPublishedContent } from "@/lib/content/get-content";
 
 export const dynamic = "force-dynamic";
 
-export const metadata = createMetadata({
-  title: "Sản phẩm số — Mua mã nguồn & Template",
-  description: "Khám phá cửa hàng sản phẩm số của Cường Design. Mua mã nguồn website Next.js, React chất lượng cao, UI kit và template chuyên nghiệp tối ưu SEO.",
-  path: "/san-pham",
-  keywords: ["Mua source code Next.js", "Mã nguồn React", "Landing page mẫu", "UI Kit website", "Cửa hàng Cường Design"],
-});
+export async function generateMetadata() {
+  const content = await getPublishedContent("products");
+  return createMetadata({
+    title: content.metadata.title,
+    description: content.metadata.description,
+    path: "/san-pham",
+    keywords: content.metadata.keywords.split(",").map((item) => item.trim()).filter(Boolean),
+  });
+}
 
 export default async function ProductsListPage() {
+  const content = await getPublishedContent("products");
   // Fetch active products from database
   let dbProducts: any[] = [];
   try {
@@ -65,12 +70,12 @@ export default async function ProductsListPage() {
 
         <div className="max-w-7xl mx-auto relative z-10 space-y-6">
           <div className="px-4 sm:px-6 lg:px-8">
-            <Breadcrumbs items={[{ label: "Sản phẩm", href: "/san-pham" }]} />
+            <Breadcrumbs items={[{ label: content.hero.breadcrumb, href: "/san-pham" }]} />
           </div>
           
           {/* Reuse the digital products interactive component */}
           <div className="-mt-12">
-            <DigitalProductsSection initialProducts={dbProducts} />
+          <DigitalProductsSection initialProducts={dbProducts} content={{ title: content.hero.title, subtitle: content.hero.intro.replace(/<[^>]+>/g, ""), displayLimit: 100, priceLabel: content.labels.price, ctaLabel: content.cta.label, ctaUrl: content.cta.url, emptyState: content.emptyState }} />
           </div>
         </div>
       </main>

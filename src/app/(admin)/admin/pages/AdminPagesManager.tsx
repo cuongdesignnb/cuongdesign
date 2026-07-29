@@ -7,7 +7,7 @@ import { upsertPage, deletePage } from "@/app/actions/pages";
 import { slugify } from "@/lib/utils";
 import GlassCard from "@/components/ui/GlassCard";
 import Button from "@/components/ui/Button";
-import RichTextEditor from "@/components/ui/RichTextEditor";
+import ContentEditor from "@/components/admin/content/ContentEditor";
 import { Plus, Edit2, Trash2, ArrowLeft, Save, Globe, Eye, FileText } from "lucide-react";
 
 interface PageItem {
@@ -204,7 +204,7 @@ export default function AdminPagesManager({ initialPages }: AdminPagesManagerPro
             <label className="text-xs text-gray-400 font-semibold uppercase tracking-wider block mb-2">
               Nội dung chính sách (HTML/TipTap Editor)
             </label>
-            <RichTextEditor
+            <ContentEditor
               value={editingPage.content || ""}
               onChange={(html) => setEditingPage((prev) => prev ? { ...prev, content: html } : null)}
             />

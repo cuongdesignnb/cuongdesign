@@ -7,15 +7,22 @@ import GlassCard from "../ui/GlassCard";
 import AnimatedSectionHeading from "../motion/AnimatedSectionHeading";
 import Stagger from "../motion/Stagger";
 import { fadeUpVariants, hoverDepthVariants } from "@/lib/motion";
+import { homeContentDefaults, type HomeContent } from "@/content/defaults/home";
 
-export default function TestimonialsSection({ initialTestimonials }: { initialTestimonials?: any[] }) {
-  const testimonials = initialTestimonials || staticTestimonials;
+export default function TestimonialsSection({
+  initialTestimonials,
+  content = homeContentDefaults.testimonials,
+}: {
+  initialTestimonials?: any[];
+  content?: HomeContent["testimonials"];
+}) {
+  const testimonials = (initialTestimonials || staticTestimonials).slice(0, content.displayLimit);
   return (
     <section id="testimonials" className="py-24 relative overflow-hidden">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         <AnimatedSectionHeading
-          title="Đánh giá của khách hàng / Testimonials"
-          subtitle="Những phản hồi chân thực từ các đối tác, khách hàng đã trực tiếp hợp tác cùng Cường."
+          title={content.title}
+          subtitle={content.subtitle}
         />
 
         <Stagger className="grid grid-cols-1 md:grid-cols-2 gap-8" stagger={0.12}>

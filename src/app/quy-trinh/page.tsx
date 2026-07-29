@@ -9,16 +9,21 @@ import { MessageSquare, Layout, Paintbrush, Cpu, CheckCircle2, ShieldAlert, Arro
 import Link from "next/link";
 import { createMetadata, JsonLd } from "@/lib/seo";
 import { siteConfig } from "@/data/site";
+import { getPublishedContent } from "@/lib/content/get-content";
 
-export const metadata = createMetadata({
-  title: "Quy trình làm việc chuyên nghiệp",
-  description: "Khám phá quy trình làm việc chuẩn 6 bước tại Cường Design giúp tối giản hóa thời gian triển khai dự án, nâng cao hiệu suất SEO, bảo mật cơ sở dữ liệu và đảm bảo bàn giao sản phẩm pixel-perfect.",
-  path: "/quy-trinh",
-  keywords: ["Quy trình thiết kế website", "Lập trình web freelancer", "Bàn giao source code", "Quy trình thiết kế Figma"],
-});
+export async function generateMetadata() {
+  const content = await getPublishedContent("process");
+  return createMetadata({
+    title: content.metadata.title,
+    description: content.metadata.description,
+    path: "/quy-trinh",
+    keywords: content.metadata.keywords.split(",").map((item) => item.trim()).filter(Boolean),
+  });
+}
 
-export default function ProcessPage() {
-  const steps = [
+export default async function ProcessPage() {
+  const content = await getPublishedContent("process");
+  const defaultSteps = [
     {
       id: "01",
       title: "Tiếp nhận & Nghiên cứu",
@@ -80,6 +85,28 @@ export default function ProcessPage() {
       time: "1 - 2 ngày"
     }
   ];
+  const iconMap = { MessageSquare, Layout, Paintbrush, Cpu, CheckCircle2, ShieldAlert };
+  const configuredSteps = content.steps as Array<{
+    number?: string;
+    titleVi?: string;
+    titleEn?: string;
+    description?: string;
+    iconKey?: keyof typeof iconMap;
+    deliverables?: string[];
+    time?: string;
+  }>;
+  const steps = configuredSteps.length > 0
+    ? configuredSteps.map((step, index) => ({
+        id: step.number || String(index + 1).padStart(2, "0"),
+        title: step.titleVi || `Bước ${index + 1}`,
+        subtitle: step.titleEn || "",
+        icon: iconMap[step.iconKey || "MessageSquare"] || MessageSquare,
+        color: defaultSteps[index % defaultSteps.length].color,
+        desc: step.description || "",
+        deliverables: step.deliverables || [],
+        time: step.time || "",
+      }))
+    : defaultSteps;
 
   // HowTo JSON-LD schema with steps from work process
   const howToSchema = {
@@ -111,17 +138,16 @@ export default function ProcessPage() {
         <div className="absolute bottom-1/4 right-1/4 translate-x-1/2 translate-y-1/2 w-96 h-96 bg-purple-500/10 rounded-full blur-[120px] pointer-events-none" />
 
         <div className="max-w-5xl mx-auto relative z-10 space-y-10">
-          <Breadcrumbs items={[{ label: "Quy trình làm việc", href: "/quy-trinh" }]} />
+          <Breadcrumbs items={[{ label: content.hero.title, href: "/quy-trinh" }]} />
 
           {/* Heading */}
           <div className="text-left space-y-4 max-w-3xl">
             <span className="text-[10px] text-pink-500 font-mono font-bold tracking-widest uppercase block">Development Lifecycle</span>
             <h1 className="text-3xl md:text-5xl font-extrabold text-white tracking-tight leading-none">
-              Quy trình làm việc <br className="hidden md:inline" />
-              <GradientText>Minh bạch & Hiệu quả</GradientText>
+              <GradientText>{content.hero.title}</GradientText>
             </h1>
             <p className="text-gray-400 text-sm md:text-base leading-relaxed">
-              Các bước phát triển phần mềm và thiết kế giao diện được chuẩn hóa nghiêm ngặt giúp dự án của bạn hoàn thành đúng tiến độ, tiết kiệm chi phí và đạt chất lượng cao nhất.
+              {content.hero.intro}
             </p>
           </div>
 

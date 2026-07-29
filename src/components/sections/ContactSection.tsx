@@ -3,14 +3,14 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Mail, Phone, MapPin, Send, CheckCircle2, AlertTriangle } from "lucide-react";
-import { siteConfig } from "@/data/site";
 import GlassCard from "../ui/GlassCard";
 import AnimatedSectionHeading from "../motion/AnimatedSectionHeading";
 import Reveal from "../motion/Reveal";
 import Button from "../ui/Button";
 import MagneticButton from "../motion/MagneticButton";
 import { motionTokens, fadeUpVariants } from "@/lib/motion";
-import { useSettings } from "@/components/ui/SettingsContext";
+import { homeContentDefaults, type HomeContent } from "@/content/defaults/home";
+import type { GlobalContent } from "@/content/defaults/global";
 
 const formFieldVariants = {
   hidden: { opacity: 0, y: 20, filter: `blur(${motionTokens.blur.sm})` },
@@ -45,11 +45,16 @@ const iconPopVariants = {
   exit: { opacity: 0, scale: 0.8, transition: { duration: 0.2 } },
 };
 
-export default function ContactSection() {
-  const settings = useSettings();
-  const email = settings.contact_email || siteConfig.contact.email;
-  const phone = settings.contact_phone || siteConfig.contact.phone;
-  const location = settings.contact_location || siteConfig.contact.location;
+export default function ContactSection({
+  content = homeContentDefaults.contact,
+  contact,
+}: {
+  content?: HomeContent["contact"];
+  contact: GlobalContent["contact"];
+}) {
+  const email = contact.email;
+  const phone = contact.phone;
+  const location = contact.address;
 
   const [formData, setFormData] = useState({
     name: "",
@@ -115,8 +120,8 @@ export default function ContactSection() {
     <section id="contact" className="py-24 relative overflow-hidden bg-[#030014]/50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         <AnimatedSectionHeading
-          title="Liên hệ / Contact"
-          subtitle="Hãy gửi tin nhắn để trao đổi chi tiết về ý tưởng dự án của bạn."
+          title={content.title}
+          subtitle={content.subtitle}
         />
 
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
@@ -125,7 +130,7 @@ export default function ContactSection() {
             <GlassCard className="p-8 border-white/5 bg-[#0d0b21]/45 space-y-6">
               <h3 className="text-xl font-bold text-white">Thông tin liên hệ</h3>
               <p className="text-gray-400 text-sm leading-relaxed">
-                Bạn có thể liên hệ trực tiếp với Cường qua email, số điện thoại Zalo hoặc điền form thông tin bên cạnh. Cường sẽ phản hồi bạn trong vòng 24 giờ làm việc.
+                {content.intro}
               </p>
 
               <motion.div
@@ -192,7 +197,7 @@ export default function ContactSection() {
                     >
                       <CheckCircle2 className="w-16 h-16 text-green-400" />
                     </motion.div>
-                    <h4 className="text-xl font-bold text-white">Gửi tin nhắn thành công!</h4>
+                    <h4 className="text-xl font-bold text-white">{content.successMessage}</h4>
                     <p className="text-sm text-gray-400 max-w-md">
                       Cảm ơn bạn đã liên hệ. Cường đã nhận được thông tin và sẽ sớm phản hồi lại bạn.
                     </p>
@@ -217,26 +222,26 @@ export default function ContactSection() {
                   >
                     <motion.div variants={formFieldVariants} className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <div className="space-y-1">
-                        <label className="text-xs text-gray-400 block font-medium">Họ và tên *</label>
+                        <label className="text-xs text-gray-400 block font-medium">{content.labels.name} *</label>
                         <input
                           type="text"
                           name="name"
                           value={formData.name}
                           onChange={handleInputChange}
                           required
-                          placeholder="Nguyễn Văn A"
+                          placeholder={content.placeholders.name}
                           className="glass-input w-full px-4 py-2.5 text-sm focus:outline-none"
                         />
                       </div>
                       <div className="space-y-1">
-                        <label className="text-xs text-gray-400 block font-medium">Email liên hệ *</label>
+                        <label className="text-xs text-gray-400 block font-medium">{content.labels.email} *</label>
                         <input
                           type="email"
                           name="email"
                           value={formData.email}
                           onChange={handleInputChange}
                           required
-                          placeholder="client@example.com"
+                          placeholder={content.placeholders.email}
                           className="glass-input w-full px-4 py-2.5 text-sm focus:outline-none"
                         />
                       </div>
@@ -244,39 +249,39 @@ export default function ContactSection() {
 
                     <motion.div variants={formFieldVariants} className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <div className="space-y-1">
-                        <label className="text-xs text-gray-400 block font-medium">Số điện thoại / Zalo</label>
+                        <label className="text-xs text-gray-400 block font-medium">{content.labels.phone}</label>
                         <input
                           type="tel"
                           name="phone"
                           value={formData.phone}
                           onChange={handleInputChange}
-                          placeholder="0912345678"
+                          placeholder={content.placeholders.phone}
                           className="glass-input w-full px-4 py-2.5 text-sm focus:outline-none"
                         />
                       </div>
                       <div className="space-y-1">
-                        <label className="text-xs text-gray-400 block font-medium">Chủ đề cần tư vấn *</label>
+                        <label className="text-xs text-gray-400 block font-medium">{content.labels.subject} *</label>
                         <input
                           type="text"
                           name="subject"
                           value={formData.subject}
                           onChange={handleInputChange}
                           required
-                          placeholder="Thiết kế website e-commerce..."
+                          placeholder={content.placeholders.subject}
                           className="glass-input w-full px-4 py-2.5 text-sm focus:outline-none"
                         />
                       </div>
                     </motion.div>
 
                     <motion.div variants={formFieldVariants} className="space-y-1">
-                      <label className="text-xs text-gray-400 block font-medium">Nội dung chi tiết *</label>
+                      <label className="text-xs text-gray-400 block font-medium">{content.labels.message} *</label>
                       <textarea
                         name="message"
                         value={formData.message}
                         onChange={handleInputChange}
                         required
                         rows={5}
-                        placeholder="Mô tả ngắn gọn về ý tưởng, quy mô hoặc câu hỏi của bạn..."
+                        placeholder={content.placeholders.message}
                         className="glass-input w-full px-4 py-2.5 text-sm focus:outline-none resize-none"
                       />
                     </motion.div>
@@ -288,7 +293,7 @@ export default function ContactSection() {
                         className="flex items-center space-x-2 text-red-400 bg-red-500/10 border border-red-500/20 p-3 rounded-xl text-xs font-semibold"
                       >
                         <AlertTriangle className="w-4 h-4 shrink-0" />
-                        <span>Có lỗi xảy ra khi gửi tin nhắn. Bạn vui lòng thử lại hoặc nhắn trực tiếp qua Zalo/Email.</span>
+                        <span>{content.errorMessage}</span>
                       </motion.div>
                     )}
 
@@ -300,11 +305,11 @@ export default function ContactSection() {
                           className="w-full flex items-center justify-center gap-2 pt-3"
                         >
                           {isSubmitting ? (
-                            <span>Đang gửi tin nhắn...</span>
+                            <span>{content.loadingLabel}</span>
                           ) : (
                             <>
                               <Send className="w-4 h-4" />
-                              <span>Gửi tin nhắn / Send message</span>
+                              <span>{content.submitLabel}</span>
                             </>
                           )}
                         </Button>

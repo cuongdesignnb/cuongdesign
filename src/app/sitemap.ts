@@ -1,7 +1,6 @@
 import { MetadataRoute } from "next";
 import { prisma } from "@/lib/db";
 import { siteConfig } from "@/data/site";
-import { servicesDetail } from "@/data/services-detail";
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const baseUrl = siteConfig?.url || "https://cuongdesign.com";
@@ -20,9 +19,6 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     "/bai-viet",
   ];
 
-  // Service landing pages
-  const servicePaths = servicesDetail.map((s) => `/dich-vu/${s.slug}`);
-
   const staticRoutes = staticPaths.map((path) => ({
     url: `${baseUrl}${path}`,
     lastModified: new Date(),
@@ -31,6 +27,10 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   }));
 
   try {
+    const services = await prisma.serviceContent.findMany({
+      where: { isPublished: true },
+      select: { slug: true, updatedAt: true },
+    });
     // Dynamic policy pages
     const dbPages = await prisma.page.findMany({
       where: { isPublished: true },
@@ -93,9 +93,9 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       priority: 0.8,
     }));
 
-    const serviceRoutes = servicePaths.map((path) => ({
-      url: `${baseUrl}${path}`,
-      lastModified: new Date(),
+    const serviceRoutes = services.map((service) => ({
+      url: `${baseUrl}/dich-vu/${service.slug}`,
+      lastModified: service.updatedAt,
       changeFrequency: "monthly" as const,
       priority: 0.8,
     }));

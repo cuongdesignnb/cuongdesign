@@ -40,6 +40,11 @@ enum Role {
   CUSTOMER
 }
 
+enum ContentStatus {
+  DRAFT
+  PUBLISHED
+}
+
 enum ChatSessionStatus {
   AI_ACTIVE       // AI is automatically responding
   HUMAN_ACTIVE    // Admin has taken over manually
@@ -62,19 +67,88 @@ model User {
   role          Role      @default(CUSTOMER)
   orders        Order[]   // Customer orders
   reviews       Review[]  // Customer reviews
+  updatedContentDocuments ContentDocument[] @relation("ContentDocumentUpdatedBy")
+  contentRevisions        ContentRevision[] @relation("ContentRevisionCreatedBy")
+  mediaUploads            Media[]           @relation("MediaCreatedBy")
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
 }
 
 // Reusable media uploads library
 model Media {
-  id        String   @id @default(cuid())
-  name      String
-  url       String   // File path (WebP converted image)
-  size      Int      // File size in bytes
-  width     Int?
-  height    Int?
-  createdAt DateTime @default(now())
+  id          String   @id @default(cuid())
+  name        String
+  url         String   @unique
+  size        Int
+  width       Int?
+  height      Int?
+  alt         String?
+  caption     String?
+  mimeType    String?
+  storageKey  String?
+  createdById String?
+  createdBy   User?    @relation("MediaCreatedBy", fields: [createdById], references: [id])
+  services    ServiceContent[]
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  deletedAt   DateTime?
+}
+
+model ContentDocument {
+  id            String            @id @default(cuid())
+  key           String            @unique
+  name          String
+  route         String?
+  schemaVersion Int               @default(1)
+  draftData     Json
+  publishedData Json?
+  status        ContentStatus     @default(DRAFT)
+  publishedAt   DateTime?
+  updatedById   String?
+  updatedBy     User?             @relation("ContentDocumentUpdatedBy", fields: [updatedById], references: [id])
+  revisions     ContentRevision[]
+  createdAt     DateTime          @default(now())
+  updatedAt     DateTime          @updatedAt
+}
+
+model ContentRevision {
+  id          String          @id @default(cuid())
+  documentId  String
+  document    ContentDocument @relation(fields: [documentId], references: [id], onDelete: Cascade)
+  version     Int
+  data        Json
+  note        String?
+  createdById String?
+  createdBy   User?           @relation("ContentRevisionCreatedBy", fields: [createdById], references: [id])
+  createdAt   DateTime        @default(now())
+
+  @@unique([documentId, version])
+}
+
+model ServiceContent {
+  id               String   @id @default(cuid())
+  slug             String   @unique
+  title            String
+  subtitle         String?
+  shortDescription String   @db.Text
+  heroContent      String   @db.Text
+  iconKey          String?
+  colorKey         String?
+  coverMediaId     String?
+  coverMedia       Media?   @relation(fields: [coverMediaId], references: [id])
+  priceText        String?
+  durationText     String?
+  features         Json
+  process          Json
+  faqs             Json
+  ctaText          String?
+  seoTitle         String?
+  seoDescription   String?
+  seoKeywords      String[]
+  isPublished      Boolean  @default(false)
+  order            Int      @default(0)
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
 }
 
 // General and page-specific configurations (Home, About, SMTP, colors, AI chatbot keys)

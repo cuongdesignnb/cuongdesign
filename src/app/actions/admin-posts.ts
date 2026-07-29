@@ -2,6 +2,15 @@
 
 import { prisma } from "@/lib/db";
 import type { PostStatus } from "@prisma/client";
+import { requireAdmin } from "@/lib/auth/require-admin";
+import { sanitizeRichHtml } from "@/lib/content/sanitize";
+import { revalidatePath } from "next/cache";
+
+function revalidatePost(slug?: string) {
+  revalidatePath("/admin/blog/posts");
+  revalidatePath("/bai-viet");
+  if (slug) revalidatePath(`/bai-viet/${slug}`);
+}
 
 export async function createPost(data: {
   title: string;
@@ -16,12 +25,13 @@ export async function createPost(data: {
   seoKeywords?: string;
 }) {
   try {
+    await requireAdmin();
     const post = await prisma.post.create({
       data: {
         title: data.title,
         slug: data.slug,
         excerpt: data.excerpt || null,
-        content: data.content || "",
+        content: sanitizeRichHtml(data.content || ""),
         coverImage: data.coverImage || null,
         status: data.status || "DRAFT",
         categoryId: data.categoryId || null,
@@ -33,6 +43,7 @@ export async function createPost(data: {
           : [],
       },
     });
+    revalidatePost(post.slug);
     return { success: true, data: post };
   } catch (error: any) {
     console.error("Error creating post:", error);
@@ -42,6 +53,7 @@ export async function createPost(data: {
 
 export async function getPosts(filter?: { status?: string }) {
   try {
+    await requireAdmin();
     const where = filter?.status ? { status: filter.status as PostStatus } : {};
     const posts = await prisma.post.findMany({
       where,
@@ -70,6 +82,7 @@ export async function updatePost(
   }
 ) {
   try {
+    await requireAdmin();
     // Build update data, converting seoKeywords string to array
     const updateData: Record<string, unknown> = { ...data };
     if (data.seoKeywords !== undefined) {
@@ -78,10 +91,14 @@ export async function updatePost(
         .map((k) => k.trim())
         .filter(Boolean);
     }
+    if (data.content !== undefined) {
+      updateData.content = sanitizeRichHtml(data.content);
+    }
     const post = await prisma.post.update({
       where: { id },
       data: updateData,
     });
+    revalidatePost(post.slug);
     return { success: true, data: post };
   } catch (error: any) {
     console.error("Error updating post:", error);
@@ -91,7 +108,9 @@ export async function updatePost(
 
 export async function deletePost(id: string) {
   try {
-    await prisma.post.delete({ where: { id } });
+    await requireAdmin();
+    const post = await prisma.post.delete({ where: { id } });
+    revalidatePost(post.slug);
     return { success: true };
   } catch (error: any) {
     console.error("Error deleting post:", error);
@@ -101,6 +120,7 @@ export async function deletePost(id: string) {
 
 export async function togglePostStatus(id: string) {
   try {
+    await requireAdmin();
     const post = await prisma.post.findUnique({ where: { id } });
     if (!post) {
       return { success: false, error: "Post not found" };
@@ -113,6 +133,7 @@ export async function togglePostStatus(id: string) {
         publishedAt: newStatus === "PUBLISHED" ? new Date() : null,
       },
     });
+    revalidatePost(updated.slug);
     return { success: true, data: updated };
   } catch (error: any) {
     console.error("Error toggling post status:", error);

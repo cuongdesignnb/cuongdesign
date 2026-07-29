@@ -2,6 +2,8 @@
 
 import { prisma } from "@/lib/db";
 import { revalidatePath } from "next/cache";
+import { requireAdmin } from "@/lib/auth/require-admin";
+import { sanitizeRichHtml } from "@/lib/content/sanitize";
 
 export async function upsertProject(data: {
   id?: string;
@@ -19,13 +21,14 @@ export async function upsertProject(data: {
   order?: number;
 }) {
   try {
+    await requireAdmin();
     const project = await prisma.project.upsert({
       where: { id: data.id || "new-project" },
       update: {
         title: data.title,
         slug: data.slug,
         description: data.description,
-        content: data.content,
+        content: sanitizeRichHtml(data.content),
         coverImage: data.coverImage,
         images: data.images,
         category: data.category,
@@ -39,7 +42,7 @@ export async function upsertProject(data: {
         title: data.title,
         slug: data.slug,
         description: data.description,
-        content: data.content,
+        content: sanitizeRichHtml(data.content),
         coverImage: data.coverImage,
         images: data.images,
         category: data.category,
@@ -62,6 +65,7 @@ export async function upsertProject(data: {
 
 export async function deleteProject(id: string) {
   try {
+    await requireAdmin();
     await prisma.project.delete({
       where: { id },
     });

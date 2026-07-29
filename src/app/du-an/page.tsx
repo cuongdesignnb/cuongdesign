@@ -6,17 +6,22 @@ import FeaturedProjectsSection from "@/components/sections/FeaturedProjectsSecti
 import { prisma } from "@/lib/db";
 import { createMetadata, JsonLd } from "@/lib/seo";
 import { siteConfig } from "@/data/site";
+import { getPublishedContent } from "@/lib/content/get-content";
 
 export const dynamic = "force-dynamic";
 
-export const metadata = createMetadata({
-  title: "Dự án thực tế",
-  description: "Chiêm ngưỡng bộ sưu tập các dự án thiết kế UI/UX Figma chuyên nghiệp, lập trình Web App Next.js/React chuẩn SEO tối ưu tốc độ của Cường Design.",
-  path: "/du-an",
-  keywords: ["Dự án Cường Design", "Hồ sơ dự án", "Next.js Web App", "Thiết kế Figma", "Portfolio Cường Design"],
-});
+export async function generateMetadata() {
+  const content = await getPublishedContent("projects");
+  return createMetadata({
+    title: content.metadata.title,
+    description: content.metadata.description,
+    path: "/du-an",
+    keywords: content.metadata.keywords.split(",").map((item) => item.trim()).filter(Boolean),
+  });
+}
 
 export default async function ProjectsListPage() {
+  const content = await getPublishedContent("projects");
   // Fetch active projects from database
   let dbProjects: any[] = [];
   try {
@@ -65,12 +70,12 @@ export default async function ProjectsListPage() {
 
         <div className="max-w-7xl mx-auto relative z-10 space-y-6">
           <div className="px-4 sm:px-6 lg:px-8">
-            <Breadcrumbs items={[{ label: "Dự án", href: "/du-an" }]} />
+            <Breadcrumbs items={[{ label: content.hero.breadcrumb, href: "/du-an" }]} />
           </div>
           
           {/* Reuse the interactive grid, adjusting vertical spacing */}
           <div className="-mt-12">
-            <FeaturedProjectsSection initialProjects={dbProjects} />
+          <FeaturedProjectsSection initialProjects={dbProjects} content={{ title: content.hero.title, subtitle: content.hero.intro.replace(/<[^>]+>/g, ""), displayLimit: 100, ctaLabel: content.cta.label, ctaUrl: content.cta.url, emptyState: content.emptyState }} />
           </div>
         </div>
       </main>

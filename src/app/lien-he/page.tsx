@@ -3,17 +3,25 @@ import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
 import Breadcrumbs from "@/components/ui/Breadcrumbs";
 import ContactPageClient from "@/components/sections/ContactPageClient";
-import { faqs } from "@/data/faqs";
 import { createMetadata, JsonLd } from "@/lib/seo";
+import { getPublishedContent } from "@/lib/content/get-content";
 
-export const metadata = createMetadata({
-  title: "Liên hệ & Yêu cầu báo giá",
-  description: "Liên hệ trực tiếp với Cường Design để thảo luận về ý tưởng dự án thiết kế UI/UX Figma hoặc lập trình website Next.js. Xem giải đáp chi tiết tại mục FAQ.",
-  path: "/lien-he",
-  keywords: ["Liên hệ Cường Design", "Thông tin liên lạc", "Zalo Cường Design", "FAQ thiết kế website"],
-});
+export async function generateMetadata() {
+  const content = await getPublishedContent("contact");
+  return createMetadata({
+    title: content.metadata.title,
+    description: content.metadata.description,
+    path: "/lien-he",
+    keywords: content.metadata.keywords.split(",").map((item) => item.trim()).filter(Boolean),
+  });
+}
 
-export default function ContactListPage() {
+export default async function ContactListPage() {
+  const [content, global] = await Promise.all([
+    getPublishedContent("contact"),
+    getPublishedContent("global"),
+  ]);
+  const faqs = content.faqs as { question: string; answer: string }[];
   // Schema.org FAQPage metadata
   const faqSchema = {
     "@context": "https://schema.org",
@@ -44,21 +52,26 @@ export default function ContactListPage() {
         <div className="absolute bottom-1/4 right-1/4 translate-x-1/2 translate-y-1/2 w-96 h-96 bg-purple-500/10 rounded-full blur-[120px] pointer-events-none" />
 
         <div className="max-w-6xl mx-auto relative z-10 space-y-10">
-          <Breadcrumbs items={[{ label: "Liên hệ & FAQ", href: "/lien-he" }]} />
+          <Breadcrumbs items={[{ label: content.hero.title, href: "/lien-he" }]} />
 
           {/* Heading */}
           <div className="text-left space-y-4 max-w-3xl">
             <span className="text-[10px] text-pink-500 font-mono font-bold tracking-widest uppercase block">Get In Touch</span>
             <h1 className="text-3xl md:text-5xl font-extrabold text-white tracking-tight leading-none">
-              Liên hệ hợp tác & <br className="hidden md:inline" />
-              Tư vấn dịch vụ
+              {content.hero.title}
             </h1>
             <p className="text-gray-400 text-sm md:text-base leading-relaxed">
-              Bạn có câu hỏi, ý kiến đóng góp hoặc dự án cần thiết kế, lập trình? Đừng ngần ngại gửi tin nhắn cho tôi hoặc liên lạc trực tiếp qua các cổng thông tin Zalo/Email.
+              {content.hero.intro}
             </p>
           </div>
 
-          <ContactPageClient />
+          <ContactPageClient
+            contact={{
+              ...content,
+              faqs,
+            }}
+            globalContact={global.contact}
+          />
         </div>
       </main>
 

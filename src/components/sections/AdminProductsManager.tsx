@@ -4,7 +4,9 @@ import { useState } from "react";
 import { upsertProduct, deleteProduct } from "@/app/actions/products";
 import GlassCard from "@/components/ui/GlassCard";
 import Button from "@/components/ui/Button";
-import { Plus, Edit2, Trash2, X, Image as ImageIcon, Check } from "lucide-react";
+import MediaField from "@/components/admin/content/MediaField";
+import MediaGalleryField from "@/components/admin/content/MediaGalleryField";
+import { Plus, Edit2, Trash2, X } from "lucide-react";
 import { formatVND, slugify } from "@/lib/utils";
 
 interface AdminProductsManagerProps {
@@ -14,7 +16,6 @@ interface AdminProductsManagerProps {
 
 export default function AdminProductsManager({
   initialProducts,
-  mediaLibrary,
 }: AdminProductsManagerProps) {
   const [products, setProducts] = useState(initialProducts);
   const [editingProduct, setEditingProduct] = useState<any | null>(null);
@@ -40,9 +41,6 @@ export default function AdminProductsManager({
     isFeatured: false,
     order: 0,
   });
-
-  // Media selection modal state
-  const [mediaTarget, setMediaTarget] = useState<"cover" | null>(null);
 
   const openCreateModal = () => {
     setForm({
@@ -105,13 +103,6 @@ export default function AdminProductsManager({
       }
       return updated;
     });
-  };
-
-  const selectMedia = (url: string) => {
-    if (mediaTarget === "cover") {
-      setForm((prev) => ({ ...prev, coverImage: url }));
-    }
-    setMediaTarget(null);
   };
 
   const handleDelete = async (id: string) => {
@@ -278,35 +269,11 @@ export default function AdminProductsManager({
               {/* Image Selectors (Glow cover) */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 {/* Cover Image Selector */}
-                <div className="space-y-2">
-                  <label className="text-xs text-gray-400 block font-medium">Ảnh đại diện (Cover Image) *</label>
-                  <div className="flex gap-2">
-                    <input
-                      type="text"
-                      name="coverImage"
-                      required
-                      value={form.coverImage}
-                      onChange={handleInputChange}
-                      placeholder="/uploads/product.webp"
-                      className="glass-input px-4 py-2 text-sm grow focus:outline-none"
-                    />
-                    <Button
-                      type="button"
-                      variant="secondary"
-                      size="sm"
-                      onClick={() => setMediaTarget("cover")}
-                      className="flex items-center gap-1"
-                    >
-                      <ImageIcon className="w-4 h-4" />
-                      <span>Chọn ảnh</span>
-                    </Button>
-                  </div>
-                  {form.coverImage && (
-                    <div className="w-20 h-12 relative rounded border border-white/10 overflow-hidden bg-black/20">
-                      <img src={form.coverImage} alt="Cover preview" className="object-cover w-full h-full" />
-                    </div>
-                  )}
-                </div>
+                <MediaField
+                  label="Ảnh đại diện (Cover Image) *"
+                  value={form.coverImage}
+                  onChange={(coverImage) => setForm((prev) => ({ ...prev, coverImage }))}
+                />
 
                 {/* Tech Stack Chips input */}
                 <div className="space-y-1">
@@ -322,6 +289,12 @@ export default function AdminProductsManager({
                   />
                 </div>
               </div>
+
+              <MediaGalleryField
+                label="Gallery sản phẩm"
+                value={form.images}
+                onChange={(images) => setForm((prev) => ({ ...prev, images }))}
+              />
 
               {/* Pricing, type and downloads */}
               <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
@@ -464,45 +437,6 @@ export default function AdminProductsManager({
         </div>
       )}
 
-      {/* Internal Media Library Picker Modal */}
-      {mediaTarget && (
-        <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/90 backdrop-blur-sm">
-          <div className="relative w-full max-w-3xl overflow-hidden glass-card border border-white/10 p-6 flex flex-col space-y-4 bg-[#0c0a21]/95 max-h-[80vh]">
-            <button
-              onClick={() => setMediaTarget(null)}
-              className="absolute top-4 right-4 text-gray-400 hover:text-white p-2 hover:bg-white/5 rounded-lg cursor-pointer"
-            >
-              <X className="w-5 h-5" />
-            </button>
-
-            <div>
-              <h3 className="text-lg font-bold text-white">Thư viện hình ảnh</h3>
-              <p className="text-xs text-gray-500 mt-0.5">Chọn một ảnh từ thư viện để sử dụng cho sản phẩm.</p>
-            </div>
-
-            <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-3 overflow-y-auto grow p-1">
-              {mediaLibrary.length > 0 ? (
-                mediaLibrary.map((media) => (
-                  <div
-                    key={media.id}
-                    onClick={() => selectMedia(media.url)}
-                    className="relative aspect-video rounded-xl overflow-hidden border border-white/5 bg-black/20 hover:border-pink-500/50 hover:scale-105 transition-all duration-200 cursor-pointer group"
-                  >
-                    <img src={media.url} alt={media.name} className="object-cover w-full h-full" />
-                    <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity">
-                      <Check className="w-6 h-6 text-pink-400" />
-                    </div>
-                  </div>
-                ))
-              ) : (
-                <div className="col-span-full py-12 text-center text-gray-500 text-sm">
-                  Thư viện ảnh trống. Bạn có thể tải ảnh lên ở mục Thư viện Media trước.
-                </div>
-              )}
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 }

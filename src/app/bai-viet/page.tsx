@@ -8,17 +8,22 @@ import { prisma } from "@/lib/db";
 import { BookOpen, Calendar, ArrowRight, Clock } from "lucide-react";
 import Link from "next/link";
 import { createMetadata, JsonLd } from "@/lib/seo";
+import { getPublishedContent } from "@/lib/content/get-content";
 
 export const dynamic = "force-dynamic";
 
-export const metadata = createMetadata({
-  title: "Blog — Bài viết & Chia sẻ kiến thức",
-  description: "Đọc các bài viết chia sẻ kinh nghiệm lập trình Next.js, React, Node.js, kiến thức thiết kế giao diện UI/UX Figma và tin tức xu hướng công nghệ mới từ Cường Design.",
-  path: "/bai-viet",
-  keywords: ["Blog lập trình", "Hướng dẫn Next.js", "Kinh nghiệm thiết kế UI/UX", "Tin tức công nghệ", "Cường Design Blog"],
-});
+export async function generateMetadata() {
+  const content = await getPublishedContent("blog");
+  return createMetadata({
+    title: content.metadata.title,
+    description: content.metadata.description,
+    path: "/bai-viet",
+    keywords: content.metadata.keywords.split(",").map((item) => item.trim()).filter(Boolean),
+  });
+}
 
 export default async function BlogListPage() {
+  const content = await getPublishedContent("blog");
   // Fetch categories and published posts
   const [categories, dbPosts] = await Promise.all([
     prisma.category.findMany({ orderBy: { order: "asc" } }),
@@ -84,17 +89,16 @@ export default async function BlogListPage() {
         <div className="absolute bottom-1/4 right-1/4 translate-x-1/2 translate-y-1/2 w-96 h-96 bg-purple-500/10 rounded-full blur-[120px] pointer-events-none" />
 
         <div className="max-w-6xl mx-auto relative z-10 space-y-10">
-          <Breadcrumbs items={[{ label: "Bài viết & Blog", href: "/bai-viet" }]} />
+          <Breadcrumbs items={[{ label: content.hero.breadcrumb, href: "/bai-viet" }]} />
 
           {/* Heading */}
           <div className="text-left space-y-4 max-w-3xl">
             <span className="text-[10px] text-pink-500 font-mono font-bold tracking-widest uppercase block">Tech Journal & Insights</span>
             <h1 className="text-3xl md:text-5xl font-extrabold text-white tracking-tight leading-none">
-              Bài viết & Chia sẻ <br className="hidden md:inline" />
-              <GradientText>Kiến thức công nghệ</GradientText>
+              <GradientText>{content.hero.title}</GradientText>
             </h1>
             <p className="text-gray-400 text-sm md:text-base leading-relaxed">
-              Các bài viết hướng dẫn lập trình, thiết kế UI/UX thực tiễn, kinh nghiệm tối ưu hiệu năng ứng dụng web và chia sẻ các xu hướng phát triển công nghệ mới nhất.
+              {content.hero.intro}
             </p>
           </div>
 
@@ -106,7 +110,7 @@ export default async function BlogListPage() {
                 href="/bai-viet"
                 className="inline-flex items-center gap-1.5 px-4 py-2 rounded-full text-xs font-semibold transition-all duration-200 bg-pink-500/15 text-pink-400 border border-pink-500/30 shadow-[0_0_12px_rgba(236,72,153,0.15)]"
               >
-                Tất cả
+                {content.filters.all}
                 <span className="ml-1 text-[10px] bg-pink-500/20 text-pink-300 px-1.5 py-0.5 rounded-full font-mono">
                   {dbPosts.length}
                 </span>

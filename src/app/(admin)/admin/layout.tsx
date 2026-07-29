@@ -17,6 +17,8 @@ import {
   MessageSquarePlus,
   Users,
   FolderOpen,
+  PanelsTopLeft,
+  Images,
 } from "lucide-react";
 import Link from "next/link";
 import GradientText from "@/components/ui/GradientText";
@@ -41,6 +43,8 @@ export default async function AdminLayout({ children }: AdminLayoutProps) {
 
   const navItems = [
     { label: "Dashboard", href: "/admin", icon: LayoutDashboard },
+    { label: "Content Hub", href: "/admin/content", icon: PanelsTopLeft },
+    { label: "Media Library", href: "/admin/media", icon: Images },
     { label: "Quản lý Dự án", href: "/admin/projects", icon: FolderKanban },
     { label: "Quản lý Sản phẩm", href: "/admin/products", icon: ShoppingBag },
     { label: "Đơn hàng (SePay)", href: "/admin/orders", icon: CreditCard },

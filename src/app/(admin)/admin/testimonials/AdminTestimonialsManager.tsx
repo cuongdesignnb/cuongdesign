@@ -3,6 +3,7 @@
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useToast } from "@/components/ui/Toast";
+import MediaField from "@/components/admin/content/MediaField";
 import {
   toggleTestimonialPublish,
   updateTestimonial,
@@ -385,23 +386,13 @@ export default function AdminTestimonialsManager({
                     className="w-full px-3 py-2 text-sm bg-black/40 border border-white/10 rounded-lg text-white focus:outline-none focus:border-pink-500/50"
                   />
                 </div>
-                <div className="space-y-1.5">
-                  <label className="text-xs text-gray-400 font-semibold uppercase tracking-wider block">
-                    Avatar URL
-                  </label>
-                  <input
-                    type="text"
-                    value={editForm.avatar || ""}
-                    onChange={(e) =>
-                      setEditForm((prev) => ({
-                        ...prev,
-                        avatar: e.target.value,
-                      }))
-                    }
-                    placeholder="https://..."
-                    className="w-full px-3 py-2 text-sm bg-black/40 border border-white/10 rounded-lg text-white focus:outline-none focus:border-pink-500/50"
-                  />
-                </div>
+                <MediaField
+                  label="Avatar"
+                  value={editForm.avatar || ""}
+                  onChange={(avatar) =>
+                    setEditForm((prev) => ({ ...prev, avatar }))
+                  }
+                />
               </div>
 
               <div className="grid grid-cols-2 gap-4">

@@ -1,9 +1,11 @@
 "use server";
 
 import { prisma } from "@/lib/db";
+import { requireAdmin } from "@/lib/auth/require-admin";
 
 export async function getCategories() {
   try {
+    await requireAdmin();
     const categories = await prisma.category.findMany({
       orderBy: { order: "asc" },
       include: {
@@ -27,6 +29,7 @@ export async function upsertCategory(data: {
   order?: number;
 }) {
   try {
+    await requireAdmin();
     if (data.id) {
       // Update existing
       const category = await prisma.category.update({
@@ -63,6 +66,7 @@ export async function upsertCategory(data: {
 
 export async function deleteCategory(id: string) {
   try {
+    await requireAdmin();
     const category = await prisma.category.findUnique({
       where: { id },
       include: { _count: { select: { posts: true } } },
@@ -89,6 +93,7 @@ export async function deleteCategory(id: string) {
 
 export async function seedDefaultCategories() {
   try {
+    await requireAdmin();
     const defaults = [
       { name: "Thiết kế UI/UX", slug: "thiet-ke-ui-ux", color: "#ec4899", order: 0 },
       { name: "Lập trình Web", slug: "lap-trinh-web", color: "#8b5cf6", order: 1 },

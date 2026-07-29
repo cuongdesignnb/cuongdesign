@@ -1,6 +1,7 @@
 import React from "react";
 import { notFound } from "next/navigation";
 import { prisma } from "@/lib/db";
+import { sanitizeRichHtml } from "@/lib/content/sanitize";
 import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
 import Breadcrumbs from "@/components/ui/Breadcrumbs";
@@ -151,7 +152,7 @@ export default async function ProjectDetailPage({ params }: ProjectPageProps) {
                 {/* Parse HTML description */}
                 <article
                   className="prose prose-invert prose-pink max-w-none text-gray-300 leading-relaxed text-xs sm:text-sm md:text-base space-y-6"
-                  dangerouslySetInnerHTML={{ __html: project.content }}
+                  dangerouslySetInnerHTML={{ __html: sanitizeRichHtml(project.content) }}
                 />
               </GlassCard>
             </div>

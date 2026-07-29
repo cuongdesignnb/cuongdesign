@@ -3,7 +3,8 @@
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
 import { createPost, updatePost, deletePost, togglePostStatus } from "@/app/actions/admin-posts";
-import RichTextEditor from "@/components/admin/RichTextEditor";
+import ContentEditor from "@/components/admin/content/ContentEditor";
+import MediaField from "@/components/admin/content/MediaField";
 import { useToast } from "@/components/ui/Toast";
 import { slugify } from "@/lib/utils";
 import {
@@ -19,11 +20,8 @@ import {
   PenLine,
   Search,
   Plus,
-  Image,
   Wand2,
   Loader2,
-  Check,
-  Upload,
 } from "lucide-react";
 
 interface CategoryOption {
@@ -68,7 +66,7 @@ interface AdminPostsManagerProps {
 
 type FilterTab = "ALL" | "PUBLISHED" | "DRAFT" | "SCHEDULED";
 
-export default function AdminPostsManager({ initialPosts, categories, mediaLibrary }: AdminPostsManagerProps) {
+export default function AdminPostsManager({ initialPosts, categories }: AdminPostsManagerProps) {
   const router = useRouter();
   const toast = useToast();
   const [filter, setFilter] = useState<FilterTab>("ALL");
@@ -76,9 +74,7 @@ export default function AdminPostsManager({ initialPosts, categories, mediaLibra
   const [isCreateMode, setIsCreateMode] = useState(false);
   const [formData, setFormData] = useState<Partial<PostItem>>({});
   const [saving, setSaving] = useState(false);
-  const [mediaTarget, setMediaTarget] = useState<"cover" | null>(null);
   const [isGenerating, setIsGenerating] = useState(false);
-  const [uploadingImage, setUploadingImage] = useState(false);
 
   const filteredPosts =
     filter === "ALL"
@@ -205,28 +201,6 @@ export default function AdminPostsManager({ initialPosts, categories, mediaLibra
       }
     } catch (err: any) {
       toast.error("Lỗi", err.message);
-    }
-  };
-
-  const handleUploadImage = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    setUploadingImage(true);
-    try {
-      const formDataUpload = new FormData();
-      formDataUpload.append('file', file);
-      const res = await fetch('/api/admin/media/upload', { method: 'POST', body: formDataUpload });
-      const data = await res.json();
-      if (res.ok) {
-        setFormData(prev => ({ ...prev, coverImage: data.url }));
-        toast.success('Thành công', 'Đã upload hình ảnh.');
-      } else {
-        toast.error('Lỗi', data.error);
-      }
-    } catch (err: any) {
-      toast.error('Lỗi', err.message);
-    } finally {
-      setUploadingImage(false);
     }
   };
 
@@ -530,8 +504,8 @@ export default function AdminPostsManager({ initialPosts, categories, mediaLibra
                     )}
                   </button>
                 </div>
-                <RichTextEditor
-                  content={formData.content || ""}
+                <ContentEditor
+                  value={formData.content || ""}
                   onChange={(html) => setFormData(prev => ({ ...prev, content: html }))}
                   placeholder="Bắt đầu viết nội dung bài viết..."
                 />
@@ -539,42 +513,11 @@ export default function AdminPostsManager({ initialPosts, categories, mediaLibra
 
               {/* Cover Image */}
               <div className="space-y-2">
-                <label className="text-xs text-gray-400 font-semibold uppercase tracking-wider block">
-                  Ảnh bìa
-                </label>
-                {formData.coverImage ? (
-                  <div className="relative aspect-video w-full rounded-xl overflow-hidden border border-white/10 bg-white/5">
-                    <img src={formData.coverImage} alt="Cover" className="w-full h-full object-cover" />
-                    <button
-                      type="button"
-                      onClick={() => setFormData(prev => ({ ...prev, coverImage: '' }))}
-                      className="absolute top-2 right-2 p-1.5 bg-black/60 rounded-lg text-white hover:bg-red-500/80 transition cursor-pointer"
-                    >
-                      <X className="w-4 h-4" />
-                    </button>
-                  </div>
-                ) : (
-                  <div className="aspect-video w-full rounded-xl border-2 border-dashed border-white/10 bg-white/5 flex items-center justify-center">
-                    <span className="text-gray-500 text-sm">Chưa có ảnh bìa</span>
-                  </div>
-                )}
-                <div className="flex gap-2">
-                  <button
-                    type="button"
-                    onClick={() => setMediaTarget('cover')}
-                    className="px-3 py-1.5 rounded-lg text-xs font-semibold bg-white/5 border border-white/10 text-gray-300 hover:bg-white/10 flex items-center gap-1.5 transition cursor-pointer"
-                  >
-                    <Image className="w-3.5 h-3.5" /> Thư viện
-                  </button>
-                  <label className="px-3 py-1.5 rounded-lg text-xs font-semibold bg-white/5 border border-white/10 text-gray-300 hover:bg-white/10 flex items-center gap-1.5 transition cursor-pointer">
-                    {uploadingImage ? (
-                      <><Loader2 className="w-3.5 h-3.5 animate-spin" /> Đang upload...</>
-                    ) : (
-                      <><Upload className="w-3.5 h-3.5" /> Upload</>
-                    )}
-                    <input type="file" accept="image/*" onChange={handleUploadImage} className="hidden" />
-                  </label>
-                </div>
+                <MediaField
+                  label="Ảnh bìa"
+                  value={formData.coverImage || ""}
+                  onChange={(coverImage) => setFormData((prev) => ({ ...prev, coverImage }))}
+                />
               </div>
 
               {/* Category + Status */}
@@ -685,39 +628,6 @@ export default function AdminPostsManager({ initialPosts, categories, mediaLibra
         </div>
       )}
 
-      {/* Media Library Picker Modal */}
-      {mediaTarget && (
-        <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/90 backdrop-blur-sm">
-          <div className="relative w-full max-w-3xl overflow-hidden rounded-2xl border border-white/10 p-6 flex flex-col space-y-4 bg-[#0c0a21]/95 max-h-[80vh]">
-            <div className="flex items-center justify-between">
-              <h3 className="text-lg font-bold text-white">Thư viện hình ảnh</h3>
-              <button onClick={() => setMediaTarget(null)} className="text-gray-400 hover:text-white p-1 cursor-pointer">
-                <X className="w-5 h-5" />
-              </button>
-            </div>
-            <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-3 overflow-y-auto grow p-1">
-              {mediaLibrary.length > 0 ? (
-                mediaLibrary.map((media) => (
-                  <div
-                    key={media.id}
-                    onClick={() => { setFormData(prev => ({ ...prev, coverImage: media.url })); setMediaTarget(null); }}
-                    className="relative aspect-square rounded-lg overflow-hidden border border-white/10 cursor-pointer group hover:border-pink-500/50"
-                  >
-                    <img src={media.url} alt={media.name} className="object-cover w-full h-full" />
-                    <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity">
-                      <Check className="w-6 h-6 text-pink-400" />
-                    </div>
-                  </div>
-                ))
-              ) : (
-                <div className="col-span-full py-12 text-center text-gray-500 text-sm">
-                  Thư viện ảnh trống. Bạn có thể tải ảnh lên ở mục Thư viện Media trước.
-                </div>
-              )}
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 }

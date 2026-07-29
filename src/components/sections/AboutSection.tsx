@@ -8,49 +8,21 @@ import Reveal from "../motion/Reveal";
 import Stagger from "../motion/Stagger";
 import CountUp from "../motion/CountUp";
 import { fadeUpVariants, hoverDepthVariants } from "@/lib/motion";
+import { homeContentDefaults, type HomeContent } from "@/content/defaults/home";
 
-export default function AboutSection() {
-  const stats = [
-    {
-      id: "projects",
-      value: 50,
-      suffix: "+",
-      label: "Projects Completed",
-      desc: "Dự án hoàn thành",
-      icon: Briefcase,
-    },
-    {
-      id: "clients",
-      value: 100,
-      suffix: "+",
-      label: "Happy Clients",
-      desc: "Khách hàng hài lòng",
-      icon: Users,
-    },
-    {
-      id: "experience",
-      value: 3,
-      suffix: "+",
-      label: "Years Experience",
-      desc: "Kinh nghiệm thực tế",
-      icon: Award,
-    },
-    {
-      id: "products",
-      value: 20,
-      suffix: "+",
-      label: "Source Products",
-      desc: "Sản phẩm số đã bán",
-      icon: Code2,
-    },
-  ];
+const statIcons = { Briefcase, Users, Award, Code2 };
 
+export default function AboutSection({
+  content = homeContentDefaults.about,
+}: {
+  content?: HomeContent["about"];
+}) {
   return (
     <section id="about" className="py-24 relative overflow-hidden bg-[#030014]/50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         <AnimatedSectionHeading
-          title="Về tôi / About Me"
-          subtitle="Hành trình sáng tạo giao diện và tối ưu hóa hệ thống mã nguồn kỹ thuật số."
+          title={content.title}
+          subtitle={content.subtitle}
         />
 
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
@@ -66,8 +38,8 @@ export default function AboutSection() {
                     👨‍💻
                   </div>
                   <div>
-                    <h3 className="font-bold text-lg">Cường Design</h3>
-                    <p className="text-xs text-pink-400 font-mono mt-1">Senior Fullstack Developer</p>
+                    <h3 className="font-bold text-lg">{content.name}</h3>
+                    <p className="text-xs text-pink-400 font-mono mt-1">{content.jobTitle}</p>
                   </div>
                 </div>
               </div>
@@ -75,7 +47,7 @@ export default function AboutSection() {
 
             <div className="mt-6 text-center">
               <span className="font-mono text-2xl text-pink-500 italic font-semibold tracking-wider block">
-                Cuong Design
+                {content.signature}
               </span>
               <span className="text-[10px] text-gray-500 uppercase tracking-widest mt-1 block">Chữ ký nhà phát triển</span>
             </div>
@@ -83,21 +55,14 @@ export default function AboutSection() {
 
           {/* Right Side Bio & Stats Grid */}
           <Reveal direction="right" className="lg:col-span-7 space-y-8">
-            <div className="space-y-4 text-gray-300 text-sm md:text-base leading-relaxed">
-              <p>
-                Tôi là một Freelancer Developer đam mê công nghệ và thiết kế giao diện. Với tôn chỉ làm việc lấy **chất lượng, tốc độ và tối ưu chuyển đổi** làm trọng tâm, tôi cam kết đồng hành cùng bạn hiện thực hóa ý tưởng thành sản phẩm phần mềm hoàn thiện.
-              </p>
-              <p>
-                Mọi dự án tôi bàn giao đều tuân thủ nguyên tắc: viết Code sạch, chuẩn SEO tối ưu On-Page, hiệu năng tải trang đạt điểm tối đa trên Lighthouse và hiển thị responsive mượt mà trên mọi kích cỡ màn hình thiết bị di động.
-              </p>
-            </div>
+            <div className="space-y-4 text-gray-300 text-sm md:text-base leading-relaxed" dangerouslySetInnerHTML={{ __html: content.content }} />
 
             {/* Metrics Cards Grid */}
             <Stagger className="grid grid-cols-2 gap-4" stagger={0.12}>
-              {stats.map((stat) => {
-                const Icon = stat.icon;
+              {content.statistics.map((stat) => {
+                const Icon = statIcons[stat.iconKey as keyof typeof statIcons] || Briefcase;
                 return (
-                  <motion.div key={stat.id} variants={fadeUpVariants}>
+                  <motion.div key={stat.label} variants={fadeUpVariants}>
                     <motion.div
                       initial="rest"
                       whileHover="hover"
@@ -112,7 +77,7 @@ export default function AboutSection() {
                             <CountUp to={stat.value} suffix={stat.suffix} />
                           </div>
                           <div className="text-xs font-semibold text-gray-300 mt-0.5">{stat.label}</div>
-                          <div className="text-[10px] text-gray-500 mt-0.5">{stat.desc}</div>
+                          <div className="text-[10px] text-gray-500 mt-0.5">{stat.description}</div>
                         </div>
                       </GlassCard>
                     </motion.div>

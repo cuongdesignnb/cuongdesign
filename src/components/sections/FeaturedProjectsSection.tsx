@@ -4,7 +4,6 @@ import { useState, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
 import { ExternalLink, Info, Search, Filter } from "lucide-react";
-import { projects as staticProjects } from "@/data/projects";
 import { techStack } from "@/data/techStack";
 import GlassCard from "../ui/GlassCard";
 import AnimatedSectionHeading from "../motion/AnimatedSectionHeading";
@@ -12,6 +11,7 @@ import Reveal from "../motion/Reveal";
 import Badge from "../ui/Badge";
 import Button from "../ui/Button";
 import { motionTokens, hoverDepthVariants } from "@/lib/motion";
+import { homeContentDefaults, type HomeContent } from "@/content/defaults/home";
 
 const cardVariants = {
   hidden: { opacity: 0, y: 40, filter: `blur(${motionTokens.blur.sm})` },
@@ -32,8 +32,14 @@ const cardVariants = {
   },
 };
 
-export default function FeaturedProjectsSection({ initialProjects }: { initialProjects?: any[] }) {
-  const projects = initialProjects || staticProjects;
+export default function FeaturedProjectsSection({
+  initialProjects = [],
+  content = homeContentDefaults.projects,
+}: {
+  initialProjects?: any[];
+  content?: HomeContent["projects"];
+}) {
+  const projects = initialProjects;
   const [activeCategory, setActiveCategory] = useState<string>("All");
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [selectedTech, setSelectedTech] = useState<string>("All");
@@ -41,7 +47,7 @@ export default function FeaturedProjectsSection({ initialProjects }: { initialPr
   // Get unique categories for filters
   const categories = useMemo(() => {
     return ["All", ...Array.from(new Set(projects.map((p) => p.category)))];
-  }, []);
+  }, [projects]);
 
   // Filter projects based on category, technology, and search query
   const filteredProjects = useMemo(() => {
@@ -57,14 +63,14 @@ export default function FeaturedProjectsSection({ initialProjects }: { initialPr
 
       return matchesCategory && matchesTech && matchesSearch;
     });
-  }, [activeCategory, selectedTech, searchQuery]);
+  }, [activeCategory, projects, selectedTech, searchQuery]);
 
   return (
     <section id="projects" className="py-24 relative overflow-hidden bg-[#030014]/30">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         <AnimatedSectionHeading
-          title="Dự án nổi bật / Featured Projects"
-          subtitle="Danh sách các dự án thực tế tôi đã thiết kế và lập trình hoàn thiện."
+          title={content.title}
+          subtitle={content.subtitle}
         />
 
         {/* Filter Controls Panel */}
@@ -126,7 +132,7 @@ export default function FeaturedProjectsSection({ initialProjects }: { initialPr
         {filteredProjects.length > 0 ? (
           <motion.div layout className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             <AnimatePresence mode="popLayout">
-              {filteredProjects.map((project) => (
+              {filteredProjects.slice(0, content.displayLimit).map((project) => (
                 <motion.div
                   key={project.id}
                   variants={cardVariants}
