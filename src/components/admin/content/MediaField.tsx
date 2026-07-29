@@ -29,7 +29,7 @@ export default function MediaField({
       <div className="flex min-h-28 items-center gap-3 rounded-md border border-dashed border-white/15 bg-white/[0.025] p-3">
         {imageUrl ? (
           <div className="relative h-24 w-32 shrink-0 overflow-hidden rounded-md bg-black/20">
-            <Image src={imageUrl} alt={selected?.alt || label || "Selected media"} fill sizes="128px" className="object-cover" />
+            <Image src={imageUrl} alt={selected?.alt || label || "Selected media"} fill sizes="128px" className="object-cover" unoptimized />
           </div>
         ) : (
           <div className="grid h-24 w-32 shrink-0 place-items-center rounded-md bg-white/5 text-gray-600">

@@ -93,7 +93,7 @@ export default function MediaLibraryManager() {
         <div className="grid content-start grid-cols-2 gap-3 sm:grid-cols-3 xl:grid-cols-4">
           {filtered.map((item) => (
             <button key={item.id} type="button" onClick={() => setSelected(item)} className={`overflow-hidden rounded-md border text-left ${selected?.id === item.id ? "border-pink-500" : "border-white/10 hover:border-white/30"}`}>
-              <div className="relative aspect-square bg-black/20"><Image src={item.url} alt={item.alt || item.name} fill sizes="240px" className="object-cover" /></div>
+              <div className="relative aspect-square bg-black/20"><Image src={item.url} alt={item.alt || item.name} fill sizes="240px" className="object-cover" unoptimized /></div>
               <div className="space-y-1 p-2">
                 <p className="truncate text-xs text-white">{item.name}</p>
                 <p className="text-[10px] text-gray-500">{item.width}×{item.height} · {(item.size / 1024).toFixed(1)} KB · {item.usage?.count ?? 0} nơi dùng</p>
@@ -106,7 +106,7 @@ export default function MediaLibraryManager() {
         <aside className="h-fit space-y-4 rounded-md border border-white/10 bg-white/[0.025] p-4">
           {selected ? (
             <>
-              <div className="relative aspect-video overflow-hidden rounded-md bg-black/20"><Image src={selected.url} alt={selected.alt || selected.name} fill sizes="320px" className="object-contain" /></div>
+              <div className="relative aspect-video overflow-hidden rounded-md bg-black/20"><Image src={selected.url} alt={selected.alt || selected.name} fill sizes="320px" className="object-contain" unoptimized /></div>
               <label className="block space-y-1 text-xs text-gray-400">Tên<input value={selected.name} onChange={(event) => setSelected({ ...selected, name: event.target.value })} className="w-full rounded-md border border-white/10 bg-white/5 px-3 py-2 text-sm text-white" /></label>
               <label className="block space-y-1 text-xs text-gray-400">Alt text<input value={selected.alt ?? ""} onChange={(event) => setSelected({ ...selected, alt: event.target.value })} className="w-full rounded-md border border-white/10 bg-white/5 px-3 py-2 text-sm text-white" /></label>
               <label className="block space-y-1 text-xs text-gray-400">Caption<textarea value={selected.caption ?? ""} onChange={(event) => setSelected({ ...selected, caption: event.target.value })} rows={3} className="w-full rounded-md border border-white/10 bg-white/5 px-3 py-2 text-sm text-white" /></label>

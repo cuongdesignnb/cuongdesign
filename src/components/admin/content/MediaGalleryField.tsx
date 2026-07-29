@@ -19,7 +19,7 @@ export default function MediaGalleryField({ label, value, onChange }: MediaGalle
       <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
         {value.map((url) => (
           <div key={url} className="relative aspect-square overflow-hidden rounded-md border border-white/10">
-            <Image src={url} alt="" fill sizes="160px" className="object-cover" />
+            <Image src={url} alt="" fill sizes="160px" className="object-cover" unoptimized />
             <button type="button" onClick={() => onChange(value.filter((item) => item !== url))} className="absolute right-1 top-1 rounded bg-black/70 p-1 text-white" title="Bỏ ảnh">
               <X className="h-3 w-3" />
             </button>

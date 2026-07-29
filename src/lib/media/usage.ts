@@ -14,17 +14,26 @@ function containsMedia(value: unknown, mediaId: string, url: string): boolean {
   return false;
 }
 
+async function usageQuery<T>(label: string, operation: Promise<T[]>): Promise<T[]> {
+  try {
+    return await operation;
+  } catch (error) {
+    console.error(`Media usage lookup failed (${label}):`, error);
+    return [];
+  }
+}
+
 export async function getMediaUsage(mediaId: string, url: string): Promise<MediaUsage> {
   const [services, projects, products, posts, categories, testimonials, documents, pages] =
     await Promise.all([
-      prisma.serviceContent.findMany({ where: { coverMediaId: mediaId }, select: { title: true } }),
-      prisma.project.findMany({ where: { OR: [{ coverImage: url }, { images: { has: url } }] }, select: { title: true } }),
-      prisma.product.findMany({ where: { OR: [{ coverImage: url }, { images: { has: url } }] }, select: { title: true } }),
-      prisma.post.findMany({ where: { coverImage: url }, select: { title: true } }),
-      prisma.category.findMany({ where: { coverImage: url }, select: { name: true } }),
-      prisma.testimonial.findMany({ where: { avatar: url }, select: { name: true } }),
-      prisma.contentDocument.findMany({ select: { key: true, draftData: true, publishedData: true } }),
-      prisma.page.findMany({ select: { title: true, content: true } }),
+      usageQuery("services", prisma.serviceContent.findMany({ where: { coverMediaId: mediaId }, select: { title: true } })),
+      usageQuery("projects", prisma.project.findMany({ where: { OR: [{ coverImage: url }, { images: { has: url } }] }, select: { title: true } })),
+      usageQuery("products", prisma.product.findMany({ where: { OR: [{ coverImage: url }, { images: { has: url } }] }, select: { title: true } })),
+      usageQuery("posts", prisma.post.findMany({ where: { coverImage: url }, select: { title: true } })),
+      usageQuery("categories", prisma.category.findMany({ where: { coverImage: url }, select: { name: true } })),
+      usageQuery("testimonials", prisma.testimonial.findMany({ where: { avatar: url }, select: { name: true } })),
+      usageQuery("documents", prisma.contentDocument.findMany({ select: { key: true, draftData: true, publishedData: true } })),
+      usageQuery("pages", prisma.page.findMany({ select: { title: true, content: true } })),
     ]);
 
   const locations = [

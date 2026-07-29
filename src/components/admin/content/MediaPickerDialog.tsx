@@ -116,7 +116,7 @@ export default function MediaPickerDialog({
                     className={`relative overflow-hidden rounded-md border text-left ${active ? "border-pink-500 ring-2 ring-pink-500/20" : "border-white/10 hover:border-white/30"}`}
                   >
                     <div className="relative aspect-square bg-black/20">
-                      <Image src={item.url} alt={item.alt || item.name} fill sizes="180px" className="object-cover" />
+                      <Image src={item.url} alt={item.alt || item.name} fill sizes="180px" className="object-cover" unoptimized />
                     </div>
                     <div className="truncate px-2 py-2 text-[11px] text-gray-300">{item.name}</div>
                     {active && <span className="absolute right-2 top-2 rounded-full bg-pink-600 p-1 text-white"><Check className="h-3 w-3" /></span>}
