@@ -2,7 +2,6 @@
 
 import CharacterCount from "@tiptap/extension-character-count";
 import ImageExtension from "@tiptap/extension-image";
-import LinkExtension from "@tiptap/extension-link";
 import Placeholder from "@tiptap/extension-placeholder";
 import TextAlign from "@tiptap/extension-text-align";
 import { EditorContent, useEditor } from "@tiptap/react";
@@ -61,9 +60,11 @@ export default function ContentEditor({
   const editor = useEditor({
     immediatelyRender: false,
     extensions: [
-      StarterKit.configure({ heading: { levels: [2, 3, 4] } }),
+      StarterKit.configure({
+        heading: { levels: [2, 3, 4] },
+        link: { openOnClick: false, autolink: true },
+      }),
       Placeholder.configure({ placeholder }),
-      LinkExtension.configure({ openOnClick: false, autolink: true }),
       ImageExtension.configure({ allowBase64: false }),
       TextAlign.configure({ types: ["heading", "paragraph"] }),
       CharacterCount,

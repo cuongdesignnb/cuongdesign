@@ -31,7 +31,7 @@ export async function adminApiRequest<T>(
     });
   } catch {
     throw new Error(
-      "Không thể kết nối tới máy chủ. Hãy tải lại trang hoặc tạm tắt tiện ích chặn nội dung.",
+      "Không thể kết nối tới máy chủ. Hãy tải lại trang rồi thử lại.",
     );
   }
 

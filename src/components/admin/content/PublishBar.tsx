@@ -13,6 +13,14 @@ interface PublishBarProps {
   onPreview: () => void;
 }
 
+function formatPublishedAt(value: string) {
+  return new Intl.DateTimeFormat("vi-VN", {
+    dateStyle: "short",
+    timeStyle: "medium",
+    timeZone: "Asia/Ho_Chi_Minh",
+  }).format(new Date(value));
+}
+
 export default function PublishBar({
   documentId,
   publishedAt,
@@ -27,7 +35,7 @@ export default function PublishBar({
       <div className="flex items-center gap-2 text-xs text-gray-500">
         <span className={`h-2 w-2 rounded-full ${unsaved ? "bg-amber-400" : "bg-emerald-500"}`} />
         {unsaved ? "Có thay đổi chưa lưu" : "Đã lưu bản nháp"}
-        {publishedAt && <span className="hidden items-center gap-1 sm:flex"><Clock3 className="h-3.5 w-3.5" />Publish {new Date(publishedAt).toLocaleString("vi-VN")}</span>}
+        {publishedAt && <span className="hidden items-center gap-1 sm:flex"><Clock3 className="h-3.5 w-3.5" />Publish {formatPublishedAt(publishedAt)}</span>}
       </div>
       <div className="flex flex-wrap gap-2">
         {documentId && (

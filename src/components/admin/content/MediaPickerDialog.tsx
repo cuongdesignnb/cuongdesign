@@ -18,10 +18,12 @@ interface MediaPickerDialogProps {
   onSelect: (media: MediaRecord[]) => void;
 }
 
+const EMPTY_SELECTION: string[] = [];
+
 export default function MediaPickerDialog({
   open,
   multiple = false,
-  selected = [],
+  selected = EMPTY_SELECTION,
   onClose,
   onSelect,
 }: MediaPickerDialogProps) {
@@ -36,7 +38,13 @@ export default function MediaPickerDialog({
     setLoading(true);
     adminApiRequest<MediaRecord[]>(ADMIN_ASSETS_ENDPOINT)
       .then(setItems)
-      .catch((error) => window.alert(error.message))
+      .catch((error) =>
+        window.alert(
+          error instanceof Error
+            ? error.message
+            : "Không thể tải thư viện hình ảnh.",
+        ),
+      )
       .finally(() => setLoading(false));
   }, [open, selected]);
 
