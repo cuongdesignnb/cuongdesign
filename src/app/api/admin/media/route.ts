@@ -128,6 +128,13 @@ export async function POST(request: Request) {
     const authorization = adminAuthorizationResponse(error);
     if (authorization) return authorization;
     console.error("Error uploading media:", error);
+    const filesystemError = error as NodeJS.ErrnoException;
+    if (filesystemError.code === "EACCES" || filesystemError.code === "EROFS") {
+      return NextResponse.json(
+        { error: "Thư mục upload chưa có quyền ghi." },
+        { status: 500 },
+      );
+    }
     return NextResponse.json({ error: "Không thể xử lý hình ảnh." }, { status: 500 });
   }
 }
