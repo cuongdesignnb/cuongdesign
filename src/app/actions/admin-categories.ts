@@ -2,6 +2,9 @@
 
 import { prisma } from "@/lib/db";
 import { requireAdmin } from "@/lib/auth/require-admin";
+import { normalizeSlug } from "@/lib/seo/slug";
+import { recordSeoRedirect } from "@/lib/seo/redirects";
+import { revalidatePath } from "next/cache";
 
 export async function getCategories() {
   try {
@@ -27,37 +30,72 @@ export async function upsertCategory(data: {
   coverImage?: string;
   color?: string;
   order?: number;
+  seoTitle?: string;
+  seoDescription?: string;
+  seoKeywords?: string[] | string;
+  canonicalPath?: string;
+  ogTitle?: string;
+  ogDescription?: string;
+  ogImage?: string;
+  robotsIndex?: boolean;
+  robotsFollow?: boolean;
 }) {
   try {
     await requireAdmin();
+    const slug = normalizeSlug(data.slug);
+    const previous = data.id
+      ? await prisma.category.findUnique({ where: { id: data.id }, select: { slug: true } })
+      : null;
+    const seoKeywords = Array.isArray(data.seoKeywords)
+      ? data.seoKeywords
+      : String(data.seoKeywords || "").split(",").map((item) => item.trim()).filter(Boolean);
+    const seoData = {
+      seoTitle: data.seoTitle || null,
+      seoDescription: data.seoDescription || null,
+      seoKeywords,
+      canonicalPath: data.canonicalPath || null,
+      ogTitle: data.ogTitle || null,
+      ogDescription: data.ogDescription || null,
+      ogImage: data.ogImage || null,
+      robotsIndex: data.robotsIndex ?? true,
+      robotsFollow: data.robotsFollow ?? true,
+    };
+    let category;
     if (data.id) {
-      // Update existing
-      const category = await prisma.category.update({
+      category = await prisma.category.update({
         where: { id: data.id },
         data: {
           name: data.name,
-          slug: data.slug,
+          slug,
           description: data.description || null,
           coverImage: data.coverImage || null,
           color: data.color || null,
           order: data.order ?? 0,
+          ...seoData,
         },
       });
-      return { success: true, data: category };
     } else {
-      // Create new
-      const category = await prisma.category.create({
+      category = await prisma.category.create({
         data: {
           name: data.name,
-          slug: data.slug,
+          slug,
           description: data.description || null,
           coverImage: data.coverImage || null,
           color: data.color || null,
           order: data.order ?? 0,
+          ...seoData,
         },
       });
-      return { success: true, data: category };
     }
+    if (previous && previous.slug !== category.slug) {
+      await recordSeoRedirect(
+        `/bai-viet/chuyen-muc/${previous.slug}`,
+        `/bai-viet/chuyen-muc/${category.slug}`,
+        "category-slug-changed",
+      );
+    }
+    revalidatePath("/bai-viet");
+    return { success: true, data: category };
   } catch (error: any) {
     console.error("Error upserting category:", error);
     return { success: false, error: error.message };

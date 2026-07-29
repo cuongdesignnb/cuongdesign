@@ -1,7 +1,7 @@
 import { ImageResponse } from "next/og";
 import { prisma } from "@/lib/db";
 
-export const alt = "Cuong Design - Dự án";
+export const alt = "Cường Design - Dự án";
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
 
@@ -12,7 +12,7 @@ export default async function OGImage({
 }) {
   const { slug } = await params;
 
-  let title = "Cuong Design - Dự án";
+  let title = "Cường Design - Dự án";
   let category = "Dự án";
   let techStack: string[] = [];
 

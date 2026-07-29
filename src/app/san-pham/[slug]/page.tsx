@@ -1,13 +1,14 @@
 import React from "react";
 import { notFound } from "next/navigation";
-import { prisma } from "@/lib/db";
 import { auth } from "@/auth";
 import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
 import Breadcrumbs from "@/components/ui/Breadcrumbs";
 import ProductDetailClient from "./ProductDetailClient";
 import { Metadata } from "next";
-import { createMetadata, JsonLd } from "@/lib/seo";
+import { buildProductSchema, createMetadataFromSeoFields, JsonLd } from "@/lib/seo";
+import { getProductBySlug } from "@/lib/seo/queries";
+import { resolveSeoRedirect } from "@/lib/seo/resolve-redirect";
 
 interface ProductPageProps {
   params: Promise<{ slug: string }>;
@@ -15,22 +16,33 @@ interface ProductPageProps {
 
 export async function generateMetadata({ params }: ProductPageProps): Promise<Metadata> {
   const { slug } = await params;
-  const product = await prisma.product.findUnique({
-    where: { slug },
-  });
+  const product = await getProductBySlug(slug);
 
   if (!product) {
-    return {};
+    return { robots: { index: false, follow: false } };
   }
 
-  return createMetadata({
-    title: `${product.title} - Mua mã nguồn`,
-    description: product.description,
-    path: `/san-pham/${slug}`,
-    keywords: product.techStack,
-    openGraph: {
-      images: [{ url: product.coverImage }],
+  return createMetadataFromSeoFields({
+    seo: {
+      title: product.seoTitle || undefined,
+      description: product.seoDescription || undefined,
+      keywords: product.seoKeywords,
+      canonicalPath: product.canonicalPath || undefined,
+      ogTitle: product.ogTitle || undefined,
+      ogDescription: product.ogDescription || undefined,
+      ogImage: product.ogImage || undefined,
+      robotsIndex: product.robotsIndex,
+      robotsFollow: product.robotsFollow,
     },
+    fallback: {
+      title: `${product.title} - Sản phẩm số`,
+      description: product.description,
+      keywords: product.techStack,
+      image: product.coverImage,
+    },
+    path: `/san-pham/${slug}`,
+    modifiedTime: product.updatedAt.toISOString(),
+    publishedTime: product.publishedAt?.toISOString(),
   });
 }
 
@@ -38,80 +50,34 @@ export default async function ProductDetailPage({ params }: ProductPageProps) {
   const { slug } = await params;
 
   // 1. Fetch product
-  const product = await prisma.product.findUnique({
-    where: { slug },
-  });
+  const product = await getProductBySlug(slug);
 
   if (!product) {
+    await resolveSeoRedirect(`/san-pham/${slug}`);
     notFound();
   }
 
-  // 2. Fetch approved reviews with user relation
-  const reviews = await prisma.review.findMany({
-    where: {
-      productId: product.id,
-      isApproved: true,
-    },
-    orderBy: { createdAt: "desc" },
-    include: {
-      user: {
-        select: {
-          name: true,
-          avatar: true,
-        },
-      },
-    },
-  });
+  const reviews = product.reviews;
 
   // 3. Check login status
   const session = await auth();
   const isLoggedIn = !!session?.user;
 
-  // Calculate review aggregation
-  const totalReviews = reviews.length;
-  const avgRating = totalReviews > 0
-    ? reviews.reduce((acc, r) => acc + r.rating, 0) / totalReviews
-    : 5;
-
-  const finalPrice = product.salePrice !== null ? product.salePrice : product.price;
-
-  // Schema.org Structured Data
-  const jsonLd = {
-    "@context": "https://schema.org",
-    "@type": "Product",
-    "name": product.title,
-    "image": product.coverImage,
-    "description": product.description,
-    "sku": product.id,
-    "offers": {
-      "@type": "Offer",
-      "url": `https://cuongdesign.com/san-pham/${product.slug}`,
-      "priceCurrency": "VND",
-      "price": finalPrice,
-      "priceValidUntil": "2030-01-01",
-      "availability": product.price === 0 ? "https://schema.org/LimitedAvailability" : "https://schema.org/InStock",
-      "itemCondition": "https://schema.org/NewCondition",
-    },
-    "aggregateRating": totalReviews > 0 ? {
-      "@type": "AggregateRating",
-      "ratingValue": avgRating.toFixed(1),
-      "reviewCount": totalReviews,
-    } : undefined,
-    "review": reviews.map((r) => ({
-      "@type": "Review",
-      "author": {
-        "@type": "Person",
-        "name": r.user?.name || "Khách hàng",
-      },
-      "datePublished": r.createdAt.toISOString(),
-      "reviewBody": r.comment,
-      "reviewRating": {
-        "@type": "Rating",
-        "ratingValue": r.rating,
-        "bestRating": 5,
-      },
-    })),
-  };
+  const jsonLd = buildProductSchema({
+    slug: product.slug,
+    name: product.title,
+    description: product.description,
+    images: [product.coverImage, ...product.images],
+    sku: product.sku,
+    brandName: product.brandName,
+    pricingMode: product.pricingMode,
+    price: product.price,
+    salePrice: product.salePrice,
+    currency: product.currency,
+    availability: product.availability,
+    priceValidUntil: product.priceValidUntil,
+    reviews,
+  });
 
   return (
     <div className="min-h-screen bg-[#030014] text-gray-200 flex flex-col">
@@ -127,7 +93,7 @@ export default async function ProductDetailPage({ params }: ProductPageProps) {
           {/* Breadcrumbs */}
           <Breadcrumbs
             items={[
-              { label: "Sản phẩm số", href: "/#products" },
+              { label: "Sản phẩm số", href: "/san-pham" },
               { label: product.title },
             ]}
           />

@@ -11,23 +11,48 @@ import {
 } from "lucide-react";
 import { getPublishedService } from "@/lib/content/get-service-content";
 import { getPublishedContent } from "@/lib/content/get-content";
-import { createMetadata, JsonLd, buildProfessionalServiceSchema } from "@/lib/seo";
-import { siteConfig } from "@/data/site";
+import {
+  buildBreadcrumbSchema,
+  buildServiceSchema,
+  buildWebPageSchema,
+  createMetadataFromSeoFields,
+  JsonLd,
+} from "@/lib/seo";
 import Breadcrumbs from "@/components/ui/Breadcrumbs";
 import GlassCard from "@/components/ui/GlassCard";
 import Button from "@/components/ui/Button";
+import { resolveSeoRedirect } from "@/lib/seo/resolve-redirect";
 
 type Props = { params: Promise<{ slug: string }> };
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
   const service = await getPublishedService(slug);
-  if (!service) return {};
-  return createMetadata({
-    title: service.seoTitle || service.title,
-    description: service.seoDescription || service.shortDescription,
+  if (!service) return { robots: { index: false, follow: false } };
+  return createMetadataFromSeoFields({
+    seo: {
+      title: service.seoTitle || undefined,
+      description: service.seoDescription || undefined,
+      keywords: service.seoKeywords,
+      canonicalPath: service.canonicalPath || undefined,
+      ogTitle: service.ogTitle || undefined,
+      ogDescription: service.ogDescription || undefined,
+      ogImage: service.ogImage || undefined,
+      robotsIndex: service.robotsIndex,
+      robotsFollow: service.robotsFollow,
+    },
+    fallback: {
+      title: service.title,
+      description: service.shortDescription,
+      image: service.coverMedia?.url,
+    },
     path: `/dich-vu/${slug}`,
-    keywords: service.seoKeywords,
+    publishedTime: service.publishedAt
+      ? new Date(service.publishedAt).toISOString()
+      : undefined,
+    modifiedTime: service.updatedAt
+      ? new Date(service.updatedAt).toISOString()
+      : undefined,
   });
 }
 
@@ -37,21 +62,31 @@ export default async function ServiceDetailPage({ params }: Props) {
     getPublishedService(slug),
     getPublishedContent("global"),
   ]);
-  if (!service) notFound();
+  if (!service) {
+    await resolveSeoRedirect(`/dich-vu/${slug}`);
+    notFound();
+  }
 
   const serviceSchema = {
     "@context": "https://schema.org",
     "@graph": [
-      {
-        "@type": "Service",
+      buildWebPageSchema({
+        path: `/dich-vu/${service.slug}`,
+        name: service.title,
+        description: service.shortDescription,
+      }),
+      buildServiceSchema({
+        slug: service.slug,
         name: service.title,
         description: service.seoDescription || service.shortDescription,
-        url: `${siteConfig.url}/dich-vu/${slug}`,
-        provider: buildProfessionalServiceSchema(),
-        areaServed: global.contact.serviceArea
-          .split(",")
-          .map((name) => ({ "@type": "Place", name: name.trim() })),
-      },
+        image: service.coverMedia?.url,
+        priceText: service.priceText,
+      }),
+      buildBreadcrumbSchema([
+        { name: "Trang chủ", href: "/" },
+        { name: "Dịch vụ", href: "/dich-vu" },
+        { name: service.title, href: `/dich-vu/${service.slug}` },
+      ]),
       ...(service.faqs.length
         ? [{
             "@type": "FAQPage",

@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { createPost, updatePost, deletePost, togglePostStatus } from "@/app/actions/admin-posts";
 import ContentEditor from "@/components/admin/content/ContentEditor";
 import MediaField from "@/components/admin/content/MediaField";
+import SeoFields, { type SeoValue } from "@/components/admin/content/SeoFields";
 import { useToast } from "@/components/ui/Toast";
 import { slugify } from "@/lib/utils";
 import {
@@ -44,7 +45,13 @@ interface PostItem {
   category: CategoryOption | null;
   seoTitle: string | null;
   seoDescription: string | null;
-  seoKeywords: string | null;
+  seoKeywords: string[] | string | null;
+  canonicalPath: string | null;
+  ogTitle: string | null;
+  ogDescription: string | null;
+  ogImage: string | null;
+  robotsIndex: boolean;
+  robotsFollow: boolean;
   createdAt: string;
   updatedAt: string;
 }
@@ -109,7 +116,13 @@ export default function AdminPostsManager({ initialPosts, categories }: AdminPos
       status: post.status,
       seoTitle: post.seoTitle || "",
       seoDescription: post.seoDescription || "",
-      seoKeywords: post.seoKeywords || "",
+      seoKeywords: Array.isArray(post.seoKeywords) ? post.seoKeywords.join(", ") : post.seoKeywords || "",
+      canonicalPath: post.canonicalPath || "",
+      ogTitle: post.ogTitle || "",
+      ogDescription: post.ogDescription || "",
+      ogImage: post.ogImage || "",
+      robotsIndex: post.robotsIndex,
+      robotsFollow: post.robotsFollow,
     });
     setSelectedCategoryId(post.categoryId || "");
   };
@@ -127,6 +140,12 @@ export default function AdminPostsManager({ initialPosts, categories }: AdminPos
       seoTitle: "",
       seoDescription: "",
       seoKeywords: "",
+      canonicalPath: "",
+      ogTitle: "",
+      ogDescription: "",
+      ogImage: "",
+      robotsIndex: true,
+      robotsFollow: true,
     });
     setSelectedCategoryId("");
   };
@@ -156,7 +175,13 @@ export default function AdminPostsManager({ initialPosts, categories }: AdminPos
         categoryId: selectedCategoryId || undefined,
         seoTitle: formData.seoTitle || undefined,
         seoDescription: formData.seoDescription || undefined,
-        seoKeywords: formData.seoKeywords || undefined,
+        seoKeywords: String(formData.seoKeywords || "") || undefined,
+        canonicalPath: formData.canonicalPath || undefined,
+        ogTitle: formData.ogTitle || undefined,
+        ogDescription: formData.ogDescription || undefined,
+        ogImage: formData.ogImage || undefined,
+        robotsIndex: formData.robotsIndex ?? true,
+        robotsFollow: formData.robotsFollow ?? true,
       };
       const res = isCreateMode
         ? await createPost(payload)
@@ -555,49 +580,40 @@ export default function AdminPostsManager({ initialPosts, categories }: AdminPos
                 </div>
               </div>
 
-              {/* SEO Fields */}
-              <div className="border-t border-white/5 pt-4 space-y-4">
-                <p className="text-xs text-gray-500 font-semibold uppercase tracking-wider flex items-center gap-1.5">
-                  <Search className="w-3.5 h-3.5" /> SEO Settings
-                </p>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <label className="text-xs text-gray-400 font-semibold uppercase tracking-wider block">
-                      SEO Title
-                    </label>
-                    <input
-                      type="text"
-                      value={formData.seoTitle || ""}
-                      onChange={(e) => setFormData((prev) => ({ ...prev, seoTitle: e.target.value }))}
-                      className="w-full px-4 py-2.5 text-sm rounded-lg bg-white/5 border border-white/10 text-white placeholder-gray-500 focus:outline-none focus:border-pink-500/50 transition-colors"
-                      placeholder="Tiêu đề SEO..."
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <label className="text-xs text-gray-400 font-semibold uppercase tracking-wider block">
-                      SEO Keywords
-                    </label>
-                    <input
-                      type="text"
-                      value={formData.seoKeywords || ""}
-                      onChange={(e) => setFormData((prev) => ({ ...prev, seoKeywords: e.target.value }))}
-                      className="w-full px-4 py-2.5 text-sm rounded-lg bg-white/5 border border-white/10 text-white placeholder-gray-500 focus:outline-none focus:border-pink-500/50 transition-colors"
-                      placeholder="từ khóa 1, từ khóa 2, ..."
-                    />
-                  </div>
-                </div>
-                <div className="space-y-2">
-                  <label className="text-xs text-gray-400 font-semibold uppercase tracking-wider block">
-                    SEO Description
-                  </label>
-                  <textarea
-                    rows={2}
-                    value={formData.seoDescription || ""}
-                    onChange={(e) => setFormData((prev) => ({ ...prev, seoDescription: e.target.value }))}
-                    className="w-full px-4 py-3 text-sm rounded-lg bg-white/5 border border-white/10 text-white placeholder-gray-500 focus:outline-none focus:border-pink-500/50 transition-colors resize-y"
-                    placeholder="Mô tả SEO cho bài viết..."
-                  />
-                </div>
+              <div className="border-t border-white/5 pt-4">
+                <SeoFields
+                  entityType="post"
+                  basePath="/bai-viet"
+                  slug={formData.slug || ""}
+                  fallbackTitle={formData.title || ""}
+                  fallbackDescription={formData.excerpt || ""}
+                  fallbackImage={formData.coverImage || ""}
+                  value={{
+                    title: formData.seoTitle || "",
+                    description: formData.seoDescription || "",
+                    keywords: formData.seoKeywords || "",
+                    canonicalPath: formData.canonicalPath || "",
+                    ogTitle: formData.ogTitle || "",
+                    ogDescription: formData.ogDescription || "",
+                    ogImage: formData.ogImage || "",
+                    robotsIndex: formData.robotsIndex,
+                    robotsFollow: formData.robotsFollow,
+                  }}
+                  onChange={(seo: SeoValue) =>
+                    setFormData((current) => ({
+                      ...current,
+                      seoTitle: seo.title || "",
+                      seoDescription: seo.description || "",
+                      seoKeywords: seo.keywords || "",
+                      canonicalPath: seo.canonicalPath || "",
+                      ogTitle: seo.ogTitle || "",
+                      ogDescription: seo.ogDescription || "",
+                      ogImage: seo.ogImage || "",
+                      robotsIndex: seo.robotsIndex ?? true,
+                      robotsFollow: seo.robotsFollow ?? true,
+                    }))
+                  }
+                />
               </div>
             </div>
 

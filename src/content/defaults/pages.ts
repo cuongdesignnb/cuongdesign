@@ -13,7 +13,7 @@ const seo = (title: string, description: string) => ({
 export const aboutContentDefaults = {
   metadata: seo("Giới thiệu", "Thông tin về Cường Design."),
   hero: { breadcrumb: "Giới thiệu", badge: "About me", prefix: "Xin chào, tôi là", highlight: "Cường Design", suffix: "", avatarMedia: "" },
-  profile: { name: "Nguyễn Văn Cường", jobTitle: "Freelancer Developer & UI/UX Designer", biography: "<p>Tôi thiết kế và phát triển những sản phẩm số tập trung vào hiệu năng và trải nghiệm người dùng.</p>", ctaLabel: "Liên hệ hợp tác", ctaUrl: "/lien-he" },
+  profile: { name: "Đinh Cường", jobTitle: "Freelancer Developer & UI/UX Designer", biography: "<p>Tôi thiết kế và phát triển những sản phẩm số tập trung vào hiệu năng và trải nghiệm người dùng.</p>", ctaLabel: "Liên hệ hợp tác", ctaUrl: "/lien-he" },
   skills: [],
   timeline: [],
   certificates: [],
@@ -125,8 +125,8 @@ export const footerContentDefaults = {
   columnTitles: { navigation: "Liên kết", services: "Dịch vụ", contact: "Liên hệ" },
   customLinks: [],
   newsletter: { enabled: true, title: "Nhận bản tin", description: "Cập nhật bài viết và sản phẩm mới.", placeholder: "Email của bạn", buttonLabel: "Đăng ký" },
-  copyright: "© {year} Cuong Design. All rights reserved.",
-  credit: "Designed & developed by Cuong Design.",
+  copyright: "© {year} Cường Design. All rights reserved.",
+  credit: "Designed & developed by Cường Design.",
 };
 
 export const systemCopyDefaults = {

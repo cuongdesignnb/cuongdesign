@@ -1,19 +1,19 @@
 import { ImageResponse } from "next/og";
 import { prisma } from "@/lib/db";
 
-export const alt = "Cuong Design - Bài viết";
+export const alt = "Cường Design - Bài viết";
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
 
 export default async function OGImage({
   params,
 }: {
-  params: Promise<{ category: string; slug: string }>;
+  params: Promise<{ slug: string }>;
 }) {
   const { slug } = await params;
 
-  let title = "Cuong Design - Bài viết";
-  let authorName = "Cường Design";
+  let title = "Cường Design - Bài viết";
+  let authorName = "Đinh Cường";
   let publishDate = "";
   let categoryName = "";
   let categoryColor = "#ec4899";
@@ -30,7 +30,7 @@ export default async function OGImage({
 
     if (post) {
       title = post.title;
-      authorName = "Cường Design";
+      authorName = "Đinh Cường";
       const dateObj = post.publishedAt || post.createdAt;
       publishDate = new Date(dateObj).toLocaleDateString("vi-VN", {
         year: "numeric",
@@ -222,7 +222,7 @@ export default async function OGImage({
               display: "flex",
             }}
           >
-            cuongdesign.com
+            cuongdesign.net
           </div>
         </div>
       </div>

@@ -11,7 +11,7 @@ import TestimonialsSection from "@/components/sections/TestimonialsSection";
 import CTASection from "@/components/sections/CTASection";
 import ContactSection from "@/components/sections/ContactSection";
 import Footer from "@/components/layout/Footer";
-import { createMetadata } from "@/lib/seo";
+import { createMetadataFromSeoFields } from "@/lib/seo";
 import { prisma } from "@/lib/db";
 import { getPublishedContent } from "@/lib/content/get-content";
 import { getPublishedServices } from "@/lib/content/get-service-content";
@@ -20,11 +20,21 @@ export const dynamic = "force-dynamic";
 
 export async function generateMetadata() {
   const global = await getPublishedContent("global");
-  return createMetadata({
-    titleAbsolute: global.seo.title,
-    description: global.seo.description,
+  return createMetadataFromSeoFields({
+    seo: {
+      title: global.seo.title,
+      description: global.seo.description,
+      keywords: global.seo.keywords,
+      ogTitle: global.seo.ogTitle,
+      ogDescription: global.seo.ogDescription,
+      ogImage: global.brand.defaultOgMedia,
+    },
+    fallback: {
+      title: global.seo.title,
+      description: global.seo.description,
+      image: global.brand.defaultOgMedia,
+    },
     path: "/",
-    keywords: global.seo.keywords.split(",").map((item) => item.trim()).filter(Boolean),
   });
 }
 
@@ -40,8 +50,14 @@ export default async function Home() {
   let dbTestimonials: Awaited<ReturnType<typeof prisma.testimonial.findMany>> = [];
   try {
     [dbProjects, dbProducts, dbTestimonials] = await Promise.all([
-      prisma.project.findMany({ orderBy: { order: "asc" } }),
-      prisma.product.findMany({ orderBy: { order: "asc" } }),
+      prisma.project.findMany({
+        where: { isPublished: true },
+        orderBy: { order: "asc" },
+      }),
+      prisma.product.findMany({
+        where: { isPublished: true },
+        orderBy: { order: "asc" },
+      }),
       prisma.testimonial.findMany({
         where: { isPublished: true },
         orderBy: { order: "asc" },

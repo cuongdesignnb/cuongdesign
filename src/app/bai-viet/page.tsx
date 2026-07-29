@@ -7,18 +7,21 @@ import GradientText from "@/components/ui/GradientText";
 import { prisma } from "@/lib/db";
 import { BookOpen, Calendar, ArrowRight, Clock } from "lucide-react";
 import Link from "next/link";
-import { createMetadata, JsonLd } from "@/lib/seo";
+import { buildCollectionPageSchema, createMetadataFromSeoFields, JsonLd } from "@/lib/seo";
 import { getPublishedContent } from "@/lib/content/get-content";
 
 export const dynamic = "force-dynamic";
 
 export async function generateMetadata() {
   const content = await getPublishedContent("blog");
-  return createMetadata({
-    title: content.metadata.title,
-    description: content.metadata.description,
+  return createMetadataFromSeoFields({
+    seo: content.metadata,
+    fallback: {
+      title: content.metadata.title,
+      description: content.metadata.description,
+    },
     path: "/bai-viet",
-    keywords: content.metadata.keywords.split(",").map((item) => item.trim()).filter(Boolean),
+    type: "website",
   });
 }
 
@@ -47,31 +50,18 @@ export default async function BlogListPage() {
   };
 
   // Schema.org Blog structured data metadata
-  const blogSchema = {
-    "@context": "https://schema.org",
-    "@type": "Blog",
-    "name": "Cường Design Blog",
-    "description": "Kênh chia sẻ kiến thức thiết kế UI/UX và lập trình Fullstack của Cường Design.",
-    "publisher": {
-      "@type": "Person",
-      "name": "Nguyễn Văn Cường",
-      "url": "https://cuongdesign.com"
-    },
-    "blogPost": dbPosts.map((post) => ({
-      "@type": "BlogPosting",
-      "headline": post.title,
-      "alternativeHeadline": post.excerpt || "",
-      "genre": "Software Development & Design",
-      "url": `https://cuongdesign.com/bai-viet/${post.category?.slug || "chua-phan-loai"}/${post.slug}`,
-      "datePublished": post.publishedAt || post.createdAt,
-      "dateModified": post.updatedAt,
-      "author": {
-        "@type": "Person",
-        "name": "Cường Design"
-      },
-      ...(post.category?.name && { "articleSection": post.category.name }),
-    }))
-  };
+  const blogSchema = buildCollectionPageSchema({
+    path: "/bai-viet",
+    name: content.hero.title,
+    description: content.hero.intro,
+    type: "Blog",
+    items: dbPosts.map((post) => ({
+      name: post.title,
+      description: post.excerpt || undefined,
+      image: post.coverImage || undefined,
+      url: `/bai-viet/${post.slug}`,
+    })),
+  });
 
   return (
     <div className="min-h-screen bg-[#030014] text-gray-200 flex flex-col">
@@ -121,7 +111,7 @@ export default async function BlogListPage() {
                 return (
                   <Link
                     key={cat.id}
-                    href={`/bai-viet/${cat.slug}`}
+                    href={`/bai-viet/chuyen-muc/${cat.slug}`}
                     className="inline-flex items-center gap-1.5 px-4 py-2 rounded-full text-xs font-semibold transition-all duration-200 bg-white/5 text-gray-400 border border-white/10 hover:bg-white/10 hover:text-white hover:border-white/20"
                   >
                     {cat.color && (
@@ -146,7 +136,7 @@ export default async function BlogListPage() {
           {dbPosts.length > 0 ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
               {dbPosts.map((post) => {
-                const postUrl = `/bai-viet/${post.category?.slug || "chua-phan-loai"}/${post.slug}`;
+                const postUrl = `/bai-viet/${post.slug}`;
                 return (
                   <GlassCard
                     key={post.id}
@@ -176,7 +166,7 @@ export default async function BlogListPage() {
                       {/* Category badge + Date and Reading Time row */}
                       <div className="flex flex-col gap-2.5">
                         {post.category && (
-                          <Link href={`/bai-viet/${post.category.slug}`}>
+                          <Link href={`/bai-viet/chuyen-muc/${post.category.slug}`}>
                             <span
                               className="inline-flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-full w-fit transition-opacity hover:opacity-80"
                               style={{

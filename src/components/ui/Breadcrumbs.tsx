@@ -4,6 +4,7 @@ import React from "react";
 import Link from "next/link";
 import { ChevronRight, Home } from "lucide-react";
 import { JsonLd, buildBreadcrumbSchema } from "@/lib/seo";
+import { usePathname } from "next/navigation";
 
 interface BreadcrumbItem {
   label: string;
@@ -15,13 +16,14 @@ interface BreadcrumbsProps {
 }
 
 export default function Breadcrumbs({ items }: BreadcrumbsProps) {
+  const pathname = usePathname();
   // Map breadcrumb items for the schema builder:
   // "Trang chủ" is always the first item, then all passed items
   const schemaItems = [
     { name: "Trang chủ", href: "/" },
     ...items.map((item) => ({
       name: item.label,
-      href: item.href || "",
+      href: item.href || pathname,
     })),
   ];
 

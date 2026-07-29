@@ -6,6 +6,8 @@ import GlassCard from "@/components/ui/GlassCard";
 import Button from "@/components/ui/Button";
 import MediaField from "@/components/admin/content/MediaField";
 import MediaGalleryField from "@/components/admin/content/MediaGalleryField";
+import ContentEditor from "@/components/admin/content/ContentEditor";
+import SeoFields, { type SeoValue } from "@/components/admin/content/SeoFields";
 import { Plus, Edit2, Trash2, X } from "lucide-react";
 import { formatVND, slugify } from "@/lib/utils";
 
@@ -28,6 +30,7 @@ export default function AdminProductsManager({
     title: "",
     slug: "",
     description: "",
+    content: "",
     price: 0,
     salePrice: "" as string | number,
     type: "SOURCE_CODE" as "SOURCE_CODE" | "TEMPLATE" | "UI_KIT" | "SERVICE",
@@ -38,6 +41,26 @@ export default function AdminProductsManager({
     demoUrl: "",
     downloadUrl: "",
     maxDownloads: 5,
+    currency: "VND",
+    pricingMode: "FIXED" as "FIXED" | "FREE" | "CONTACT",
+    availability: "IN_STOCK" as "IN_STOCK" | "OUT_OF_STOCK" | "PRE_ORDER" | "LIMITED",
+    priceValidUntil: "",
+    sku: "",
+    brandName: "Cường Design",
+    softwareCategory: "",
+    operatingSystem: "",
+    softwareVersion: "",
+    licenseName: "",
+    seoTitle: "",
+    seoDescription: "",
+    seoKeywords: "",
+    canonicalPath: "",
+    ogTitle: "",
+    ogDescription: "",
+    ogImage: "",
+    robotsIndex: true,
+    robotsFollow: true,
+    isPublished: false,
     isFeatured: false,
     order: 0,
   });
@@ -48,6 +71,7 @@ export default function AdminProductsManager({
       title: "",
       slug: "",
       description: "",
+      content: "",
       price: 0,
       salePrice: "",
       type: "SOURCE_CODE",
@@ -58,6 +82,26 @@ export default function AdminProductsManager({
       demoUrl: "",
       downloadUrl: "",
       maxDownloads: 5,
+      currency: "VND",
+      pricingMode: "FIXED",
+      availability: "IN_STOCK",
+      priceValidUntil: "",
+      sku: "",
+      brandName: "Cường Design",
+      softwareCategory: "",
+      operatingSystem: "",
+      softwareVersion: "",
+      licenseName: "",
+      seoTitle: "",
+      seoDescription: "",
+      seoKeywords: "",
+      canonicalPath: "",
+      ogTitle: "",
+      ogDescription: "",
+      ogImage: "",
+      robotsIndex: true,
+      robotsFollow: true,
+      isPublished: false,
       isFeatured: false,
       order: products.length,
     });
@@ -72,6 +116,7 @@ export default function AdminProductsManager({
       title: product.title,
       slug: product.slug,
       description: product.description,
+      content: product.content || "",
       price: product.price,
       salePrice: product.salePrice !== null ? product.salePrice : "",
       type: product.type || "SOURCE_CODE",
@@ -82,6 +127,26 @@ export default function AdminProductsManager({
       demoUrl: product.demoUrl || "",
       downloadUrl: product.downloadUrl || "",
       maxDownloads: product.maxDownloads !== undefined ? product.maxDownloads : 5,
+      currency: product.currency || "VND",
+      pricingMode: product.pricingMode || (product.price === 0 ? "FREE" : "FIXED"),
+      availability: product.availability || "IN_STOCK",
+      priceValidUntil: product.priceValidUntil ? String(product.priceValidUntil).slice(0, 10) : "",
+      sku: product.sku || "",
+      brandName: product.brandName || "Cường Design",
+      softwareCategory: product.softwareCategory || "",
+      operatingSystem: product.operatingSystem || "",
+      softwareVersion: product.softwareVersion || "",
+      licenseName: product.licenseName || "",
+      seoTitle: product.seoTitle || "",
+      seoDescription: product.seoDescription || "",
+      seoKeywords: product.seoKeywords ? product.seoKeywords.join(", ") : "",
+      canonicalPath: product.canonicalPath || "",
+      ogTitle: product.ogTitle || "",
+      ogDescription: product.ogDescription || "",
+      ogImage: product.ogImage || "",
+      robotsIndex: product.robotsIndex ?? true,
+      robotsFollow: product.robotsFollow ?? true,
+      isPublished: product.isPublished ?? false,
       isFeatured: product.isFeatured || false,
       order: product.order || 0,
     });
@@ -172,7 +237,11 @@ export default function AdminProductsManager({
                   {product.type}
                 </span>
                 <span className="text-sm font-bold text-white">
-                  {product.price === 0 ? "Miễn phí (Free)" : formatVND(product.price)}
+                  {product.pricingMode === "CONTACT"
+                    ? "Liên hệ"
+                    : product.pricingMode === "FREE"
+                      ? "Miễn phí (Free)"
+                      : formatVND(product.price)}
                 </span>
               </div>
               <h3 className="font-bold text-white text-lg line-clamp-1">{product.title}</h3>
@@ -395,8 +464,65 @@ export default function AdminProductsManager({
                 </div>
               </div>
 
+              <div className="space-y-2 border-t border-white/5 pt-5">
+                <label className="text-xs text-gray-400">Nội dung chi tiết sản phẩm</label>
+                <ContentEditor value={form.content} onChange={(content) => setForm((current) => ({ ...current, content }))} />
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 border-t border-white/5 pt-5">
+                <label className="space-y-1 text-xs text-gray-400">Chế độ giá<select name="pricingMode" value={form.pricingMode} onChange={handleInputChange} className="glass-input w-full px-4 py-2.5 text-sm"><option value="FIXED">Giá cố định</option><option value="FREE">Miễn phí</option><option value="CONTACT">Liên hệ</option></select></label>
+                <label className="space-y-1 text-xs text-gray-400">Tình trạng<select name="availability" value={form.availability} onChange={handleInputChange} className="glass-input w-full px-4 py-2.5 text-sm"><option value="IN_STOCK">Còn hàng</option><option value="OUT_OF_STOCK">Hết hàng</option><option value="PRE_ORDER">Đặt trước</option><option value="LIMITED">Giới hạn</option></select></label>
+                <label className="space-y-1 text-xs text-gray-400">Hạn giá<input type="date" name="priceValidUntil" value={form.priceValidUntil} onChange={handleInputChange} className="glass-input w-full px-4 py-2.5 text-sm" /></label>
+                <label className="space-y-1 text-xs text-gray-400">SKU<input name="sku" value={form.sku} onChange={handleInputChange} className="glass-input w-full px-4 py-2.5 text-sm" /></label>
+                <label className="space-y-1 text-xs text-gray-400">Thương hiệu<input name="brandName" value={form.brandName} onChange={handleInputChange} className="glass-input w-full px-4 py-2.5 text-sm" /></label>
+                <label className="space-y-1 text-xs text-gray-400">Danh mục phần mềm<input name="softwareCategory" value={form.softwareCategory} onChange={handleInputChange} className="glass-input w-full px-4 py-2.5 text-sm" /></label>
+                <label className="space-y-1 text-xs text-gray-400">Hệ điều hành<input name="operatingSystem" value={form.operatingSystem} onChange={handleInputChange} className="glass-input w-full px-4 py-2.5 text-sm" /></label>
+                <label className="space-y-1 text-xs text-gray-400">Phiên bản<input name="softwareVersion" value={form.softwareVersion} onChange={handleInputChange} className="glass-input w-full px-4 py-2.5 text-sm" /></label>
+                <label className="space-y-1 text-xs text-gray-400">Giấy phép<input name="licenseName" value={form.licenseName} onChange={handleInputChange} className="glass-input w-full px-4 py-2.5 text-sm" /></label>
+              </div>
+
+              <div className="border-t border-white/5 pt-5">
+                <SeoFields
+                  entityType="product"
+                  basePath="/san-pham"
+                  slug={form.slug}
+                  fallbackTitle={form.title}
+                  fallbackDescription={form.description}
+                  fallbackImage={form.coverImage}
+                  value={{
+                    title: form.seoTitle,
+                    description: form.seoDescription,
+                    keywords: form.seoKeywords,
+                    canonicalPath: form.canonicalPath,
+                    ogTitle: form.ogTitle,
+                    ogDescription: form.ogDescription,
+                    ogImage: form.ogImage,
+                    robotsIndex: form.robotsIndex,
+                    robotsFollow: form.robotsFollow,
+                  }}
+                  onChange={(seo: SeoValue) =>
+                    setForm((current) => ({
+                      ...current,
+                      seoTitle: seo.title || "",
+                      seoDescription: seo.description || "",
+                      seoKeywords: String(seo.keywords || ""),
+                      canonicalPath: seo.canonicalPath || "",
+                      ogTitle: seo.ogTitle || "",
+                      ogDescription: seo.ogDescription || "",
+                      ogImage: seo.ogImage || "",
+                      robotsIndex: seo.robotsIndex ?? true,
+                      robotsFollow: seo.robotsFollow ?? true,
+                    }))
+                  }
+                />
+              </div>
+
               {/* Ordering and Featured checks */}
               <div className="flex items-center gap-6 pt-2">
+                <label className="flex items-center gap-2 text-xs text-gray-300">
+                  <input type="checkbox" name="isPublished" checked={form.isPublished} onChange={handleInputChange} />
+                  Published
+                </label>
                 <div className="flex items-center space-x-2">
                   <input
                     type="checkbox"

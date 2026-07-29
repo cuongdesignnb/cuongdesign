@@ -8,6 +8,7 @@ import Button from "@/components/ui/Button";
 import ContentEditor from "@/components/admin/content/ContentEditor";
 import MediaField from "@/components/admin/content/MediaField";
 import MediaGalleryField from "@/components/admin/content/MediaGalleryField";
+import SeoFields, { type SeoValue } from "@/components/admin/content/SeoFields";
 import { Plus, Edit2, Trash2, X } from "lucide-react";
 
 interface AdminProjectsManagerProps {
@@ -36,6 +37,22 @@ export default function AdminProjectsManager({
     demoUrl: "",
     githubUrl: "",
     techStack: "",
+    projectType: "CREATIVE_WORK" as "CREATIVE_WORK" | "SOFTWARE_SOURCE_CODE" | "WEB_SITE" | "WEB_APPLICATION",
+    clientName: "",
+    clientIndustry: "",
+    projectRole: "",
+    completedAt: "",
+    projectResult: "",
+    seoTitle: "",
+    seoDescription: "",
+    seoKeywords: "",
+    canonicalPath: "",
+    ogTitle: "",
+    ogDescription: "",
+    ogImage: "",
+    robotsIndex: true,
+    robotsFollow: true,
+    isPublished: false,
     isFeatured: false,
     order: 0,
   });
@@ -53,6 +70,22 @@ export default function AdminProjectsManager({
       demoUrl: "",
       githubUrl: "",
       techStack: "",
+      projectType: "CREATIVE_WORK",
+      clientName: "",
+      clientIndustry: "",
+      projectRole: "",
+      completedAt: "",
+      projectResult: "",
+      seoTitle: "",
+      seoDescription: "",
+      seoKeywords: "",
+      canonicalPath: "",
+      ogTitle: "",
+      ogDescription: "",
+      ogImage: "",
+      robotsIndex: true,
+      robotsFollow: true,
+      isPublished: false,
       isFeatured: false,
       order: projects.length,
     });
@@ -74,6 +107,22 @@ export default function AdminProjectsManager({
       demoUrl: project.demoUrl || "",
       githubUrl: project.githubUrl || "",
       techStack: project.techStack ? project.techStack.join(", ") : "",
+      projectType: project.projectType || "CREATIVE_WORK",
+      clientName: project.clientName || "",
+      clientIndustry: project.clientIndustry || "",
+      projectRole: project.projectRole || "",
+      completedAt: project.completedAt ? String(project.completedAt).slice(0, 10) : "",
+      projectResult: project.projectResult || "",
+      seoTitle: project.seoTitle || "",
+      seoDescription: project.seoDescription || "",
+      seoKeywords: project.seoKeywords ? project.seoKeywords.join(", ") : "",
+      canonicalPath: project.canonicalPath || "",
+      ogTitle: project.ogTitle || "",
+      ogDescription: project.ogDescription || "",
+      ogImage: project.ogImage || "",
+      robotsIndex: project.robotsIndex ?? true,
+      robotsFollow: project.robotsFollow ?? true,
+      isPublished: project.isPublished ?? false,
       isFeatured: project.isFeatured || false,
       order: project.order || 0,
     });
@@ -329,8 +378,65 @@ export default function AdminProjectsManager({
                 </div>
               </div>
 
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 border-t border-white/5 pt-5">
+                <label className="space-y-1 text-xs text-gray-400">
+                  Loại Schema
+                  <select name="projectType" value={form.projectType} onChange={handleInputChange} className="glass-input w-full px-4 py-2.5 text-sm">
+                    <option value="CREATIVE_WORK">Creative work / case study</option>
+                    <option value="SOFTWARE_SOURCE_CODE">Software source code</option>
+                    <option value="WEB_SITE">Website</option>
+                    <option value="WEB_APPLICATION">Web application</option>
+                  </select>
+                </label>
+                <label className="space-y-1 text-xs text-gray-400">Khách hàng<input name="clientName" value={form.clientName} onChange={handleInputChange} className="glass-input w-full px-4 py-2.5 text-sm" /></label>
+                <label className="space-y-1 text-xs text-gray-400">Ngành khách hàng<input name="clientIndustry" value={form.clientIndustry} onChange={handleInputChange} className="glass-input w-full px-4 py-2.5 text-sm" /></label>
+                <label className="space-y-1 text-xs text-gray-400">Vai trò của Đinh Cường<input name="projectRole" value={form.projectRole} onChange={handleInputChange} className="glass-input w-full px-4 py-2.5 text-sm" /></label>
+                <label className="space-y-1 text-xs text-gray-400">Ngày hoàn thành<input type="date" name="completedAt" value={form.completedAt} onChange={handleInputChange} className="glass-input w-full px-4 py-2.5 text-sm" /></label>
+                <label className="space-y-1 text-xs text-gray-400">Kết quả dự án<textarea name="projectResult" value={form.projectResult} onChange={handleInputChange} rows={3} className="glass-input w-full px-4 py-2.5 text-sm" /></label>
+              </div>
+
+              <div className="border-t border-white/5 pt-5">
+                <SeoFields
+                  entityType="project"
+                  basePath="/du-an"
+                  slug={form.slug}
+                  fallbackTitle={form.title}
+                  fallbackDescription={form.description}
+                  fallbackImage={form.coverImage}
+                  value={{
+                    title: form.seoTitle,
+                    description: form.seoDescription,
+                    keywords: form.seoKeywords,
+                    canonicalPath: form.canonicalPath,
+                    ogTitle: form.ogTitle,
+                    ogDescription: form.ogDescription,
+                    ogImage: form.ogImage,
+                    robotsIndex: form.robotsIndex,
+                    robotsFollow: form.robotsFollow,
+                  }}
+                  onChange={(seo: SeoValue) =>
+                    setForm((current) => ({
+                      ...current,
+                      seoTitle: seo.title || "",
+                      seoDescription: seo.description || "",
+                      seoKeywords: String(seo.keywords || ""),
+                      canonicalPath: seo.canonicalPath || "",
+                      ogTitle: seo.ogTitle || "",
+                      ogDescription: seo.ogDescription || "",
+                      ogImage: seo.ogImage || "",
+                      robotsIndex: seo.robotsIndex ?? true,
+                      robotsFollow: seo.robotsFollow ?? true,
+                    }))
+                  }
+                />
+              </div>
+
               {/* Ordering and Featured checks */}
               <div className="flex items-center gap-6 pt-2">
+                <label className="flex items-center gap-2 text-xs text-gray-300">
+                  <input type="checkbox" name="isPublished" checked={form.isPublished} onChange={handleInputChange} />
+                  Published
+                </label>
                 <div className="flex items-center space-x-2">
                   <input
                     type="checkbox"

@@ -8,7 +8,9 @@
     "start": "next start",
     "lint": "eslint",
     "seed": "tsx prisma/seed.ts",
-    "seed:content": "tsx prisma/seed-content.ts"
+    "seed:content": "tsx prisma/seed-content.ts",
+    "seo:audit": "tsx scripts/seo-audit.ts",
+    "seo:test": "tsx --test src/lib/seo/schema/__tests__/*.test.ts src/lib/content/__tests__/*.test.ts"
   },
   "dependencies": {
     "@auth/prisma-adapter": "^2.11.2",

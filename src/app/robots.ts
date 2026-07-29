@@ -1,15 +1,23 @@
-import { MetadataRoute } from "next";
-import { siteConfig } from "@/data/site";
+import type { MetadataRoute } from "next";
+import { getSiteUrl } from "@/lib/seo/url";
 
 export default function robots(): MetadataRoute.Robots {
-  const baseUrl = siteConfig?.url || "https://cuongdesign.com";
-
+  const siteUrl = getSiteUrl();
   return {
     rules: {
       userAgent: "*",
       allow: "/",
-      disallow: ["/admin/", "/api/", "/download/", "/thanh-toan", "/login"],
+      disallow: [
+        "/admin/",
+        "/api/",
+        "/login",
+        "/preview/",
+        "/draft/",
+        "/thanh-toan/",
+        "/download/",
+      ],
     },
-    sitemap: `${baseUrl}/sitemap.xml`,
+    host: siteUrl,
+    sitemap: `${siteUrl}/sitemap.xml`,
   };
 }

@@ -123,6 +123,7 @@ export async function getRouteSuggestions() {
 
     // 2. Fetch projects slugs
     const projects = await prisma.project.findMany({
+      where: { isPublished: true },
       select: { title: true, slug: true }
     });
     projects.forEach(p => {
@@ -134,6 +135,7 @@ export async function getRouteSuggestions() {
 
     // 3. Fetch products slugs
     const products = await prisma.product.findMany({
+      where: { isPublished: true },
       select: { title: true, slug: true }
     });
     products.forEach(p => {

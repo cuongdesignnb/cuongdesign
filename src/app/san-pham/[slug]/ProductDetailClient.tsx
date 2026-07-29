@@ -40,6 +40,7 @@ interface Product {
   description: string;
   price: number;
   salePrice: number | null;
+  pricingMode: "FIXED" | "FREE" | "CONTACT";
   type: string;
   features: string[];
   techStack: string[];
@@ -171,6 +172,12 @@ export default function ProductDetailClient({
   };
 
   const finalPrice = product.salePrice !== null ? product.salePrice : product.price;
+  const priceLabel =
+    product.pricingMode === "CONTACT"
+      ? "LIÊN HỆ"
+      : product.pricingMode === "FREE"
+        ? "MIỄN PHÍ"
+        : formatVND(finalPrice);
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
@@ -352,9 +359,9 @@ export default function ProductDetailClient({
             <span className="text-[9px] text-gray-500 uppercase tracking-widest block">Giá bán</span>
             <div className="flex items-baseline gap-2 mt-1">
               <span className="text-2xl font-extrabold text-white">
-                {product.price === 0 ? "MIỄN PHÍ" : formatVND(finalPrice)}
+                {priceLabel}
               </span>
-              {product.salePrice !== null && product.price > 0 && (
+              {product.pricingMode === "FIXED" && product.salePrice !== null && (
                 <span className="text-xs text-gray-500 line-through">
                   {formatVND(product.price)}
                 </span>
@@ -392,7 +399,7 @@ export default function ProductDetailClient({
 
         {/* Call to actions */}
         <div className="space-y-3">
-          {product.price === 0 ? (
+          {product.pricingMode !== "FIXED" ? (
             <Button
               onClick={() => {
                 setFreeSuccess(false);
@@ -402,7 +409,7 @@ export default function ProductDetailClient({
               className="w-full bg-green-600 hover:bg-green-500 text-white font-bold py-3.5 flex items-center justify-center gap-2 rounded-xl text-sm"
             >
               <Download className="w-4 h-4" />
-              <span>Tải xuống Miễn phí (Free)</span>
+              <span>{product.pricingMode === "FREE" ? "Tải xuống miễn phí" : "Liên hệ báo giá"}</span>
             </Button>
           ) : (
             <Button

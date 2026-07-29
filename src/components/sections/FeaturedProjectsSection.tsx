@@ -35,9 +35,11 @@ const cardVariants = {
 export default function FeaturedProjectsSection({
   initialProjects = [],
   content = homeContentDefaults.projects,
+  headingLevel = 2,
 }: {
   initialProjects?: any[];
   content?: HomeContent["projects"];
+  headingLevel?: 1 | 2;
 }) {
   const projects = initialProjects;
   const [activeCategory, setActiveCategory] = useState<string>("All");
@@ -71,6 +73,7 @@ export default function FeaturedProjectsSection({
         <AnimatedSectionHeading
           title={content.title}
           subtitle={content.subtitle}
+          level={headingLevel}
         />
 
         {/* Filter Controls Panel */}

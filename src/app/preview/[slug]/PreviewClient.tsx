@@ -30,6 +30,7 @@ interface PreviewItem {
   demoUrl: string;
   price?: number;
   salePrice?: number | null;
+  pricingMode?: "FIXED" | "FREE" | "CONTACT";
   type?: string;
   features?: string[];
   techStack?: string[];
@@ -299,7 +300,7 @@ export default function PreviewClient({ item, isProject = false }: PreviewClient
               <MessageSquare className="w-3.5 h-3.5 shrink-0" />
               <span>Liên hệ tư vấn</span>
             </Button>
-          ) : item.price === 0 ? (
+          ) : (item.pricingMode || (item.price === 0 ? "FREE" : "FIXED")) !== "FIXED" ? (
             <Button
               variant="secondary"
               size="sm"

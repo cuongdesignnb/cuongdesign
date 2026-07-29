@@ -18,20 +18,21 @@ import Breadcrumbs from "@/components/ui/Breadcrumbs";
 import Button from "@/components/ui/Button";
 import GlassCard from "@/components/ui/GlassCard";
 import GradientText from "@/components/ui/GradientText";
-import { createMetadata, JsonLd } from "@/lib/seo";
+import { buildCollectionPageSchema, createMetadataFromSeoFields, JsonLd } from "@/lib/seo";
 import { getPublishedContent } from "@/lib/content/get-content";
 import { getPublishedServices } from "@/lib/content/get-service-content";
-import { siteConfig } from "@/data/site";
 
 const icons = { Layout, Globe, Target, ShoppingBag, BarChart3, Zap, Cpu, Code2 };
 
 export async function generateMetadata(): Promise<Metadata> {
   const content = await getPublishedContent("services");
-  return createMetadata({
-    title: content.metadata.title,
-    description: content.metadata.description,
+  return createMetadataFromSeoFields({
+    seo: content.metadata,
+    fallback: {
+      title: content.metadata.title,
+      description: content.metadata.description,
+    },
     path: "/dich-vu",
-    keywords: content.metadata.keywords.split(",").map((item) => item.trim()).filter(Boolean),
   });
 }
 
@@ -41,22 +42,17 @@ export default async function ServicesPage() {
     getPublishedServices(),
   ]);
 
-  const servicesSchema = {
-    "@context": "https://schema.org",
-    "@type": "ItemList",
-    numberOfItems: services.length,
-    itemListElement: services.map((service, index) => ({
-      "@type": "ListItem",
-      position: index + 1,
-      item: {
-        "@type": "Service",
-        name: service.title,
-        description: service.shortDescription,
-        url: `${siteConfig.url}/dich-vu/${service.slug}`,
-        provider: { "@type": "Person", name: siteConfig.author.name, url: siteConfig.url },
-      },
+  const servicesSchema = buildCollectionPageSchema({
+    path: "/dich-vu",
+    name: content.hero.title,
+    description: content.hero.intro,
+    items: services.map((service) => ({
+      name: service.title,
+      description: service.shortDescription,
+      image: service.coverMedia?.url,
+      url: `/dich-vu/${service.slug}`,
     })),
-  };
+  });
 
   return (
     <div className="min-h-screen bg-[#030014] text-gray-200 flex flex-col">

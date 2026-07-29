@@ -4,6 +4,12 @@ import Button from "@/components/ui/Button";
 import { getPublishedContent } from "@/lib/content/get-content";
 import { ArrowLeft } from "lucide-react";
 import Link from "next/link";
+import type { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "Không tìm thấy trang",
+  robots: { index: false, follow: false },
+};
 
 export default async function NotFound() {
   const content = await getPublishedContent("system-copy");

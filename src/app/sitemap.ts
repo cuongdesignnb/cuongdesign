@@ -1,116 +1,94 @@
-import { MetadataRoute } from "next";
+import type { MetadataRoute } from "next";
 import { prisma } from "@/lib/db";
-import { siteConfig } from "@/data/site";
+import { absoluteUrl } from "@/lib/seo/url";
+
+export const dynamic = "force-dynamic";
+
+const staticRoutes: Record<string, string> = {
+  home: "/",
+  about: "/gioi-thieu",
+  services: "/dich-vu",
+  process: "/quy-trinh",
+  skills: "/ky-nang",
+  projects: "/du-an",
+  products: "/san-pham",
+  reviews: "/danh-gia",
+  contact: "/lien-he",
+  blog: "/bai-viet",
+};
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const baseUrl = siteConfig?.url || "https://cuongdesign.com";
-
-  // Static routes
-  const staticPaths = [
-    "",
-    "/gioi-thieu",
-    "/du-an",
-    "/san-pham",
-    "/dich-vu",
-    "/quy-trinh",
-    "/ky-nang",
-    "/danh-gia",
-    "/lien-he",
-    "/bai-viet",
-  ];
-
-  const staticRoutes = staticPaths.map((path) => ({
-    url: `${baseUrl}${path}`,
-    lastModified: new Date(),
-    changeFrequency: (path === "" ? "daily" : "weekly") as "daily" | "weekly",
-    priority: path === "" ? 1.0 : 0.8,
-  }));
-
   try {
-    const services = await prisma.serviceContent.findMany({
-      where: { isPublished: true },
-      select: { slug: true, updatedAt: true },
-    });
-    // Dynamic policy pages
-    const dbPages = await prisma.page.findMany({
-      where: { isPublished: true },
-      select: { slug: true, updatedAt: true },
-    });
+    const [documents, services, pages, categories, posts, projects, products] =
+      await Promise.all([
+        prisma.contentDocument.findMany({
+          where: { key: { in: Object.keys(staticRoutes) }, status: "PUBLISHED" },
+          select: { key: true, updatedAt: true },
+        }),
+        prisma.serviceContent.findMany({
+          where: { isPublished: true, robotsIndex: true },
+          select: { slug: true, updatedAt: true, canonicalPath: true },
+        }),
+        prisma.page.findMany({
+          where: { isPublished: true, robotsIndex: true },
+          select: { slug: true, updatedAt: true, canonicalPath: true },
+        }),
+        prisma.category.findMany({
+          where: {
+            robotsIndex: true,
+            posts: { some: { status: "PUBLISHED", robotsIndex: true } },
+          },
+          select: { slug: true, updatedAt: true, canonicalPath: true },
+        }),
+        prisma.post.findMany({
+          where: { status: "PUBLISHED", robotsIndex: true },
+          select: { slug: true, updatedAt: true, canonicalPath: true },
+        }),
+        prisma.project.findMany({
+          where: { isPublished: true, robotsIndex: true },
+          select: { slug: true, updatedAt: true, canonicalPath: true },
+        }),
+        prisma.product.findMany({
+          where: { isPublished: true, robotsIndex: true },
+          select: { slug: true, updatedAt: true, canonicalPath: true },
+        }),
+      ]);
 
-    const pageRoutes = dbPages.map((page) => ({
-      url: `${baseUrl}/${page.slug}`,
-      lastModified: new Date(page.updatedAt),
-      changeFrequency: "monthly" as const,
-      priority: 0.5,
-    }));
-
-    // Dynamic blog categories
-    const dbCategories = await prisma.category.findMany({
-      select: { slug: true, updatedAt: true },
-    });
-
-    const categoryRoutes = dbCategories.map((cat) => ({
-      url: `${baseUrl}/bai-viet/${cat.slug}`,
-      lastModified: new Date(cat.updatedAt),
-      changeFrequency: "weekly" as const,
-      priority: 0.8,
-    }));
-
-    // Dynamic blog posts
-    const dbPosts = await prisma.post.findMany({
-      where: { status: "PUBLISHED" },
-      select: { slug: true, updatedAt: true, category: { select: { slug: true } } },
-    });
-
-    const blogRoutes = dbPosts.map((post) => ({
-      url: `${baseUrl}/bai-viet/${post.category?.slug || "chua-phan-loai"}/${post.slug}`,
-      lastModified: new Date(post.updatedAt),
-      changeFrequency: "weekly" as const,
-      priority: 0.8,
-    }));
-
-    // Dynamic projects
-    const dbProjects = await prisma.project.findMany({
-      select: { slug: true, updatedAt: true },
-    });
-
-    const projectRoutes = dbProjects.map((project) => ({
-      url: `${baseUrl}/du-an/${project.slug}`,
-      lastModified: new Date(project.updatedAt),
-      changeFrequency: "weekly" as const,
-      priority: 0.8,
-    }));
-
-    // Dynamic products
-    const dbProducts = await prisma.product.findMany({
-      select: { slug: true, updatedAt: true },
-    });
-
-    const productRoutes = dbProducts.map((product) => ({
-      url: `${baseUrl}/san-pham/${product.slug}`,
-      lastModified: new Date(product.updatedAt),
-      changeFrequency: "weekly" as const,
-      priority: 0.8,
-    }));
-
-    const serviceRoutes = services.map((service) => ({
-      url: `${baseUrl}/dich-vu/${service.slug}`,
-      lastModified: service.updatedAt,
-      changeFrequency: "monthly" as const,
-      priority: 0.8,
+    const documentDates = new Map(documents.map((document) => [document.key, document.updatedAt]));
+    const staticEntries = Object.entries(staticRoutes).map(([key, path]) => ({
+      url: absoluteUrl(path),
+      lastModified: documentDates.get(key),
     }));
 
     return [
-      ...staticRoutes,
-      ...serviceRoutes,
-      ...pageRoutes,
-      ...categoryRoutes,
-      ...blogRoutes,
-      ...projectRoutes,
-      ...productRoutes,
+      ...staticEntries,
+      ...services.map((item) => ({
+        url: absoluteUrl(item.canonicalPath || `/dich-vu/${item.slug}`),
+        lastModified: item.updatedAt,
+      })),
+      ...pages.map((item) => ({
+        url: absoluteUrl(item.canonicalPath || `/${item.slug}`),
+        lastModified: item.updatedAt,
+      })),
+      ...categories.map((item) => ({
+        url: absoluteUrl(item.canonicalPath || `/bai-viet/chuyen-muc/${item.slug}`),
+        lastModified: item.updatedAt,
+      })),
+      ...posts.map((item) => ({
+        url: absoluteUrl(item.canonicalPath || `/bai-viet/${item.slug}`),
+        lastModified: item.updatedAt,
+      })),
+      ...projects.map((item) => ({
+        url: absoluteUrl(item.canonicalPath || `/du-an/${item.slug}`),
+        lastModified: item.updatedAt,
+      })),
+      ...products.map((item) => ({
+        url: absoluteUrl(item.canonicalPath || `/san-pham/${item.slug}`),
+        lastModified: item.updatedAt,
+      })),
     ];
   } catch (error) {
-    console.error("Lỗi khi lập chỉ mục sitemap:", error);
-    return staticRoutes;
+    console.error("[SEO] Could not generate sitemap.", error);
+    return Object.values(staticRoutes).map((path) => ({ url: absoluteUrl(path) }));
   }
 }

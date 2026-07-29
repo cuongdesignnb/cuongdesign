@@ -73,6 +73,7 @@ export async function GET(
     responseHeaders.set("Content-Disposition", `attachment; filename="${filename}"`);
     responseHeaders.set("Content-Type", "application/zip");
     responseHeaders.set("Content-Length", String(fileBuffer.length));
+    responseHeaders.set("X-Robots-Tag", "noindex, nofollow, noarchive");
 
     return new Response(fileBuffer, {
       status: 200,

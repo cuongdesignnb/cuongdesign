@@ -6,6 +6,7 @@ import {
 } from "@/app/actions/service-content";
 import ContentEditor from "./ContentEditor";
 import MediaField from "./MediaField";
+import SeoFields, { type SeoValue } from "./SeoFields";
 import RepeaterField from "./RepeaterField";
 import { ArrowLeft, Save } from "lucide-react";
 import Link from "next/link";
@@ -35,6 +36,12 @@ interface ServiceFormValue {
   seoTitle: string;
   seoDescription: string;
   seoKeywords: string[];
+  canonicalPath: string;
+  ogTitle: string;
+  ogDescription: string;
+  ogImage: string;
+  robotsIndex: boolean;
+  robotsFollow: boolean;
   isPublished: boolean;
   order: number;
 }
@@ -128,11 +135,40 @@ export default function ServiceContentForm({ initial }: { initial: ServiceFormVa
         />
 
         <label className="space-y-1 text-xs text-gray-400">CTA<input value={form.ctaText} onChange={(event) => set("ctaText", event.target.value)} className={inputClass} /></label>
-        <div className="grid gap-4 md:grid-cols-2">
-          <label className="space-y-1 text-xs text-gray-400">SEO title<input value={form.seoTitle} onChange={(event) => set("seoTitle", event.target.value)} className={inputClass} /></label>
-          <label className="space-y-1 text-xs text-gray-400">SEO keywords<input value={form.seoKeywords.join(", ")} onChange={(event) => set("seoKeywords", event.target.value.split(",").map((item) => item.trim()).filter(Boolean))} className={inputClass} /></label>
-        </div>
-        <label className="space-y-1 text-xs text-gray-400">SEO description<textarea rows={3} value={form.seoDescription} onChange={(event) => set("seoDescription", event.target.value)} className={inputClass} /></label>
+        <SeoFields
+          entityType="service"
+          basePath="/dich-vu"
+          slug={form.slug}
+          fallbackTitle={form.title}
+          fallbackDescription={form.shortDescription}
+          value={{
+            title: form.seoTitle,
+            description: form.seoDescription,
+            keywords: form.seoKeywords,
+            canonicalPath: form.canonicalPath,
+            ogTitle: form.ogTitle,
+            ogDescription: form.ogDescription,
+            ogImage: form.ogImage,
+            robotsIndex: form.robotsIndex,
+            robotsFollow: form.robotsFollow,
+          }}
+          onChange={(seo: SeoValue) =>
+            setForm((current) => ({
+              ...current,
+              seoTitle: seo.title || "",
+              seoDescription: seo.description || "",
+              seoKeywords: Array.isArray(seo.keywords)
+                ? seo.keywords
+                : String(seo.keywords || "").split(",").map((item) => item.trim()).filter(Boolean),
+              canonicalPath: seo.canonicalPath || "",
+              ogTitle: seo.ogTitle || "",
+              ogDescription: seo.ogDescription || "",
+              ogImage: seo.ogImage || "",
+              robotsIndex: seo.robotsIndex ?? true,
+              robotsFollow: seo.robotsFollow ?? true,
+            }))
+          }
+        />
         <label className="flex items-center gap-2 text-xs text-gray-300"><input type="checkbox" checked={form.isPublished} onChange={(event) => set("isPublished", event.target.checked)} />Published</label>
       </div>
 

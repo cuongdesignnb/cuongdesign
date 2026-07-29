@@ -8,6 +8,7 @@ import { revalidateServices } from "@/lib/content/revalidate";
 import { prisma } from "@/lib/db";
 import type { Prisma } from "@prisma/client";
 import { revalidatePath } from "next/cache";
+import { recordSeoRedirect } from "@/lib/seo/redirects";
 
 function errorMessage(error: unknown) {
   return error instanceof Error ? error.message : "Unknown error";
@@ -41,8 +42,20 @@ export async function createServiceContent(input: unknown): Promise<ContentActio
 export async function updateServiceContent(id: string, input: unknown): Promise<ContentActionResult> {
   try {
     await requireAdmin();
+    const previous = await prisma.serviceContent.findUnique({
+      where: { id },
+      select: { slug: true },
+    });
     const data = serviceData(input);
     const service = await prisma.serviceContent.update({ where: { id }, data });
+    if (previous && previous.slug !== service.slug) {
+      await recordSeoRedirect(
+        `/dich-vu/${previous.slug}`,
+        `/dich-vu/${service.slug}`,
+        "service-slug-changed",
+      );
+      revalidateServices(previous.slug);
+    }
     revalidateServices(service.slug);
     revalidatePath(`/admin/content/services/${id}`);
     return { success: true, data: service };
@@ -58,7 +71,10 @@ export async function publishServiceContent(id: string): Promise<ContentActionRe
     if (!current) return { success: false, error: "Service not found." };
     const service = await prisma.serviceContent.update({
       where: { id },
-      data: { isPublished: !current.isPublished },
+      data: {
+        isPublished: !current.isPublished,
+        publishedAt: current.isPublished ? null : new Date(),
+      },
     });
     revalidateServices(service.slug);
     revalidatePath("/admin/content/services");

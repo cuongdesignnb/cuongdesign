@@ -23,6 +23,12 @@ const emptyService = {
   seoTitle: "",
   seoDescription: "",
   seoKeywords: [],
+  canonicalPath: "",
+  ogTitle: "",
+  ogDescription: "",
+  ogImage: "",
+  robotsIndex: true,
+  robotsFollow: true,
   isPublished: false,
   order: 0,
 };
@@ -53,6 +59,10 @@ export default async function AdminServiceContentPage({
           ctaText: service.ctaText ?? "",
           seoTitle: service.seoTitle ?? "",
           seoDescription: service.seoDescription ?? "",
+          canonicalPath: service.canonicalPath ?? "",
+          ogTitle: service.ogTitle ?? "",
+          ogDescription: service.ogDescription ?? "",
+          ogImage: service.ogImage ?? "",
         }),
       )}
     />

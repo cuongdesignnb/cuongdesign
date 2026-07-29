@@ -7,17 +7,18 @@ import GradientText from "@/components/ui/GradientText";
 import Button from "@/components/ui/Button";
 import { MessageSquare, Layout, Paintbrush, Cpu, CheckCircle2, ShieldAlert, ArrowRight } from "lucide-react";
 import Link from "next/link";
-import { createMetadata, JsonLd } from "@/lib/seo";
-import { siteConfig } from "@/data/site";
+import { buildWebPageSchema, createMetadataFromSeoFields, JsonLd } from "@/lib/seo";
 import { getPublishedContent } from "@/lib/content/get-content";
 
 export async function generateMetadata() {
   const content = await getPublishedContent("process");
-  return createMetadata({
-    title: content.metadata.title,
-    description: content.metadata.description,
+  return createMetadataFromSeoFields({
+    seo: content.metadata,
+    fallback: {
+      title: content.metadata.title,
+      description: content.metadata.description,
+    },
     path: "/quy-trinh",
-    keywords: content.metadata.keywords.split(",").map((item) => item.trim()).filter(Boolean),
   });
 }
 
@@ -108,25 +109,30 @@ export default async function ProcessPage() {
       }))
     : defaultSteps;
 
-  // HowTo JSON-LD schema with steps from work process
-  const howToSchema = {
+  const processSchema = {
     "@context": "https://schema.org",
-    "@type": "HowTo",
-    "name": "Quy trình thiết kế & lập trình website chuyên nghiệp",
-    "description": "Quy trình 6 bước phát triển phần mềm và thiết kế giao diện chuẩn hóa tại Cuong Design.",
-    "url": `${siteConfig.url}/quy-trinh`,
-    "totalTime": "P30D",
-    "step": steps.map((step) => ({
-      "@type": "HowToStep",
-      "name": step.title,
-      "text": step.desc,
-      "url": `${siteConfig.url}/quy-trinh#step-${step.id}`
-    }))
+    "@graph": [
+      buildWebPageSchema({
+        path: "/quy-trinh",
+        name: content.hero.title,
+        description: content.hero.intro,
+      }),
+      {
+        "@type": "ItemList",
+        numberOfItems: steps.length,
+        itemListElement: steps.map((step, index) => ({
+          "@type": "ListItem",
+          position: index + 1,
+          name: step.title,
+          description: step.desc,
+        })),
+      },
+    ],
   };
 
   return (
     <div className="min-h-screen bg-[#030014] text-gray-200 flex flex-col">
-      <JsonLd data={howToSchema} />
+      <JsonLd data={processSchema} />
       <Header />
 
       <main className="grow pt-28 pb-16 px-4 sm:px-6 lg:px-8 relative overflow-hidden">

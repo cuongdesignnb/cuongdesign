@@ -3,7 +3,7 @@ import LoginForm from "./LoginForm";
 
 export const metadata: Metadata = {
   title: "Đăng nhập | CUONG DESIGN",
-  description: "Đăng nhập hệ thống quản trị Cuong Design",
+  description: "Đăng nhập hệ thống quản trị Cường Design",
   robots: {
     index: false,
     follow: false,

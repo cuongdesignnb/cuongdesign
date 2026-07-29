@@ -4,61 +4,58 @@ import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
 import Breadcrumbs from "@/components/ui/Breadcrumbs";
 import GlassCard from "@/components/ui/GlassCard";
-import { prisma } from "@/lib/db";
 import { BookOpen, Calendar, ArrowRight, Clock, Layers } from "lucide-react";
 import Link from "next/link";
-import { createMetadata, JsonLd } from "@/lib/seo";
+import { buildCollectionPageSchema, createMetadataFromSeoFields, JsonLd } from "@/lib/seo";
 import type { Metadata } from "next";
+import { getCategoryBySlug } from "@/lib/seo/queries";
+import { prisma } from "@/lib/db";
 
 interface CategoryPageProps {
-  params: Promise<{ category: string }>;
+  params: Promise<{ slug: string }>;
 }
 
 export async function generateMetadata({ params }: CategoryPageProps): Promise<Metadata> {
-  const { category: categorySlug } = await params;
+  const { slug } = await params;
+  const category = await getCategoryBySlug(slug);
 
-  const category = await prisma.category.findUnique({
-    where: { slug: categorySlug },
-  });
+  if (!category) return { robots: { index: false, follow: false } };
 
-  if (!category) return {};
-
-  return createMetadata({
-    title: `${category.name} — Blog Chuyên mục`,
-    description: category.description || `Tổng hợp các bài viết thuộc chuyên mục ${category.name} — chia sẻ kiến thức và kinh nghiệm thực tiễn từ Cường Design.`,
-    path: `/bai-viet/${category.slug}`,
-    keywords: [category.name, "Blog", "Cường Design", "Chuyên mục"],
+  return createMetadataFromSeoFields({
+    seo: {
+      title: category.seoTitle || undefined,
+      description: category.seoDescription || undefined,
+      keywords: category.seoKeywords,
+      canonicalPath: category.canonicalPath || undefined,
+      ogTitle: category.ogTitle || undefined,
+      ogDescription: category.ogDescription || undefined,
+      ogImage: category.ogImage || undefined,
+      robotsIndex: category.robotsIndex,
+      robotsFollow: category.robotsFollow,
+    },
+    fallback: {
+      title: `${category.name} — Chuyên mục blog`,
+      description: category.description || `Tổng hợp bài viết thuộc chuyên mục ${category.name}.`,
+      keywords: [category.name, "Blog", "Chuyên mục"],
+      image: category.coverImage || undefined,
+    },
+    path: `/bai-viet/chuyen-muc/${category.slug}`,
   });
 }
 
 export default async function CategoryPage({ params }: CategoryPageProps) {
-  const { category: categorySlug } = await params;
-
-  // Fetch current category
-  const category = await prisma.category.findUnique({
-    where: { slug: categorySlug },
-  });
+  const { slug } = await params;
+  const category = await getCategoryBySlug(slug);
 
   if (!category) {
     notFound();
   }
 
   // Fetch all categories for navigation pills + posts for this category
-  const [allCategories, posts] = await Promise.all([
+  const [allCategories] = await Promise.all([
     prisma.category.findMany({ orderBy: { order: "asc" } }),
-    prisma.post.findMany({
-      where: {
-        categoryId: category.id,
-        status: "PUBLISHED",
-      },
-      include: {
-        category: {
-          select: { name: true, slug: true, color: true },
-        },
-      },
-      orderBy: { publishedAt: "desc" },
-    }),
   ]);
+  const posts = category.posts;
 
   // Calculate reading time helper
   const getReadTime = (content: string | null) => {
@@ -69,38 +66,17 @@ export default async function CategoryPage({ params }: CategoryPageProps) {
   };
 
   // Schema.org CollectionPage structured data
-  const collectionSchema = {
-    "@context": "https://schema.org",
-    "@type": "CollectionPage",
-    "name": `${category.name} — Chuyên mục Blog`,
-    "description": category.description || `Tổng hợp các bài viết thuộc chuyên mục ${category.name}.`,
-    "url": `https://cuongdesign.com/bai-viet/${category.slug}`,
-    "isPartOf": {
-      "@type": "Blog",
-      "name": "Cường Design Blog",
-      "url": "https://cuongdesign.com/bai-viet",
-    },
-    "mainEntity": {
-      "@type": "ItemList",
-      "numberOfItems": posts.length,
-      "itemListElement": posts.map((post, index) => ({
-        "@type": "ListItem",
-        "position": index + 1,
-        "item": {
-          "@type": "BlogPosting",
-          "headline": post.title,
-          "url": `https://cuongdesign.com/bai-viet/${category.slug}/${post.slug}`,
-          "datePublished": post.publishedAt || post.createdAt,
-          "dateModified": post.updatedAt,
-          "author": {
-            "@type": "Person",
-            "name": "Cường Design",
-          },
-          "articleSection": category.name,
-        },
-      })),
-    },
-  };
+  const collectionSchema = buildCollectionPageSchema({
+    path: `/bai-viet/chuyen-muc/${category.slug}`,
+    name: `${category.name} — Chuyên mục Blog`,
+    description: category.description || undefined,
+    items: posts.map((post) => ({
+      name: post.title,
+      url: `/bai-viet/${post.slug}`,
+      description: post.excerpt || undefined,
+      image: post.coverImage || undefined,
+    })),
+  });
 
   const accentColor = category.color || "#ec4899";
 
@@ -198,12 +174,12 @@ export default async function CategoryPage({ params }: CategoryPageProps) {
             </Link>
 
             {allCategories.map((cat) => {
-              const isActive = cat.slug === categorySlug;
+              const isActive = cat.slug === category.slug;
               const pillColor = cat.color || "#ec4899";
               return (
                 <Link
                   key={cat.id}
-                  href={`/bai-viet/${cat.slug}`}
+                  href={`/bai-viet/chuyen-muc/${cat.slug}`}
                   className={`inline-flex items-center gap-1.5 px-4 py-2 rounded-full text-xs font-semibold transition-all duration-200 ${
                     isActive
                       ? "shadow-[0_0_12px_rgba(236,72,153,0.15)]"
@@ -237,7 +213,7 @@ export default async function CategoryPage({ params }: CategoryPageProps) {
           {posts.length > 0 ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
               {posts.map((post) => {
-                const postUrl = `/bai-viet/${category.slug}/${post.slug}`;
+                const postUrl = `/bai-viet/${post.slug}`;
                 return (
                   <GlassCard
                     key={post.id}
@@ -264,20 +240,20 @@ export default async function CategoryPage({ params }: CategoryPageProps) {
                     {/* Post Info */}
                     <div className="p-6 flex flex-col grow space-y-4 text-left">
                       <div className="flex flex-col gap-2.5">
-                        {post.category && (
+                        {category && (
                           <span
                             className="inline-flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-full w-fit"
                             style={{
-                              backgroundColor: `${post.category.color || "#ec4899"}15`,
-                              color: post.category.color || "#ec4899",
-                              border: `1px solid ${post.category.color || "#ec4899"}30`,
+                              backgroundColor: `${category.color || "#ec4899"}15`,
+                              color: category.color || "#ec4899",
+                              border: `1px solid ${category.color || "#ec4899"}30`,
                             }}
                           >
                             <span
                               className="w-1.5 h-1.5 rounded-full"
-                              style={{ backgroundColor: post.category.color || "#ec4899" }}
+                              style={{ backgroundColor: category.color || "#ec4899" }}
                             />
-                            {post.category.name}
+                            {category.name}
                           </span>
                         )}
                         <div className="flex items-center space-x-4 text-[10px] text-gray-500 font-mono">

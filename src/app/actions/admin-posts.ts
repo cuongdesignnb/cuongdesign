@@ -5,6 +5,8 @@ import type { PostStatus } from "@prisma/client";
 import { requireAdmin } from "@/lib/auth/require-admin";
 import { sanitizeRichHtml } from "@/lib/content/sanitize";
 import { revalidatePath } from "next/cache";
+import { normalizeSlug } from "@/lib/seo/slug";
+import { recordSeoRedirect } from "@/lib/seo/redirects";
 
 function revalidatePost(slug?: string) {
   revalidatePath("/admin/blog/posts");
@@ -23,13 +25,19 @@ export async function createPost(data: {
   seoTitle?: string;
   seoDescription?: string;
   seoKeywords?: string;
+  canonicalPath?: string;
+  ogTitle?: string;
+  ogDescription?: string;
+  ogImage?: string;
+  robotsIndex?: boolean;
+  robotsFollow?: boolean;
 }) {
   try {
     await requireAdmin();
     const post = await prisma.post.create({
       data: {
         title: data.title,
-        slug: data.slug,
+        slug: normalizeSlug(data.slug),
         excerpt: data.excerpt || null,
         content: sanitizeRichHtml(data.content || ""),
         coverImage: data.coverImage || null,
@@ -41,6 +49,12 @@ export async function createPost(data: {
         seoKeywords: data.seoKeywords
           ? data.seoKeywords.split(",").map((k) => k.trim()).filter(Boolean)
           : [],
+        canonicalPath: data.canonicalPath || null,
+        ogTitle: data.ogTitle || null,
+        ogDescription: data.ogDescription || null,
+        ogImage: data.ogImage || null,
+        robotsIndex: data.robotsIndex ?? true,
+        robotsFollow: data.robotsFollow ?? true,
       },
     });
     revalidatePost(post.slug);
@@ -79,10 +93,20 @@ export async function updatePost(
     seoTitle?: string;
     seoDescription?: string;
     seoKeywords?: string;
+    canonicalPath?: string;
+    ogTitle?: string;
+    ogDescription?: string;
+    ogImage?: string;
+    robotsIndex?: boolean;
+    robotsFollow?: boolean;
   }
 ) {
   try {
     await requireAdmin();
+    const previous = await prisma.post.findUnique({
+      where: { id },
+      select: { slug: true },
+    });
     // Build update data, converting seoKeywords string to array
     const updateData: Record<string, unknown> = { ...data };
     if (data.seoKeywords !== undefined) {
@@ -94,10 +118,19 @@ export async function updatePost(
     if (data.content !== undefined) {
       updateData.content = sanitizeRichHtml(data.content);
     }
+    if (data.slug !== undefined) updateData.slug = normalizeSlug(data.slug);
     const post = await prisma.post.update({
       where: { id },
       data: updateData,
     });
+    if (previous && previous.slug !== post.slug) {
+      await recordSeoRedirect(
+        `/bai-viet/${previous.slug}`,
+        `/bai-viet/${post.slug}`,
+        "post-slug-changed",
+      );
+      revalidatePost(previous.slug);
+    }
     revalidatePost(post.slug);
     return { success: true, data: post };
   } catch (error: any) {

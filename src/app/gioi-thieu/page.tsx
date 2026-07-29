@@ -8,16 +8,20 @@ import Button from "@/components/ui/Button";
 import { User, Calendar, Briefcase, Award, ArrowRight, ShieldCheck, Mail, Phone, MapPin } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
-import { createMetadata, JsonLd } from "@/lib/seo";
+import { buildProfilePageSchema, createMetadataFromSeoFields, JsonLd } from "@/lib/seo";
 import { getPublishedContent } from "@/lib/content/get-content";
 
 export async function generateMetadata() {
   const content = await getPublishedContent("about");
-  return createMetadata({
-    title: content.metadata.title,
-    description: content.metadata.description,
+  return createMetadataFromSeoFields({
+    seo: content.metadata,
+    fallback: {
+      title: content.metadata.title,
+      description: content.metadata.description,
+      image: content.hero.avatarMedia,
+    },
     path: "/gioi-thieu",
-    keywords: content.metadata.keywords.split(",").map((item) => item.trim()).filter(Boolean),
+    type: "profile",
   });
 }
 
@@ -28,43 +32,16 @@ export default async function AboutPage() {
   ]);
   const avatarUrl = content.hero.avatarMedia || global.author.avatarMedia;
   // Schema.org Person & AboutPage Structured Metadata
-  const personSchema = {
-    "@context": "https://schema.org",
-    "@type": "AboutPage",
-    "mainEntity": {
-      "@type": "Person",
-      "name": global.author.name || content.profile.name,
-      "alternateName": global.author.alternateName,
-      "jobTitle": global.author.jobTitle || content.profile.jobTitle,
-      "image": avatarUrl,
-      "worksFor": {
-        "@type": "Organization",
-        "name": "Freelancer",
-      },
-      "url": global.brand.websiteUrl,
-      "sameAs": [
-        global.social.facebook,
-        global.social.github,
-        global.social.linkedin,
-      ].filter(Boolean),
-      "email": global.contact.email,
-      "telephone": global.contact.phone,
-      "address": {
-        "@type": "PostalAddress",
-        "addressLocality": global.contact.address,
-        "addressCountry": "Việt Nam",
-      },
-      "knowsAbout": [
-        "ReactJS", "NextJS", "NodeJS", "UI/UX Design", "Figma", "Prisma ORM", "Docker", "SEO Optimization"
-      ],
-    }
-  };
+  const personSchema = buildProfilePageSchema({
+    name: content.metadata.title,
+    description: content.metadata.description,
+  });
 
   const defaultCareerTimeline = [
     {
       period: "2024 - Hiện tại",
       role: "Freelance Solution Architect & Fullstack Engineer",
-      company: "Tự do (Thương hiệu cá nhân Cuong Design)",
+      company: "Tự do (Thương hiệu cá nhân Cường Design)",
       desc: "Chuyên tư vấn kiến trúc công nghệ, lập trình web landing page premium, dashboard e-commerce phức tạp và tích hợp tự động hóa thanh toán cho đối tác trong và ngoài nước.",
     },
     {
@@ -243,7 +220,7 @@ export default async function AboutPage() {
                     <ArrowRight className="w-4 h-4" />
                   </Button>
                 </Link>
-                <Link href="/#products">
+                <Link href="/san-pham">
                   <Button variant="outline" className="px-6 font-semibold">
                     Xem source code của tôi
                   </Button>

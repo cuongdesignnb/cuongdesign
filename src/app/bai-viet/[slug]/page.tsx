@@ -1,71 +1,60 @@
 import React from "react";
-import { notFound } from "next/navigation";
+import { notFound, permanentRedirect } from "next/navigation";
 import { prisma } from "@/lib/db";
 import { sanitizeRichHtml } from "@/lib/content/sanitize";
 import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
 import Breadcrumbs from "@/components/ui/Breadcrumbs";
 import GlassCard from "@/components/ui/GlassCard";
-import { createMetadata, JsonLd } from "@/lib/seo";
+import { buildArticleSchema, createMetadataFromSeoFields, JsonLd } from "@/lib/seo";
 import { Clock, Calendar, User, ArrowLeft, ArrowRight, Tag, BookOpen, Layers } from "lucide-react";
 import Link from "next/link";
 import type { Metadata } from "next";
+import { getCategoryBySlug, getPostBySlug } from "@/lib/seo/queries";
+import { resolveSeoRedirect } from "@/lib/seo/resolve-redirect";
 
 interface BlogPostPageProps {
-  params: Promise<{ category: string; slug: string }>;
+  params: Promise<{ slug: string }>;
 }
 
 export async function generateMetadata({ params }: BlogPostPageProps): Promise<Metadata> {
-  const { category: categorySlug, slug } = await params;
+  const { slug } = await params;
+  const post = await getPostBySlug(slug);
 
-  const post = await prisma.post.findFirst({
-    where: {
-      OR: [{ slug }, { id: slug }],
+  if (!post) return { robots: { index: false, follow: false } };
+
+  return createMetadataFromSeoFields({
+    seo: {
+      title: post.seoTitle || undefined,
+      description: post.seoDescription || undefined,
+      keywords: post.seoKeywords,
+      canonicalPath: post.canonicalPath || undefined,
+      ogTitle: post.ogTitle || undefined,
+      ogDescription: post.ogDescription || undefined,
+      ogImage: post.ogImage || undefined,
+      robotsIndex: post.robotsIndex,
+      robotsFollow: post.robotsFollow,
     },
-    include: {
-      category: { select: { name: true, slug: true } },
+    fallback: {
+      title: `${post.title} — Bài viết`,
+      description: post.excerpt || post.title,
+      image: post.coverImage || undefined,
     },
-  });
-
-  if (!post) return {};
-
-  const canonicalCategory = post.category?.slug || "chua-phan-loai";
-
-  return createMetadata({
-    title: `${post.seoTitle || post.title} — Bài viết`,
-    description: post.seoDescription || post.excerpt || post.title,
-    path: `/bai-viet/${canonicalCategory}/${post.slug}`,
-    keywords: post.seoKeywords || [],
-    openGraph: {
-      type: "article",
-      images: post.coverImage ? [{ url: post.coverImage }] : undefined,
-      publishedTime: post.publishedAt?.toISOString(),
-      modifiedTime: post.updatedAt.toISOString(),
-      authors: ["Cường Design"],
-    },
+    path: `/bai-viet/${post.slug}`,
+    type: "article",
+    publishedTime: post.publishedAt?.toISOString(),
+    modifiedTime: post.updatedAt.toISOString(),
   });
 }
 
 export default async function BlogPostPage({ params }: BlogPostPageProps) {
-  const { category: categorySlug, slug } = await params;
-
-  // Fetch post with category
-  const post = await prisma.post.findFirst({
-    where: {
-      OR: [{ slug }, { id: slug }],
-    },
-    include: {
-      category: true,
-    },
-  });
+  const { slug } = await params;
+  const post = await getPostBySlug(slug);
 
   if (!post) {
-    notFound();
-  }
-
-  // Verify post belongs to correct category — 404 if mismatch
-  const postCategorySlug = post.category?.slug || "chua-phan-loai";
-  if (postCategorySlug !== categorySlug) {
+    const category = await getCategoryBySlug(slug);
+    if (category) permanentRedirect(`/bai-viet/chuyen-muc/${category.slug}`);
+    await resolveSeoRedirect(`/bai-viet/${slug}`);
     notFound();
   }
 
@@ -78,8 +67,6 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
   };
 
   const readingTime = getReadTime(post.content);
-  const canonicalUrl = `https://cuongdesign.com/bai-viet/${categorySlug}/${post.slug}`;
-
   // Fetch related posts from same category (exclude current)
   const relatedPosts = post.categoryId
     ? await prisma.post.findMany({
@@ -97,36 +84,17 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
     : [];
 
   // Schema.org BlogPosting structured data
-  const blogPostingSchema = {
-    "@context": "https://schema.org",
-    "@type": "BlogPosting",
-    "mainEntityOfPage": {
-      "@type": "WebPage",
-      "@id": canonicalUrl,
-    },
-    "headline": post.title,
-    "description": post.excerpt || post.seoDescription || post.title,
-    "image": post.coverImage
-      ? `https://cuongdesign.com${post.coverImage}`
-      : "https://cuongdesign.com/images/og-image.jpg",
-    "author": {
-      "@type": "Person",
-      "name": "Cường Design",
-      "url": "https://cuongdesign.com",
-    },
-    "publisher": {
-      "@type": "Organization",
-      "name": "CUONG DESIGN",
-      "logo": {
-        "@type": "ImageObject",
-        "url": "https://cuongdesign.com/favicon.ico",
-      },
-    },
-    "datePublished":
-      post.publishedAt?.toISOString() || post.createdAt.toISOString(),
-    "dateModified": post.updatedAt.toISOString(),
-    ...(post.category?.name && { "articleSection": post.category.name }),
-  };
+  const blogPostingSchema = buildArticleSchema({
+    slug: post.slug,
+    headline: post.title,
+    description: post.excerpt || post.seoDescription || post.title,
+    image: post.coverImage || "/images/og-image.jpg",
+    publishedAt: post.publishedAt || post.createdAt,
+    updatedAt: post.updatedAt,
+    section: post.category?.name,
+    keywords: post.seoKeywords,
+    content: post.content,
+  });
 
   const accentColor = post.category?.color || "#ec4899";
 
@@ -149,7 +117,7 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
                 ? [
                     {
                       label: post.category.name,
-                      href: `/bai-viet/${post.category.slug}`,
+                      href: `/bai-viet/chuyen-muc/${post.category.slug}`,
                     },
                   ]
                 : []),
@@ -161,7 +129,7 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
           <div className="space-y-4 text-left">
             {/* Category badge */}
             {post.category && (
-              <Link href={`/bai-viet/${post.category.slug}`}>
+              <Link href={`/bai-viet/chuyen-muc/${post.category.slug}`}>
                 <span
                   className="inline-flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider px-3 py-1.5 rounded-full transition-opacity hover:opacity-80"
                   style={{
@@ -241,7 +209,7 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
           {/* Back to blog */}
           <div className="border-t border-white/5 pt-6">
             <Link
-              href={post.category ? `/bai-viet/${post.category.slug}` : "/bai-viet"}
+              href={post.category ? `/bai-viet/chuyen-muc/${post.category.slug}` : "/bai-viet"}
               className="inline-flex items-center gap-2 text-sm text-gray-400 hover:text-pink-400 transition-colors"
             >
               <ArrowLeft className="w-4 h-4" />
@@ -261,7 +229,7 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
               </h2>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 {relatedPosts.map((related) => {
-                  const relatedUrl = `/bai-viet/${related.category?.slug || "chua-phan-loai"}/${related.slug}`;
+                  const relatedUrl = `/bai-viet/${related.slug}`;
                   return (
                     <GlassCard
                       key={related.id}

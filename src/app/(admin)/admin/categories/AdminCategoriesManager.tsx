@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { useToast } from "@/components/ui/Toast";
 import { slugify } from "@/lib/utils";
 import MediaField from "@/components/admin/content/MediaField";
+import SeoFields, { type SeoValue } from "@/components/admin/content/SeoFields";
 import {
   upsertCategory,
   deleteCategory,
@@ -31,6 +32,15 @@ interface CategoryItem {
   coverImage: string | null;
   color: string | null;
   order: number;
+  seoTitle: string | null;
+  seoDescription: string | null;
+  seoKeywords: string[];
+  canonicalPath: string | null;
+  ogTitle: string | null;
+  ogDescription: string | null;
+  ogImage: string | null;
+  robotsIndex: boolean;
+  robotsFollow: boolean;
   createdAt: string;
   _count: { posts: number };
 }
@@ -58,13 +68,27 @@ export default function AdminCategoriesManager({
     coverImage: "",
     color: "#ec4899",
     order: 0,
+    seoTitle: "",
+    seoDescription: "",
+    seoKeywords: "",
+    canonicalPath: "",
+    ogTitle: "",
+    ogDescription: "",
+    ogImage: "",
+    robotsIndex: true,
+    robotsFollow: true,
   });
 
   const totalPosts = initialCategories.reduce((sum, c) => sum + c._count.posts, 0);
 
   const openAdd = () => {
     setEditingId(null);
-    setFormData({ name: "", slug: "", description: "", coverImage: "", color: "#ec4899", order: initialCategories.length });
+    setFormData({
+      name: "", slug: "", description: "", coverImage: "", color: "#ec4899",
+      order: initialCategories.length, seoTitle: "", seoDescription: "", seoKeywords: "",
+      canonicalPath: "", ogTitle: "", ogDescription: "", ogImage: "",
+      robotsIndex: true, robotsFollow: true,
+    });
     setShowModal(true);
   };
 
@@ -77,6 +101,15 @@ export default function AdminCategoriesManager({
       coverImage: cat.coverImage || "",
       color: cat.color || "#ec4899",
       order: cat.order,
+      seoTitle: cat.seoTitle || "",
+      seoDescription: cat.seoDescription || "",
+      seoKeywords: cat.seoKeywords.join(", "),
+      canonicalPath: cat.canonicalPath || "",
+      ogTitle: cat.ogTitle || "",
+      ogDescription: cat.ogDescription || "",
+      ogImage: cat.ogImage || "",
+      robotsIndex: cat.robotsIndex,
+      robotsFollow: cat.robotsFollow,
     });
     setShowModal(true);
   };
@@ -109,6 +142,15 @@ export default function AdminCategoriesManager({
         coverImage: formData.coverImage.trim() || undefined,
         color: formData.color.trim() || undefined,
         order: formData.order,
+        seoTitle: formData.seoTitle || undefined,
+        seoDescription: formData.seoDescription || undefined,
+        seoKeywords: formData.seoKeywords,
+        canonicalPath: formData.canonicalPath || undefined,
+        ogTitle: formData.ogTitle || undefined,
+        ogDescription: formData.ogDescription || undefined,
+        ogImage: formData.ogImage || undefined,
+        robotsIndex: formData.robotsIndex,
+        robotsFollow: formData.robotsFollow,
       });
       if (res.success) {
         toast.success("Thành công", editingId ? "Đã cập nhật chuyên mục" : "Đã tạo chuyên mục mới");
@@ -338,6 +380,40 @@ export default function AdminCategoriesManager({
                 value={formData.coverImage}
                 onChange={(coverImage) =>
                   setFormData((prev) => ({ ...prev, coverImage }))
+                }
+              />
+
+              <SeoFields
+                entityType="category"
+                basePath="/bai-viet/chuyen-muc"
+                slug={formData.slug}
+                fallbackTitle={formData.name}
+                fallbackDescription={formData.description}
+                fallbackImage={formData.coverImage}
+                value={{
+                  title: formData.seoTitle,
+                  description: formData.seoDescription,
+                  keywords: formData.seoKeywords,
+                  canonicalPath: formData.canonicalPath,
+                  ogTitle: formData.ogTitle,
+                  ogDescription: formData.ogDescription,
+                  ogImage: formData.ogImage,
+                  robotsIndex: formData.robotsIndex,
+                  robotsFollow: formData.robotsFollow,
+                }}
+                onChange={(seo: SeoValue) =>
+                  setFormData((current) => ({
+                    ...current,
+                    seoTitle: seo.title || "",
+                    seoDescription: seo.description || "",
+                    seoKeywords: String(seo.keywords || ""),
+                    canonicalPath: seo.canonicalPath || "",
+                    ogTitle: seo.ogTitle || "",
+                    ogDescription: seo.ogDescription || "",
+                    ogImage: seo.ogImage || "",
+                    robotsIndex: seo.robotsIndex ?? true,
+                    robotsFollow: seo.robotsFollow ?? true,
+                  }))
                 }
               />
 

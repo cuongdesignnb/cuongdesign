@@ -4,19 +4,20 @@ import Footer from "@/components/layout/Footer";
 import Breadcrumbs from "@/components/ui/Breadcrumbs";
 import FeaturedProjectsSection from "@/components/sections/FeaturedProjectsSection";
 import { prisma } from "@/lib/db";
-import { createMetadata, JsonLd } from "@/lib/seo";
-import { siteConfig } from "@/data/site";
+import { buildCollectionPageSchema, createMetadataFromSeoFields, JsonLd } from "@/lib/seo";
 import { getPublishedContent } from "@/lib/content/get-content";
 
 export const dynamic = "force-dynamic";
 
 export async function generateMetadata() {
   const content = await getPublishedContent("projects");
-  return createMetadata({
-    title: content.metadata.title,
-    description: content.metadata.description,
+  return createMetadataFromSeoFields({
+    seo: content.metadata,
+    fallback: {
+      title: content.metadata.title,
+      description: content.metadata.description,
+    },
     path: "/du-an",
-    keywords: content.metadata.keywords.split(",").map((item) => item.trim()).filter(Boolean),
   });
 }
 
@@ -26,6 +27,7 @@ export default async function ProjectsListPage() {
   let dbProjects: any[] = [];
   try {
     dbProjects = await prisma.project.findMany({
+      where: { isPublished: true },
       orderBy: { order: "asc" }
     });
   } catch (error) {
@@ -33,27 +35,17 @@ export default async function ProjectsListPage() {
   }
 
   // CollectionPage JSON-LD schema
-  const collectionSchema = {
-    "@context": "https://schema.org",
-    "@type": "CollectionPage",
-    "name": "Dự án thực tế — Cuong Design",
-    "description": "Bộ sưu tập các dự án thiết kế UI/UX và lập trình website nổi bật của Cuong Design.",
-    "url": `${siteConfig.url}/du-an`,
-    "publisher": {
-      "@type": "Person",
-      "name": siteConfig.author.name,
-      "url": siteConfig.url
-    },
-    "mainEntity": {
-      "@type": "ItemList",
-      "numberOfItems": dbProjects.length,
-      "itemListElement": dbProjects.map((project, index) => ({
-        "@type": "ListItem",
-        "position": index + 1,
-        "url": `${siteConfig.url}/du-an/${project.slug}`
-      }))
-    }
-  };
+  const collectionSchema = buildCollectionPageSchema({
+    path: "/du-an",
+    name: content.hero.title,
+    description: content.hero.intro,
+    items: dbProjects.map((project) => ({
+      name: project.title,
+      description: project.description,
+      image: project.coverImage,
+      url: `/du-an/${project.slug}`,
+    })),
+  });
 
   return (
     <div className="min-h-screen bg-[#030014] text-gray-200 flex flex-col">
@@ -75,7 +67,7 @@ export default async function ProjectsListPage() {
           
           {/* Reuse the interactive grid, adjusting vertical spacing */}
           <div className="-mt-12">
-          <FeaturedProjectsSection initialProjects={dbProjects} content={{ title: content.hero.title, subtitle: content.hero.intro.replace(/<[^>]+>/g, ""), displayLimit: 100, ctaLabel: content.cta.label, ctaUrl: content.cta.url, emptyState: content.emptyState }} />
+          <FeaturedProjectsSection headingLevel={1} initialProjects={dbProjects} content={{ title: content.hero.title, subtitle: content.hero.intro.replace(/<[^>]+>/g, ""), displayLimit: 100, ctaLabel: content.cta.label, ctaUrl: content.cta.url, emptyState: content.emptyState }} />
           </div>
         </div>
       </main>

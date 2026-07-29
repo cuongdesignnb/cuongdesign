@@ -60,6 +60,10 @@ export function sanitizeContentTree<T>(value: T): T {
     return (value.includes("<") ? sanitizeRichHtml(value) : value) as T;
   }
 
+  if (value instanceof Date) {
+    return value;
+  }
+
   if (Array.isArray(value)) {
     return value.map((item) => sanitizeContentTree(item)) as T;
   }

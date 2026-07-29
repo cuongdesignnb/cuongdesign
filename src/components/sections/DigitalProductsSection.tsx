@@ -38,12 +38,18 @@ const modalContentVariants = {
   },
 };
 
+function productPricingMode(product: { pricingMode?: string; price: number }) {
+  return product.pricingMode || (product.price === 0 ? "FREE" : "FIXED");
+}
+
 export default function DigitalProductsSection({
   initialProducts = [],
   content = homeContentDefaults.products,
+  headingLevel = 2,
 }: {
   initialProducts?: any[];
   content?: HomeContent["products"];
+  headingLevel?: 1 | 2;
 }) {
   const products = initialProducts;
   const [selectedProduct, setSelectedProduct] = useState<ProductItem | null>(null);
@@ -155,6 +161,7 @@ export default function DigitalProductsSection({
         <AnimatedSectionHeading
           title={content.title}
           subtitle={content.subtitle}
+          level={headingLevel}
         />
 
         <Stagger className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8" stagger={0.12}>
@@ -227,9 +234,9 @@ export default function DigitalProductsSection({
                         <div className="flex flex-col text-left">
                           <span className="text-[10px] text-gray-500 uppercase tracking-widest font-semibold">Giá / Price</span>
                           <span className="text-base font-extrabold text-white">
-                            {product.price === 0 ? (
+                            {productPricingMode(product) !== "FIXED" ? (
                               <span className="bg-gradient-to-r from-green-400 to-emerald-500 bg-clip-text text-transparent font-bold uppercase tracking-wider text-xs sm:text-sm">
-                                Miễn phí / Free
+                                {productPricingMode(product) === "FREE" ? "Miễn phí / Free" : "Liên hệ"}
                               </span>
                             ) : (
                               formatVND(product.price)
@@ -258,12 +265,12 @@ export default function DigitalProductsSection({
                           </button>
                         </Link>
 
-                        {product.price === 0 ? (
+                        {productPricingMode(product) !== "FIXED" ? (
                           <button
                             onClick={() => openContactModal(product)}
                             className="w-full inline-flex items-center justify-center font-semibold rounded-xl transition-all duration-300 px-3 py-2.5 text-xs bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 hover:bg-emerald-500/20 hover:border-emerald-500/40 cursor-pointer text-center"
                           >
-                            Nhận code
+                            {productPricingMode(product) === "FREE" ? "Nhận code" : "Liên hệ"}
                           </button>
                         ) : (
                           <button

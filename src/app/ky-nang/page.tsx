@@ -7,17 +7,19 @@ import GradientText from "@/components/ui/GradientText";
 import Button from "@/components/ui/Button";
 import { Cpu, Layout, Server, Database, Settings, Sparkles, ArrowRight, ShieldCheck } from "lucide-react";
 import Link from "next/link";
-import { createMetadata, JsonLd } from "@/lib/seo";
-import { siteConfig } from "@/data/site";
+import { createMetadataFromSeoFields, JsonLd } from "@/lib/seo";
+import { absoluteUrl } from "@/lib/seo/url";
 import { getPublishedContent } from "@/lib/content/get-content";
 
 export async function generateMetadata() {
   const content = await getPublishedContent("skills");
-  return createMetadata({
-    title: content.metadata.title,
-    description: content.metadata.description,
+  return createMetadataFromSeoFields({
+    seo: content.metadata,
+    fallback: {
+      title: content.metadata.title,
+      description: content.metadata.description,
+    },
     path: "/ky-nang",
-    keywords: content.metadata.keywords.split(",").map((item) => item.trim()).filter(Boolean),
   });
 }
 
@@ -138,9 +140,9 @@ export default async function SkillsPage() {
   const skillsSchema = {
     "@context": "https://schema.org",
     "@type": "WebPage",
-    "name": "Kỹ năng & Công nghệ sử dụng — Cuong Design",
-    "description": "Tổng hợp bộ kỹ năng lập trình Fullstack và thiết kế UI/UX của Cuong Design.",
-    "url": `${siteConfig.url}/ky-nang`,
+    "name": "Kỹ năng & Công nghệ sử dụng — Cường Design",
+    "description": "Tổng hợp bộ kỹ năng lập trình Fullstack và thiết kế UI/UX của Cường Design.",
+    "url": absoluteUrl("/ky-nang"),
     "mainEntity": {
       "@type": "ItemList",
       "numberOfItems": skillGroups.length,

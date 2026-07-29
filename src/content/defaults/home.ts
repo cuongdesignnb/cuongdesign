@@ -47,7 +47,7 @@ export const homeContentDefaults = {
     profileMedia: "",
     name: "Cường Design",
     jobTitle: "Senior Fullstack Developer",
-    signature: "Cuong Design",
+    signature: "Cường Design",
     content:
       "<p>Tôi là một Freelancer Developer đam mê công nghệ và thiết kế giao diện. Chất lượng, tốc độ và tối ưu chuyển đổi luôn là trọng tâm trong mỗi sản phẩm.</p><p>Mọi dự án đều tuân thủ nguyên tắc code sạch, chuẩn SEO, hiệu năng cao và responsive trên mọi thiết bị.</p>",
     statistics: [

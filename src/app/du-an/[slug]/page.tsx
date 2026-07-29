@@ -1,6 +1,5 @@
 import React from "react";
 import { notFound } from "next/navigation";
-import { prisma } from "@/lib/db";
 import { sanitizeRichHtml } from "@/lib/content/sanitize";
 import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
@@ -10,6 +9,13 @@ import Button from "@/components/ui/Button";
 import { Folder, Globe, Code, Tag, Calendar, User, ArrowLeft, Layers } from "lucide-react";
 import Link from "next/link";
 import { Metadata } from "next";
+import {
+  buildProjectSchema,
+  createMetadataFromSeoFields,
+  JsonLd,
+} from "@/lib/seo";
+import { getProjectBySlug } from "@/lib/seo/queries";
+import { resolveSeoRedirect } from "@/lib/seo/resolve-redirect";
 
 interface ProjectPageProps {
   params: Promise<{ slug: string }>;
@@ -17,69 +23,63 @@ interface ProjectPageProps {
 
 export async function generateMetadata({ params }: ProjectPageProps): Promise<Metadata> {
   const { slug } = await params;
-  const project = await prisma.project.findUnique({
-    where: { slug },
-  });
+  const project = await getProjectBySlug(slug);
 
   if (!project) {
-    return {};
+    return { robots: { index: false, follow: false } };
   }
 
-  return {
-    title: `${project.title} - Chi tiết dự án | Cường Design`,
-    description: project.description,
-    keywords: project.techStack,
-    openGraph: {
+  return createMetadataFromSeoFields({
+    seo: {
+      title: project.seoTitle || `${project.title} | Dự án của Đinh Cường`,
+      description: project.seoDescription || project.description,
+      keywords: project.seoKeywords,
+      canonicalPath: project.canonicalPath || undefined,
+      ogTitle: project.ogTitle || undefined,
+      ogDescription: project.ogDescription || undefined,
+      ogImage: project.ogImage || undefined,
+      robotsIndex: project.robotsIndex,
+      robotsFollow: project.robotsFollow,
+    },
+    fallback: {
       title: project.title,
       description: project.description,
-      images: [{ url: project.coverImage }],
+      keywords: project.techStack,
+      image: project.coverImage,
     },
-    twitter: {
-      card: "summary_large_image",
-      title: `${project.title} - Chi tiết dự án | Cường Design`,
-      description: project.description,
-      images: [project.coverImage],
-    },
-    alternates: {
-      canonical: `https://cuongdesign.com/du-an/${slug}`,
-    },
-  };
+    path: `/du-an/${project.slug}`,
+    modifiedTime: project.updatedAt.toISOString(),
+    publishedTime: project.publishedAt?.toISOString(),
+  });
 }
 
 export default async function ProjectDetailPage({ params }: ProjectPageProps) {
   const { slug } = await params;
 
-  const project = await prisma.project.findUnique({
-    where: { slug },
-  });
+  const project = await getProjectBySlug(slug);
 
   if (!project) {
+    await resolveSeoRedirect(`/du-an/${slug}`);
     notFound();
   }
 
-  // Schema.org Structured Data
-  const jsonLd = {
-    "@context": "https://schema.org",
-    "@type": "SoftwareSourceCode",
-    "name": project.title,
-    "description": project.description,
-    "codeRepository": project.githubUrl || undefined,
-    "programmingLanguage": project.techStack,
-    "runtimePlatform": project.techStack.join(", "),
-    "author": {
-      "@type": "Person",
-      "name": "Cường Design",
-    },
-    "creativeWorkStatus": "Completed",
-    "image": project.coverImage,
-  };
+  const jsonLd = buildProjectSchema({
+    slug: project.slug,
+    title: project.title,
+    description: project.description,
+    image: project.coverImage,
+    projectType: project.projectType,
+    techStack: project.techStack,
+    githubUrl: project.githubUrl,
+    demoUrl: project.demoUrl,
+    createdAt: project.createdAt,
+    updatedAt: project.updatedAt,
+    completedAt: project.completedAt,
+  });
 
   return (
     <div className="min-h-screen bg-[#030014] text-gray-200 flex flex-col">
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
-      />
+      <JsonLd data={jsonLd} />
 
       <Header />
 
@@ -91,7 +91,7 @@ export default async function ProjectDetailPage({ params }: ProjectPageProps) {
           {/* Breadcrumbs */}
           <Breadcrumbs
             items={[
-              { label: "Dự án đã làm", href: "/#projects" },
+              { label: "Dự án đã làm", href: "/du-an" },
               { label: project.title },
             ]}
           />
@@ -170,7 +170,7 @@ export default async function ProjectDetailPage({ params }: ProjectPageProps) {
                       <User className="w-3.5 h-3.5" />
                       <span>Nhà phát triển:</span>
                     </span>
-                    <span className="font-semibold text-white">Cường Design</span>
+                    <span className="font-semibold text-white">Đinh Cường</span>
                   </div>
                   
                   <div className="flex items-center justify-between">

@@ -23,6 +23,12 @@ import {
 import Link from "next/link";
 import GradientText from "@/components/ui/GradientText";
 import { ToastProvider } from "@/components/ui/Toast";
+import type { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "Quản trị Cường Design",
+  robots: { index: false, follow: false },
+};
 
 interface AdminLayoutProps {
   children: React.ReactNode;

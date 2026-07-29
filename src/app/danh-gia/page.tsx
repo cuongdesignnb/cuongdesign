@@ -9,18 +9,20 @@ import PublicAvatar from "@/components/ui/PublicAvatar";
 import { prisma } from "@/lib/db";
 import { testimonials as staticTestimonials } from "@/data/testimonials";
 import { Star, Quote, MessageSquare } from "lucide-react";
-import { createMetadata, JsonLd, buildProfessionalServiceSchema } from "@/lib/seo";
+import { buildCollectionPageSchema, buildReviewSchema, createMetadataFromSeoFields, JsonLd } from "@/lib/seo";
 import { getPublishedContent } from "@/lib/content/get-content";
 
 export const dynamic = "force-dynamic";
 
 export async function generateMetadata() {
   const content = await getPublishedContent("reviews");
-  return createMetadata({
-    title: content.metadata.title,
-    description: content.metadata.description,
+  return createMetadataFromSeoFields({
+    seo: content.metadata,
+    fallback: {
+      title: content.metadata.title,
+      description: content.metadata.description,
+    },
     path: "/danh-gia",
-    keywords: content.metadata.keywords.split(",").map((item) => item.trim()).filter(Boolean),
   });
 }
 
@@ -48,34 +50,26 @@ export default async function TestimonialsListPage() {
     quote: "quote" in t ? (t as any).quote : (t as any).quoteVi,
   }));
 
-  // Calculate average rating for schema
-  const avgRating = testimonials.reduce((acc, curr) => acc + curr.rating, 0) / testimonials.length;
-
-  // Schema.org ProfessionalService with AggregateRating metadata
-  const ratingSchema = {
-    "@context": "https://schema.org",
-    ...buildProfessionalServiceSchema({
-      aggregateRating: {
-        "@type": "AggregateRating",
-        "ratingValue": avgRating.toFixed(1),
-        "reviewCount": testimonials.length,
-        "bestRating": "5",
-        "worstRating": "1"
-      },
-      review: testimonials.map((t) => ({
-        "@type": "Review",
-        "author": {
-          "@type": "Person",
-          "name": t.name
-        },
-        "reviewRating": {
-          "@type": "Rating",
-          "ratingValue": t.rating
-        },
-        "reviewBody": t.quote
-      }))
-    })
-  };
+  const ratingSchema = [
+    buildCollectionPageSchema({
+      path: "/danh-gia",
+      name: content.hero.title,
+      description: content.hero.intro,
+      items: testimonials.map((testimonial) => ({
+        name: testimonial.name,
+        url: "/danh-gia",
+        description: testimonial.quote,
+        image: testimonial.avatar,
+      })),
+    }),
+    ...testimonials.map((testimonial) =>
+      buildReviewSchema({
+        author: testimonial.name,
+        body: testimonial.quote,
+        rating: testimonial.rating,
+      }),
+    ),
+  ];
 
   return (
     <div className="min-h-screen bg-[#030014] text-gray-200 flex flex-col">

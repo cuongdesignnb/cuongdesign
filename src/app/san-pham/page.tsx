@@ -4,19 +4,20 @@ import Footer from "@/components/layout/Footer";
 import Breadcrumbs from "@/components/ui/Breadcrumbs";
 import DigitalProductsSection from "@/components/sections/DigitalProductsSection";
 import { prisma } from "@/lib/db";
-import { createMetadata, JsonLd } from "@/lib/seo";
-import { siteConfig } from "@/data/site";
+import { buildCollectionPageSchema, createMetadataFromSeoFields, JsonLd } from "@/lib/seo";
 import { getPublishedContent } from "@/lib/content/get-content";
 
 export const dynamic = "force-dynamic";
 
 export async function generateMetadata() {
   const content = await getPublishedContent("products");
-  return createMetadata({
-    title: content.metadata.title,
-    description: content.metadata.description,
+  return createMetadataFromSeoFields({
+    seo: content.metadata,
+    fallback: {
+      title: content.metadata.title,
+      description: content.metadata.description,
+    },
     path: "/san-pham",
-    keywords: content.metadata.keywords.split(",").map((item) => item.trim()).filter(Boolean),
   });
 }
 
@@ -26,6 +27,7 @@ export default async function ProductsListPage() {
   let dbProducts: any[] = [];
   try {
     dbProducts = await prisma.product.findMany({
+      where: { isPublished: true },
       orderBy: { order: "asc" }
     });
   } catch (error) {
@@ -33,27 +35,17 @@ export default async function ProductsListPage() {
   }
 
   // CollectionPage JSON-LD schema
-  const collectionSchema = {
-    "@context": "https://schema.org",
-    "@type": "CollectionPage",
-    "name": "Sản phẩm số — Cuong Design",
-    "description": "Cửa hàng sản phẩm số, mã nguồn website và template chuyên nghiệp của Cuong Design.",
-    "url": `${siteConfig.url}/san-pham`,
-    "publisher": {
-      "@type": "Person",
-      "name": siteConfig.author.name,
-      "url": siteConfig.url
-    },
-    "mainEntity": {
-      "@type": "ItemList",
-      "numberOfItems": dbProducts.length,
-      "itemListElement": dbProducts.map((product, index) => ({
-        "@type": "ListItem",
-        "position": index + 1,
-        "url": `${siteConfig.url}/san-pham/${product.slug}`
-      }))
-    }
-  };
+  const collectionSchema = buildCollectionPageSchema({
+    path: "/san-pham",
+    name: content.hero.title,
+    description: content.hero.intro,
+    items: dbProducts.map((product) => ({
+      name: product.title,
+      description: product.description,
+      image: product.coverImage,
+      url: `/san-pham/${product.slug}`,
+    })),
+  });
 
   return (
     <div className="min-h-screen bg-[#030014] text-gray-200 flex flex-col">
@@ -75,7 +67,7 @@ export default async function ProductsListPage() {
           
           {/* Reuse the digital products interactive component */}
           <div className="-mt-12">
-          <DigitalProductsSection initialProducts={dbProducts} content={{ title: content.hero.title, subtitle: content.hero.intro.replace(/<[^>]+>/g, ""), displayLimit: 100, priceLabel: content.labels.price, ctaLabel: content.cta.label, ctaUrl: content.cta.url, emptyState: content.emptyState }} />
+          <DigitalProductsSection headingLevel={1} initialProducts={dbProducts} content={{ title: content.hero.title, subtitle: content.hero.intro.replace(/<[^>]+>/g, ""), displayLimit: 100, priceLabel: content.labels.price, ctaLabel: content.cta.label, ctaUrl: content.cta.url, emptyState: content.emptyState }} />
           </div>
         </div>
       </main>

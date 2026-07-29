@@ -8,6 +8,7 @@ import { slugify } from "@/lib/utils";
 import GlassCard from "@/components/ui/GlassCard";
 import Button from "@/components/ui/Button";
 import ContentEditor from "@/components/admin/content/ContentEditor";
+import SeoFields, { type SeoValue } from "@/components/admin/content/SeoFields";
 import { Plus, Edit2, Trash2, ArrowLeft, Save, Globe, Eye, FileText } from "lucide-react";
 
 interface PageItem {
@@ -18,6 +19,13 @@ interface PageItem {
   isPublished: boolean;
   seoTitle: string | null;
   seoDescription: string | null;
+  seoKeywords: string[];
+  canonicalPath: string | null;
+  ogTitle: string | null;
+  ogDescription: string | null;
+  ogImage: string | null;
+  robotsIndex: boolean;
+  robotsFollow: boolean;
   createdAt: string;
   updatedAt: string;
 }
@@ -47,6 +55,13 @@ export default function AdminPagesManager({ initialPages }: AdminPagesManagerPro
       isPublished: true,
       seoTitle: "",
       seoDescription: "",
+      seoKeywords: [],
+      canonicalPath: "",
+      ogTitle: "",
+      ogDescription: "",
+      ogImage: "",
+      robotsIndex: true,
+      robotsFollow: true,
     });
   };
 
@@ -83,6 +98,13 @@ export default function AdminPagesManager({ initialPages }: AdminPagesManagerPro
         isPublished: editingPage.isPublished ?? true,
         seoTitle: editingPage.seoTitle || undefined,
         seoDescription: editingPage.seoDescription || undefined,
+        seoKeywords: editingPage.seoKeywords || [],
+        canonicalPath: editingPage.canonicalPath || undefined,
+        ogTitle: editingPage.ogTitle || undefined,
+        ogDescription: editingPage.ogDescription || undefined,
+        ogImage: editingPage.ogImage || undefined,
+        robotsIndex: editingPage.robotsIndex ?? true,
+        robotsFollow: editingPage.robotsFollow ?? true,
       });
 
       if (res.success) {
@@ -157,33 +179,44 @@ export default function AdminPagesManager({ initialPages }: AdminPagesManagerPro
             </div>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div className="space-y-2">
-              <label className="text-xs text-gray-400 font-semibold uppercase tracking-wider block">
-                Tiêu đề SEO (seoTitle)
-              </label>
-              <input
-                type="text"
-                value={editingPage.seoTitle || ""}
-                onChange={(e) => setEditingPage((prev) => prev ? { ...prev, seoTitle: e.target.value } : null)}
-                placeholder="Bỏ trống để dùng tiêu đề gốc"
-                className="glass-input w-full px-4 py-2.5 text-sm focus:outline-none"
-              />
-            </div>
-
-            <div className="space-y-2">
-              <label className="text-xs text-gray-400 font-semibold uppercase tracking-wider block">
-                Mô tả SEO (seoDescription)
-              </label>
-              <input
-                type="text"
-                value={editingPage.seoDescription || ""}
-                onChange={(e) => setEditingPage((prev) => prev ? { ...prev, seoDescription: e.target.value } : null)}
-                placeholder="Mô tả tóm tắt nội dung chính sách hiển thị trên Google..."
-                className="glass-input w-full px-4 py-2.5 text-sm focus:outline-none"
-              />
-            </div>
-          </div>
+          <SeoFields
+            entityType="page"
+            basePath=""
+            slug={editingPage.slug || ""}
+            fallbackTitle={editingPage.title || ""}
+            fallbackDescription={editingPage.title || ""}
+            value={{
+              title: editingPage.seoTitle || "",
+              description: editingPage.seoDescription || "",
+              keywords: editingPage.seoKeywords || [],
+              canonicalPath: editingPage.canonicalPath || "",
+              ogTitle: editingPage.ogTitle || "",
+              ogDescription: editingPage.ogDescription || "",
+              ogImage: editingPage.ogImage || "",
+              robotsIndex: editingPage.robotsIndex,
+              robotsFollow: editingPage.robotsFollow,
+            }}
+            onChange={(seo: SeoValue) =>
+              setEditingPage((current) =>
+                current
+                  ? {
+                      ...current,
+                      seoTitle: seo.title || "",
+                      seoDescription: seo.description || "",
+                      seoKeywords: Array.isArray(seo.keywords)
+                        ? seo.keywords
+                        : String(seo.keywords || "").split(",").map((item) => item.trim()).filter(Boolean),
+                      canonicalPath: seo.canonicalPath || "",
+                      ogTitle: seo.ogTitle || "",
+                      ogDescription: seo.ogDescription || "",
+                      ogImage: seo.ogImage || "",
+                      robotsIndex: seo.robotsIndex ?? true,
+                      robotsFollow: seo.robotsFollow ?? true,
+                    }
+                  : null,
+              )
+            }
+          />
 
           <div className="space-y-2">
             <label className="text-xs text-gray-400 font-semibold uppercase tracking-wider block">

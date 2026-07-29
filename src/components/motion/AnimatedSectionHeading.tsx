@@ -9,6 +9,7 @@ interface AnimatedSectionHeadingProps {
   subtitle?: string;
   className?: string;
   align?: "left" | "center" | "right";
+  level?: 1 | 2;
 }
 
 export default function AnimatedSectionHeading({
@@ -16,7 +17,9 @@ export default function AnimatedSectionHeading({
   subtitle,
   className = "",
   align = "center",
+  level = 2,
 }: AnimatedSectionHeadingProps) {
+  const Heading = level === 1 ? motion.h1 : motion.h2;
   const alignClass =
     align === "center"
       ? "text-center items-center justify-center"
@@ -82,7 +85,7 @@ export default function AnimatedSectionHeading({
       variants={containerVariants}
       className={`flex flex-col mb-12 ${alignClass} ${className}`}
     >
-      <h2 className="text-3xl md:text-4xl font-bold tracking-tight text-white flex flex-wrap gap-2 justify-center items-center">
+      <Heading className="text-3xl md:text-4xl font-bold tracking-tight text-white flex flex-wrap gap-2 justify-center items-center">
         {mainTitle.split(" ").map((word, i) => (
           <motion.span key={i} variants={wordVariants}>
             {word}
@@ -98,7 +101,7 @@ export default function AnimatedSectionHeading({
             </motion.span>
           </>
         )}
-      </h2>
+      </Heading>
 
       {/* Decorative gradient line */}
       <motion.div

@@ -1,0 +1,302 @@
+{
+  "generatedAt": "2026-07-29T16:49:05.790Z",
+  "baseUrl": "http://localhost:13000",
+  "counts": {
+    "critical": 0,
+    "warning": 0,
+    "info": 0
+  },
+  "routes": [
+    {
+      "url": "http://localhost:13000",
+      "status": 200,
+      "title": "Cường Design — Freelancer Developer & Thiết kế UI/UX Website",
+      "description": "Thiết kế UI/UX và lập trình website, landing page, web app chuẩn SEO, tối ưu tốc độ & chuyển đổi cao. Freelancer Developer tại Việt Nam chuyên Next.js, React, Laravel.",
+      "canonical": "https://cuongdesign.net",
+      "h1Count": 1,
+      "noindex": false,
+      "jsonLdCount": 1
+    },
+    {
+      "url": "http://localhost:13000/gioi-thieu",
+      "status": 200,
+      "title": "Giới thiệu | Cường Design",
+      "description": "Thông tin về Cường Design.",
+      "canonical": "https://cuongdesign.net/gioi-thieu",
+      "h1Count": 1,
+      "noindex": false,
+      "jsonLdCount": 3
+    },
+    {
+      "url": "http://localhost:13000/dich-vu",
+      "status": 200,
+      "title": "Dịch vụ | Cường Design",
+      "description": "Dịch vụ thiết kế UI/UX và lập trình website chuyên nghiệp.",
+      "canonical": "https://cuongdesign.net/dich-vu",
+      "h1Count": 1,
+      "noindex": false,
+      "jsonLdCount": 3
+    },
+    {
+      "url": "http://localhost:13000/quy-trinh",
+      "status": 200,
+      "title": "Quy trình làm việc | Cường Design",
+      "description": "Quy trình triển khai dự án rõ ràng và minh bạch.",
+      "canonical": "https://cuongdesign.net/quy-trinh",
+      "h1Count": 1,
+      "noindex": false,
+      "jsonLdCount": 3
+    },
+    {
+      "url": "http://localhost:13000/ky-nang",
+      "status": 200,
+      "title": "Kỹ năng & Công nghệ | Cường Design",
+      "description": "Kỹ năng, công nghệ và công cụ Cường Design sử dụng.",
+      "canonical": "https://cuongdesign.net/ky-nang",
+      "h1Count": 1,
+      "noindex": false,
+      "jsonLdCount": 3
+    },
+    {
+      "url": "http://localhost:13000/du-an",
+      "status": 200,
+      "title": "Dự án | Cường Design",
+      "description": "Các dự án thiết kế và lập trình đã triển khai.",
+      "canonical": "https://cuongdesign.net/du-an",
+      "h1Count": 1,
+      "noindex": false,
+      "jsonLdCount": 3
+    },
+    {
+      "url": "http://localhost:13000/san-pham",
+      "status": 200,
+      "title": "Sản phẩm số | Cường Design",
+      "description": "Source code, template và sản phẩm số.",
+      "canonical": "https://cuongdesign.net/san-pham",
+      "h1Count": 1,
+      "noindex": false,
+      "jsonLdCount": 3
+    },
+    {
+      "url": "http://localhost:13000/bai-viet",
+      "status": 200,
+      "title": "Bài viết | Cường Design",
+      "description": "Kiến thức về thiết kế, lập trình và SEO.",
+      "canonical": "https://cuongdesign.net/bai-viet",
+      "h1Count": 1,
+      "noindex": false,
+      "jsonLdCount": 3
+    },
+    {
+      "url": "http://localhost:13000/danh-gia",
+      "status": 200,
+      "title": "Đánh giá | Cường Design",
+      "description": "Phản hồi từ khách hàng và đối tác.",
+      "canonical": "https://cuongdesign.net/danh-gia",
+      "h1Count": 1,
+      "noindex": false,
+      "jsonLdCount": 3
+    },
+    {
+      "url": "http://localhost:13000/lien-he",
+      "status": 200,
+      "title": "Liên hệ | Cường Design",
+      "description": "Liên hệ Cường Design để trao đổi về dự án.",
+      "canonical": "https://cuongdesign.net/lien-he",
+      "h1Count": 1,
+      "noindex": false,
+      "jsonLdCount": 3
+    },
+    {
+      "url": "http://localhost:13000/dich-vu/thiet-ke-ui-ux",
+      "status": 200,
+      "title": "Thiết kế UI/UX Website chuyên nghiệp — Figma, Prototype & Design System | Cường Design",
+      "description": "Dịch vụ thiết kế UI/UX Website chuyên sâu từ Wireframe, Mockup đến Prototype tương tác cao. Xây dựng Design System chuẩn, tối ưu trải nghiệm người dùng và tăng tỷ lệ chuyển đổi.",
+      "canonical": "https://cuongdesign.net/dich-vu/thiet-ke-ui-ux",
+      "h1Count": 1,
+      "noindex": false,
+      "jsonLdCount": 3
+    },
+    {
+      "url": "http://localhost:13000/dich-vu/website-doanh-nghiep",
+      "status": 200,
+      "title": "Thiết kế Website doanh nghiệp chuẩn SEO — Next.js & React | Cường Design",
+      "description": "Dịch vụ thiết kế và lập trình website doanh nghiệp chuyên nghiệp bằng Next.js. Chuẩn SEO, bảo mật cao, tốc độ nhanh, tích hợp CMS quản trị nội dung dễ dàng.",
+      "canonical": "https://cuongdesign.net/dich-vu/website-doanh-nghiep",
+      "h1Count": 1,
+      "noindex": false,
+      "jsonLdCount": 3
+    },
+    {
+      "url": "http://localhost:13000/dich-vu/landing-page",
+      "status": 200,
+      "title": "Thiết kế Landing Page chuyển đổi cao — Tối ưu quảng cáo & Leads | Cường Design",
+      "description": "Dịch vụ thiết kế và lập trình Landing Page chuyển đổi cao, tốc độ tải siêu nhanh, tối ưu cho Google Ads và Facebook Ads. Thu thập leads hiệu quả, tăng doanh số tức thì.",
+      "canonical": "https://cuongdesign.net/dich-vu/landing-page",
+      "h1Count": 1,
+      "noindex": false,
+      "jsonLdCount": 3
+    },
+    {
+      "url": "http://localhost:13000/dich-vu/e-commerce",
+      "status": 200,
+      "title": "Thiết kế Website bán hàng E-commerce — Thanh toán tự động & Quản lý đơn hàng | Cường Design",
+      "description": "Dịch vụ thiết kế và lập trình website bán hàng E-commerce chuyên nghiệp. Tích hợp thanh toán QR Code tự động, giỏ hàng thông minh, dashboard quản lý đơn hàng và phân phối sản phẩm số.",
+      "canonical": "https://cuongdesign.net/dich-vu/e-commerce",
+      "h1Count": 1,
+      "noindex": false,
+      "jsonLdCount": 3
+    },
+    {
+      "url": "http://localhost:13000/dich-vu/dashboard-saas",
+      "status": 200,
+      "title": "Thiết kế Dashboard & SaaS Application — Admin Panel & Hệ thống quản trị | Cường Design",
+      "description": "Dịch vụ thiết kế và lập trình Dashboard, Admin Panel và ứng dụng SaaS chuyên nghiệp. Biểu đồ trực quan, quản lý phân quyền RBAC, chat real-time và tích hợp AI.",
+      "canonical": "https://cuongdesign.net/dich-vu/dashboard-saas",
+      "h1Count": 1,
+      "noindex": false,
+      "jsonLdCount": 3
+    },
+    {
+      "url": "http://localhost:13000/dich-vu/seo-toi-uu-toc-do",
+      "status": 200,
+      "title": "SEO & Tối ưu tốc độ Website — Core Web Vitals & Google Lighthouse 95+ | Cường Design",
+      "description": "Dịch vụ tối ưu SEO kỹ thuật và tăng tốc website. Cải thiện Core Web Vitals, đạt điểm Google Lighthouse 95+, cài đặt Schema Markup, sitemap và cấu trúc SEO chuẩn Google.",
+      "canonical": "https://cuongdesign.net/dich-vu/seo-toi-uu-toc-do",
+      "h1Count": 1,
+      "noindex": false,
+      "jsonLdCount": 3
+    },
+    {
+      "url": "http://localhost:13000/dich-vu/automation-doanh-nghiep",
+      "status": 200,
+      "title": "Tự động hóa Quy trình Doanh nghiệp — Giải pháp RPA, CRM & Tool Tối ưu Vận hành | Cường Design",
+      "description": "Dịch vụ thiết kế và lập trình hệ thống tự động hóa quy trình (RPA), liên kết dữ liệu CRM, ERP, Auto-bot Telegram/Email giúp doanh nghiệp giảm 80% tác vụ thủ công.",
+      "canonical": "https://cuongdesign.net/dich-vu/automation-doanh-nghiep",
+      "h1Count": 1,
+      "noindex": false,
+      "jsonLdCount": 3
+    },
+    {
+      "url": "http://localhost:13000/du-an/sales-dashboard-pro",
+      "status": 200,
+      "title": "Sales Dashboard Pro | Dự án của Đinh Cường | Cường Design",
+      "description": "Dashboard doanh thu & phân tích dữ liệu kinh doanh trực quan, thời gian thực.",
+      "canonical": "https://cuongdesign.net/du-an/sales-dashboard-pro",
+      "h1Count": 1,
+      "noindex": false,
+      "jsonLdCount": 3
+    },
+    {
+      "url": "http://localhost:13000/du-an/crypto-ico-landing",
+      "status": 200,
+      "title": "Crypto ICO Landing | Dự án của Đinh Cường | Cường Design",
+      "description": "Landing page kêu gọi ICO tiền điện tử với hiệu ứng 3D & cuộn trang mượt mà.",
+      "canonical": "https://cuongdesign.net/du-an/crypto-ico-landing",
+      "h1Count": 1,
+      "noindex": false,
+      "jsonLdCount": 3
+    },
+    {
+      "url": "http://localhost:13000/du-an/saigoncare-web-app",
+      "status": 200,
+      "title": "SaigonCare Web App | Dự án của Đinh Cường | Cường Design",
+      "description": "Web ứng dụng chăm sóc sức khỏe trực tuyến & quản lý phòng khám chuyên nghiệp.",
+      "canonical": "https://cuongdesign.net/du-an/saigoncare-web-app",
+      "h1Count": 1,
+      "noindex": false,
+      "jsonLdCount": 3
+    },
+    {
+      "url": "http://localhost:13000/du-an/minh-store",
+      "status": 200,
+      "title": "Minh Store | Dự án của Đinh Cường | Cường Design",
+      "description": "Website bán hàng thời trang hiện đại, tối ưu SEO, tích hợp cổng thanh toán.",
+      "canonical": "https://cuongdesign.net/du-an/minh-store",
+      "h1Count": 1,
+      "noindex": false,
+      "jsonLdCount": 3
+    },
+    {
+      "url": "http://localhost:13000/du-an/eduhub-platform",
+      "status": 200,
+      "title": "EduHub Platform | Dự án của Đinh Cường | Cường Design",
+      "description": "Nền tảng đào tạo trực tuyến, tích hợp video học tập, bài tập & thi cử tự động.",
+      "canonical": "https://cuongdesign.net/du-an/eduhub-platform",
+      "h1Count": 1,
+      "noindex": false,
+      "jsonLdCount": 3
+    },
+    {
+      "url": "http://localhost:13000/du-an/technova-solutions",
+      "status": 200,
+      "title": "TechNova Solutions | Dự án của Đinh Cường | Cường Design",
+      "description": "Website giới thiệu công ty công nghệ, chuẩn SEO, thiết kế layout sang trọng.",
+      "canonical": "https://cuongdesign.net/du-an/technova-solutions",
+      "h1Count": 1,
+      "noindex": false,
+      "jsonLdCount": 3
+    },
+    {
+      "url": "http://localhost:13000/san-pham/shopbase-ecommerce",
+      "status": 200,
+      "title": "ShopBase - E-commerce - Sản phẩm số | Cường Design",
+      "description": "Website bán hàng chuyên nghiệp đầy đủ tính năng giỏ hàng, thanh toán, quản trị sản phẩm.",
+      "canonical": "https://cuongdesign.net/san-pham/shopbase-ecommerce",
+      "h1Count": 1,
+      "noindex": false,
+      "jsonLdCount": 3
+    },
+    {
+      "url": "http://localhost:13000/san-pham/laravel-source-pack",
+      "status": 200,
+      "title": "Laravel Source Pack - Sản phẩm số | Cường Design",
+      "description": "Bộ mã nguồn mẫu Laravel chuẩn cấu trúc, cài đặt sẵn auth, roles, API utilities.",
+      "canonical": "https://cuongdesign.net/san-pham/laravel-source-pack",
+      "h1Count": 1,
+      "noindex": false,
+      "jsonLdCount": 3
+    },
+    {
+      "url": "http://localhost:13000/san-pham/landing-page-template",
+      "status": 200,
+      "title": "Landing Page Template - Sản phẩm số | Cường Design",
+      "description": "Template landing page giới thiệu sản phẩm, dịch vụ tối ưu chuyển đổi, tốc độ load cực nhanh.",
+      "canonical": "https://cuongdesign.net/san-pham/landing-page-template",
+      "h1Count": 1,
+      "noindex": false,
+      "jsonLdCount": 3
+    },
+    {
+      "url": "http://localhost:13000/san-pham/admin-dashboard-pro",
+      "status": 200,
+      "title": "Admin Dashboard Pro - Sản phẩm số | Cường Design",
+      "description": "Hệ thống quản trị doanh nghiệp đa tính năng, thống kê doanh thu, phân tích đơn hàng.",
+      "canonical": "https://cuongdesign.net/san-pham/admin-dashboard-pro",
+      "h1Count": 1,
+      "noindex": false,
+      "jsonLdCount": 3
+    },
+    {
+      "url": "http://localhost:13000/san-pham/corporate-website-premium",
+      "status": 200,
+      "title": "Corporate Website Premium - Sản phẩm số | Cường Design",
+      "description": "Website giới thiệu doanh nghiệp cao cấp, chuẩn SEO, hỗ trợ đa ngôn ngữ, load nhanh.",
+      "canonical": "https://cuongdesign.net/san-pham/corporate-website-premium",
+      "h1Count": 1,
+      "noindex": false,
+      "jsonLdCount": 3
+    },
+    {
+      "url": "http://localhost:13000/san-pham/react-ui-kit-pro",
+      "status": 200,
+      "title": "React UI Kit Pro - Sản phẩm số | Cường Design",
+      "description": "Bộ component React cao cấp xây dựng bằng Tailwind, sẵn sàng copy-paste cho dự án.",
+      "canonical": "https://cuongdesign.net/san-pham/react-ui-kit-pro",
+      "h1Count": 1,
+      "noindex": false,
+      "jsonLdCount": 3
+    }
+  ],
+  "findings": []
+}

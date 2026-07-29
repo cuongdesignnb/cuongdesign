@@ -1,22 +1,22 @@
 export const siteConfig = {
   // ─── Brand ────────────────────────────────────────────
   name: "CUONG DESIGN",
-  legalName: "Cuong Design",
-  title: "Cuong Design — Freelancer Developer & Thiết kế UI/UX Website",
+  legalName: "Cường Design",
+  title: "Cường Design — Freelancer Developer & Thiết kế UI/UX Website",
   description:
     "Thiết kế UI/UX và lập trình website, landing page, web app chuẩn SEO, tối ưu tốc độ & chuyển đổi cao. Freelancer Developer tại Việt Nam chuyên Next.js, React, Laravel.",
 
   // ─── URLs ─────────────────────────────────────────────
-  url: "https://cuongdesign.com",
+  url: "https://cuongdesign.net",
   ogImage: "/images/og-image.jpg", // relative, resolved by metadataBase
 
   // ─── Author / Person ─────────────────────────────────
   author: {
-    name: "Nguyễn Văn Cường",
+    name: "Đinh Cường",
     alternateName: "Cường Design",
     jobTitle: "Freelancer Developer & UI/UX Designer",
-    url: "https://cuongdesign.com/gioi-thieu",
-    image: "https://cuongdesign.com/images/cuong-avatar.jpg",
+    url: "https://cuongdesign.net/gioi-thieu",
+    image: "https://cuongdesign.net/images/cuong-avatar.jpg",
   },
 
   // ─── Contact ──────────────────────────────────────────
@@ -50,12 +50,12 @@ export const siteConfig = {
     "landing page",
     "web app",
     "tối ưu SEO",
-    "Cuong Design",
+    "Cường Design",
   ],
   defaultOG: {
     width: 1200,
     height: 630,
-    alt: "Cuong Design — Freelancer Developer & Thiết kế UI/UX Website",
+    alt: "Cường Design — Freelancer Developer & Thiết kế UI/UX Website",
   },
 
   // ─── Navigation ───────────────────────────────────────

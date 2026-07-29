@@ -3,8 +3,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import ChatWidget from "@/components/ui/ChatWidget";
 import DraftPreviewBanner from "@/components/admin/content/DraftPreviewBanner";
-import { siteConfig } from "@/data/site";
-import { JsonLd, buildSitewideGraph } from "@/lib/seo";
+import { JsonLd, buildSitewideGraph, createMetadataFromSeoFields } from "@/lib/seo";
 import { prisma } from "@/lib/db";
 import { SettingsProvider } from "@/components/ui/SettingsContext";
 import { getPublishedContent } from "@/lib/content/get-content";
@@ -19,54 +18,32 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
-export const metadata: Metadata = {
-  metadataBase: new URL(siteConfig.url),
-  title: {
-    default: siteConfig.title,
-    template: `%s | ${siteConfig.legalName}`,
-  },
-  description: siteConfig.description,
-  keywords: siteConfig.keywords,
-  authors: [{ name: siteConfig.author.name, url: siteConfig.author.url }],
-  creator: siteConfig.legalName,
-  publisher: siteConfig.legalName,
-  openGraph: {
-    title: siteConfig.title,
-    description: siteConfig.description,
-    url: siteConfig.url,
-    siteName: siteConfig.legalName,
-    locale: siteConfig.locale,
-    type: "website",
-    images: [
-      {
-        url: siteConfig.ogImage,
-        width: siteConfig.defaultOG.width,
-        height: siteConfig.defaultOG.height,
-        alt: siteConfig.defaultOG.alt,
+export async function generateMetadata(): Promise<Metadata> {
+  const global = await getPublishedContent("global");
+  return {
+    ...createMetadataFromSeoFields({
+      seo: {
+        title: global.seo.title,
+        description: global.seo.description,
+        keywords: global.seo.keywords,
+        ogTitle: global.seo.ogTitle,
+        ogDescription: global.seo.ogDescription,
+        ogImage: global.brand.defaultOgMedia,
       },
-    ],
-  },
-  twitter: {
-    card: "summary_large_image",
-    title: siteConfig.title,
-    description: siteConfig.description,
-    images: [siteConfig.ogImage],
-  },
-  robots: {
-    index: true,
-    follow: true,
-    googleBot: {
-      index: true,
-      follow: true,
-      "max-video-preview": -1,
-      "max-image-preview": "large",
-      "max-snippet": -1,
+      fallback: {
+        title: "Cường Design",
+        description: global.seo.description,
+        image: global.brand.defaultOgMedia,
+      },
+      path: "/",
+    }),
+    title: {
+      default: global.seo.title,
+      template: `%s | ${global.brand.legalName}`,
     },
-  },
-  icons: {
-    icon: "/favicon.ico",
-  },
-};
+    icons: { icon: global.brand.faviconMedia || "/favicon.ico" },
+  };
+}
 
 export default async function RootLayout({
   children,

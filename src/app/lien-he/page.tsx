@@ -3,16 +3,18 @@ import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
 import Breadcrumbs from "@/components/ui/Breadcrumbs";
 import ContactPageClient from "@/components/sections/ContactPageClient";
-import { createMetadata, JsonLd } from "@/lib/seo";
+import { buildContactPageSchema, createMetadataFromSeoFields, JsonLd } from "@/lib/seo";
 import { getPublishedContent } from "@/lib/content/get-content";
 
 export async function generateMetadata() {
   const content = await getPublishedContent("contact");
-  return createMetadata({
-    title: content.metadata.title,
-    description: content.metadata.description,
+  return createMetadataFromSeoFields({
+    seo: content.metadata,
+    fallback: {
+      title: content.metadata.title,
+      description: content.metadata.description,
+    },
     path: "/lien-he",
-    keywords: content.metadata.keywords.split(",").map((item) => item.trim()).filter(Boolean),
   });
 }
 
@@ -35,11 +37,18 @@ export default async function ContactListPage() {
       }
     }))
   };
+  const contactSchemas = [
+    buildContactPageSchema({
+      name: content.hero.title,
+      description: content.hero.intro,
+    }),
+    ...(faqs.length ? [faqSchema] : []),
+  ];
 
   return (
     <div className="min-h-screen bg-[#030014] text-gray-200 flex flex-col">
       {/* Inject Structured Data */}
-      <JsonLd data={faqSchema} />
+      <JsonLd data={contactSchemas} />
 
       <Header />
 
