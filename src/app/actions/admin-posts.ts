@@ -7,6 +7,7 @@ import { sanitizeRichHtml } from "@/lib/content/sanitize";
 import { revalidatePath } from "next/cache";
 import { normalizeSlug } from "@/lib/seo/slug";
 import { recordSeoRedirect } from "@/lib/seo/redirects";
+import { ensureImageAlt } from "@/lib/ai/html";
 
 function revalidatePost(slug?: string) {
   revalidatePath("/admin/blog/posts");
@@ -20,6 +21,7 @@ export async function createPost(data: {
   excerpt?: string;
   content?: string;
   coverImage?: string;
+  coverImageAlt?: string;
   status?: PostStatus;
   categoryId?: string;
   seoTitle?: string;
@@ -39,8 +41,14 @@ export async function createPost(data: {
         title: data.title,
         slug: normalizeSlug(data.slug),
         excerpt: data.excerpt || null,
-        content: sanitizeRichHtml(data.content || ""),
+        content: ensureImageAlt(
+          sanitizeRichHtml(data.content || ""),
+          data.title,
+        ),
         coverImage: data.coverImage || null,
+        coverImageAlt: data.coverImage
+          ? data.coverImageAlt?.trim() || data.title
+          : null,
         status: data.status || "DRAFT",
         categoryId: data.categoryId || null,
         publishedAt: data.status === "PUBLISHED" ? new Date() : null,
@@ -88,6 +96,7 @@ export async function updatePost(
     excerpt?: string;
     content?: string;
     coverImage?: string;
+    coverImageAlt?: string;
     status?: PostStatus;
     categoryId?: string | null;
     seoTitle?: string;
@@ -105,7 +114,7 @@ export async function updatePost(
     await requireAdmin();
     const previous = await prisma.post.findUnique({
       where: { id },
-      select: { slug: true },
+      select: { slug: true, title: true },
     });
     // Build update data, converting seoKeywords string to array
     const updateData: Record<string, unknown> = { ...data };
@@ -116,7 +125,18 @@ export async function updatePost(
         .filter(Boolean);
     }
     if (data.content !== undefined) {
-      updateData.content = sanitizeRichHtml(data.content);
+      updateData.content = ensureImageAlt(
+        sanitizeRichHtml(data.content),
+        data.title || previous?.title || "Hình minh họa bài viết",
+      );
+    }
+    if (data.coverImage !== undefined) {
+      updateData.coverImage = data.coverImage || null;
+      updateData.coverImageAlt = data.coverImage
+        ? data.coverImageAlt?.trim() || data.title || previous?.title || "Hình minh họa bài viết"
+        : null;
+    } else if (data.coverImageAlt !== undefined) {
+      updateData.coverImageAlt = data.coverImageAlt.trim() || null;
     }
     if (data.slug !== undefined) updateData.slug = normalizeSlug(data.slug);
     const post = await prisma.post.update({

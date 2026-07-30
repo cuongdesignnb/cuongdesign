@@ -10,11 +10,19 @@ import { applyGlobalSettings } from "@/lib/content/global-settings";
 import { mergeContentDefaults } from "@/lib/content/merge-defaults";
 import { revalidateContentKey } from "@/lib/content/revalidate";
 import type { Prisma } from "@prisma/client";
+import { requireAdmin } from "@/lib/auth/require-admin";
 
 export async function updateSettings(data: Record<string, string>) {
   try {
+    await requireAdmin();
+    const normalized = Object.fromEntries(
+      Object.entries(data).filter(([key, value]) => {
+        if (key.endsWith("_api_key") && !value.trim()) return false;
+        return true;
+      }),
+    );
     await prisma.$transaction(async (tx) => {
-      await Promise.all(Object.entries(data).map(([key, value]) => {
+      await Promise.all(Object.entries(normalized).map(([key, value]) => {
         return tx.setting.upsert({
           where: { key },
           update: { value },
@@ -33,7 +41,7 @@ export async function updateSettings(data: Record<string, string>) {
         if (!parsed.success) return null;
         return applyGlobalSettings(
           parsed.data as GlobalContent,
-          data,
+          normalized,
           true,
         ) as Prisma.InputJsonValue;
       };

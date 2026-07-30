@@ -8,9 +8,16 @@ import { Save, CheckCircle, ShieldAlert } from "lucide-react";
 
 interface AdminSettingsFormProps {
   initialSettings: Record<string, string>;
+  configuredSecrets: {
+    textApiKey: boolean;
+    imageApiKey: boolean;
+  };
 }
 
-export default function AdminSettingsForm({ initialSettings }: AdminSettingsFormProps) {
+export default function AdminSettingsForm({
+  initialSettings,
+  configuredSecrets,
+}: AdminSettingsFormProps) {
   const [settings, setSettings] = useState({
     theme_primary_color: initialSettings.theme_primary_color || "#ec4899",
     theme_secondary_color: initialSettings.theme_secondary_color || "#8b5cf6",
@@ -24,6 +31,12 @@ export default function AdminSettingsForm({ initialSettings }: AdminSettingsForm
     telegram_chat_id: initialSettings.telegram_chat_id || "",
     ai_chat_prompt: initialSettings.ai_chat_prompt || "",
     ai_writer_prompt: initialSettings.ai_writer_prompt || "",
+    openai_text_api_key: "",
+    openai_text_model: initialSettings.openai_text_model || "gpt-5-mini",
+    openai_image_api_key: "",
+    openai_image_model: initialSettings.openai_image_model || "gpt-image-1",
+    ai_queue_auto_enabled: initialSettings.ai_queue_auto_enabled || "false",
+    ai_queue_batch_limit: initialSettings.ai_queue_batch_limit || "5",
     contact_email: initialSettings.contact_email || "",
     contact_phone: initialSettings.contact_phone || "",
     contact_zalo: initialSettings.contact_zalo || "",
@@ -35,7 +48,9 @@ export default function AdminSettingsForm({ initialSettings }: AdminSettingsForm
   const [loading, setLoading] = useState(false);
   const [status, setStatus] = useState<"idle" | "success" | "error">("idle");
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>,
+  ) => {
     const { name, value } = e.target;
     setSettings((prev) => ({ ...prev, [name]: value }));
   };
@@ -49,6 +64,11 @@ export default function AdminSettingsForm({ initialSettings }: AdminSettingsForm
 
     if (result.success) {
       setStatus("success");
+      setSettings((current) => ({
+        ...current,
+        openai_text_api_key: "",
+        openai_image_api_key: "",
+      }));
       
       // Dynamically apply primary color change to the root variables for immediate client preview
       document.documentElement.style.setProperty("--primary-color", settings.theme_primary_color);
@@ -215,6 +235,88 @@ export default function AdminSettingsForm({ initialSettings }: AdminSettingsForm
               value={settings.telegram_chat_id}
               onChange={handleChange}
               placeholder="-1001898762"
+              className="glass-input w-full px-4 py-2 text-sm focus:outline-none"
+            />
+          </div>
+        </div>
+      </GlassCard>
+
+      <GlassCard className="p-6 border-white/5 bg-[#0a0822]/60 space-y-5">
+        <div>
+          <h3 className="text-lg font-bold text-white">AI Writer, Image và Scheduler</h3>
+          <p className="text-xs text-gray-500 mt-1">
+            Dùng API key riêng cho nội dung và hình ảnh. Để trống key khi lưu nếu không muốn thay đổi key hiện tại.
+          </p>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="space-y-1">
+            <label className="text-xs text-gray-400 block font-medium">OpenAI API key viết bài</label>
+            <input
+              type="password"
+              name="openai_text_api_key"
+              value={settings.openai_text_api_key}
+              onChange={handleChange}
+              placeholder={configuredSecrets.textApiKey ? "Đã cấu hình - để trống để giữ nguyên" : "sk-..."}
+              autoComplete="new-password"
+              className="glass-input w-full px-4 py-2 text-sm focus:outline-none"
+            />
+          </div>
+          <div className="space-y-1">
+            <label className="text-xs text-gray-400 block font-medium">Model viết bài</label>
+            <input
+              type="text"
+              name="openai_text_model"
+              value={settings.openai_text_model}
+              onChange={handleChange}
+              placeholder="gpt-5-mini"
+              className="glass-input w-full px-4 py-2 text-sm focus:outline-none"
+            />
+          </div>
+          <div className="space-y-1">
+            <label className="text-xs text-gray-400 block font-medium">OpenAI API key sinh ảnh</label>
+            <input
+              type="password"
+              name="openai_image_api_key"
+              value={settings.openai_image_api_key}
+              onChange={handleChange}
+              placeholder={configuredSecrets.imageApiKey ? "Đã cấu hình - để trống để giữ nguyên" : "sk-..."}
+              autoComplete="new-password"
+              className="glass-input w-full px-4 py-2 text-sm focus:outline-none"
+            />
+          </div>
+          <div className="space-y-1">
+            <label className="text-xs text-gray-400 block font-medium">Model sinh ảnh</label>
+            <input
+              type="text"
+              name="openai_image_model"
+              value={settings.openai_image_model}
+              onChange={handleChange}
+              placeholder="gpt-image-1"
+              className="glass-input w-full px-4 py-2 text-sm focus:outline-none"
+            />
+          </div>
+          <div className="space-y-1">
+            <label className="text-xs text-gray-400 block font-medium">Chạy lịch tự động phía server</label>
+            <select
+              name="ai_queue_auto_enabled"
+              value={settings.ai_queue_auto_enabled}
+              onChange={handleChange}
+              className="glass-input w-full px-4 py-2 text-sm focus:outline-none"
+            >
+              <option value="false">Tắt</option>
+              <option value="true">Bật</option>
+            </select>
+          </div>
+          <div className="space-y-1">
+            <label className="text-xs text-gray-400 block font-medium">Số bài tối đa mỗi lượt</label>
+            <input
+              type="number"
+              name="ai_queue_batch_limit"
+              value={settings.ai_queue_batch_limit}
+              onChange={handleChange}
+              min={1}
+              max={20}
               className="glass-input w-full px-4 py-2 text-sm focus:outline-none"
             />
           </div>

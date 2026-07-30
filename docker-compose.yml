@@ -16,6 +16,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
+    image: cuongdesignnet-web
     container_name: cuongdesign-web
     restart: always
     ports:
@@ -28,7 +29,21 @@ services:
       - NEXTAUTH_URL=http://localhost:13000
       - AUTH_URL=http://localhost:13000
       - AUTH_TRUST_HOST=true
+      - AI_QUEUE_EMBEDDED_WORKER=false
       # Thêm các biến môi trường khác vào đây (Zalo, Telegram, Mailer...)
+    depends_on:
+      - postgres
+    volumes:
+      - media_uploads:/app/public/uploads
+
+  ai-worker:
+    image: cuongdesignnet-web
+    container_name: cuongdesign-ai-worker
+    restart: always
+    command: npm run ai:worker
+    environment:
+      - DATABASE_URL=postgresql://cuongdesign_user:cuongdesign_password@postgres:5432/cuongdesign_db?schema=public
+      - AI_QUEUE_EMBEDDED_WORKER=false
     depends_on:
       - postgres
     volumes:
