@@ -340,6 +340,7 @@ model Category {
   robotsFollow   Boolean  @default(true)
   order          Int      @default(0)
   posts          Post[]
+  aiTasks        AiTask[] @relation("AiTaskCategory")
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt
 }
@@ -352,6 +353,7 @@ model Post {
   excerpt        String?    @db.Text
   content        String     @db.Text
   coverImage     String?
+  coverImageAlt  String?
   status         PostStatus @default(DRAFT)
   publishedAt    DateTime?
   categoryId     String?
@@ -366,6 +368,7 @@ model Post {
   robotsIndex    Boolean    @default(true)
   robotsFollow   Boolean    @default(true)
   schemaMarkup   Json?
+  aiTask         AiTask?    @relation("AiGeneratedPost")
   createdAt      DateTime   @default(now())
   updatedAt      DateTime   @updatedAt
 }
@@ -376,11 +379,32 @@ model AiTask {
   keyword         String
   status          AiTaskStatus @default(PENDING)
   scheduleTime    DateTime
-  generatedPostId String?
-  categoryId      String? // Category to assign to generated post
+  generatedPostId String?      @unique
+  generatedPost   Post?        @relation("AiGeneratedPost", fields: [generatedPostId], references: [id], onDelete: SetNull)
+  categoryId      String?
+  category        Category?    @relation("AiTaskCategory", fields: [categoryId], references: [id], onDelete: SetNull)
+  autoPublish     Boolean      @default(false)
+  tone            String       @default("professional")
+  length          String       @default("medium")
+  sharedKeywords  String[]     @default([])
+  withImages      Boolean      @default(false)
+  imageCount      Int          @default(0)
+  attempts        Int          @default(0)
+  maxAttempts     Int          @default(3)
+  claimToken      String?      @unique
+  lockedAt        DateTime?
+  lastAttemptAt   DateTime?
+  nextAttemptAt   DateTime?
+  startedAt       DateTime?
+  completedAt     DateTime?
   errorMessage    String?      @db.Text
   createdAt       DateTime     @default(now())
   updatedAt       DateTime     @updatedAt
+
+  @@index([status, scheduleTime])
+  @@index([status, nextAttemptAt])
+  @@index([lockedAt])
+  @@index([categoryId])
 }
 
 // Live Chat Sessions

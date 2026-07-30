@@ -39,6 +39,7 @@ interface PostItem {
   excerpt: string | null;
   content: string | null;
   coverImage: string | null;
+  coverImageAlt: string | null;
   status: string;
   publishedAt: string | null;
   categoryId: string | null;
@@ -113,6 +114,7 @@ export default function AdminPostsManager({ initialPosts, categories }: AdminPos
       excerpt: post.excerpt || "",
       content: post.content || "",
       coverImage: post.coverImage || "",
+      coverImageAlt: post.coverImageAlt || post.title,
       status: post.status,
       seoTitle: post.seoTitle || "",
       seoDescription: post.seoDescription || "",
@@ -136,6 +138,7 @@ export default function AdminPostsManager({ initialPosts, categories }: AdminPos
       excerpt: "",
       content: "",
       coverImage: "",
+      coverImageAlt: "",
       status: "DRAFT",
       seoTitle: "",
       seoDescription: "",
@@ -170,7 +173,8 @@ export default function AdminPostsManager({ initialPosts, categories }: AdminPos
         slug: formData.slug,
         excerpt: formData.excerpt || undefined,
         content: formData.content || undefined,
-        coverImage: formData.coverImage || undefined,
+        coverImage: formData.coverImage ?? undefined,
+        coverImageAlt: formData.coverImageAlt || undefined,
         status: formData.status as "DRAFT" | "PUBLISHED" | "SCHEDULED" | undefined,
         categoryId: selectedCategoryId || undefined,
         seoTitle: formData.seoTitle || undefined,
@@ -252,6 +256,7 @@ export default function AdminPostsManager({ initialPosts, categories }: AdminPos
           content: data.content,
           excerpt: data.excerpt || prev.excerpt,
           coverImage: data.coverImage || prev.coverImage,
+          coverImageAlt: data.coverImageAlt || prev.coverImageAlt || formData.title,
           seoTitle: data.seoTitle || prev.seoTitle,
           seoDescription: data.seoDescription || prev.seoDescription,
           seoKeywords: data.seoKeywords?.join(', ') || prev.seoKeywords,
@@ -541,8 +546,35 @@ export default function AdminPostsManager({ initialPosts, categories }: AdminPos
                 <MediaField
                   label="Ảnh bìa"
                   value={formData.coverImage || ""}
-                  onChange={(coverImage) => setFormData((prev) => ({ ...prev, coverImage }))}
+                  onChange={(coverImage, media) =>
+                    setFormData((prev) => ({
+                      ...prev,
+                      coverImage,
+                      coverImageAlt: coverImage
+                        ? media?.alt || media?.name || prev.coverImageAlt || prev.title || ""
+                        : "",
+                    }))
+                  }
                 />
+                {formData.coverImage && (
+                  <div className="space-y-1">
+                    <label className="block text-xs font-medium text-gray-300">
+                      Alt ảnh bìa
+                    </label>
+                    <input
+                      type="text"
+                      value={formData.coverImageAlt || ""}
+                      onChange={(event) =>
+                        setFormData((prev) => ({
+                          ...prev,
+                          coverImageAlt: event.target.value,
+                        }))
+                      }
+                      placeholder="Mô tả nội dung ảnh cho SEO và trợ năng"
+                      className="w-full rounded-lg border border-white/10 bg-white/5 px-4 py-2.5 text-sm text-white placeholder-gray-500 focus:border-pink-500/50 focus:outline-none"
+                    />
+                  </div>
+                )}
               </div>
 
               {/* Category + Status */}

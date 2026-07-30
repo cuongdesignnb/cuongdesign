@@ -180,7 +180,7 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
                 src={post.coverImage}
-                alt={post.title}
+                alt={post.coverImageAlt || post.title}
                 className="w-full h-full object-cover"
               />
             </div>
@@ -240,7 +240,7 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
                         {related.coverImage ? (
                           <img
                             src={related.coverImage}
-                            alt={related.title}
+                            alt={related.coverImageAlt || related.title}
                             className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                           />
                         ) : (

@@ -17,6 +17,8 @@ const allowedTags = [
   "li",
   "a",
   "img",
+  "figure",
+  "figcaption",
   "hr",
   "span",
 ];
@@ -25,8 +27,8 @@ export function sanitizeRichHtml(value: string): string {
   return sanitizeHtml(value, {
     allowedTags,
     allowedAttributes: {
-      a: ["href", "target", "rel"],
-      img: ["src", "alt", "title", "width", "height"],
+      a: ["href", "target", "rel", "data-internal-link"],
+      img: ["src", "alt", "title", "width", "height", "loading"],
       p: ["style"],
       h2: ["style"],
       h3: ["style"],

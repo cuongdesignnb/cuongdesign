@@ -27,6 +27,7 @@ import {
 } from "lucide-react";
 import { useEffect, useState } from "react";
 import MediaPickerDialog from "./MediaPickerDialog";
+import type { MediaRecord } from "./media-types";
 
 export interface ContentEditorProps {
   value: string;
@@ -55,6 +56,8 @@ export default function ContentEditor({
   allowMedia = true,
 }: ContentEditorProps) {
   const [mediaOpen, setMediaOpen] = useState(false);
+  const [pendingMedia, setPendingMedia] = useState<MediaRecord | null>(null);
+  const [imageAlt, setImageAlt] = useState("");
   const [sourceMode, setSourceMode] = useState(false);
   const [source, setSource] = useState(value);
   const editor = useEditor({
@@ -178,9 +181,65 @@ export default function ContentEditor({
         open={mediaOpen}
         onClose={() => setMediaOpen(false)}
         onSelect={([media]) => {
-          activeEditor.chain().focus().setImage({ src: media.url, alt: media.alt || media.name }).run();
+          setMediaOpen(false);
+          setPendingMedia(media);
+          setImageAlt(media.alt || media.name);
         }}
       />
+
+      {pendingMedia && (
+        <div className="fixed inset-0 z-[120] grid place-items-center bg-black/70 p-4">
+          <div
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="image-alt-title"
+            className="w-full max-w-md rounded-lg border border-white/10 bg-[#0b0921] p-5 shadow-2xl"
+          >
+            <h3 id="image-alt-title" className="text-base font-semibold text-white">
+              Alt ảnh
+            </h3>
+            <p className="mt-1 text-xs text-gray-400">
+              Mô tả ngắn nội dung thực tế của ảnh cho SEO và người dùng trình đọc màn hình.
+            </p>
+            <input
+              type="text"
+              value={imageAlt}
+              onChange={(event) => setImageAlt(event.target.value)}
+              placeholder="Ví dụ: Giao diện website bán hàng trên điện thoại"
+              autoFocus
+              className="mt-4 w-full rounded-md border border-white/10 bg-white/5 px-3 py-2.5 text-sm text-white outline-none focus:border-pink-500/60"
+            />
+            <div className="mt-4 flex justify-end gap-2">
+              <button
+                type="button"
+                onClick={() => {
+                  setPendingMedia(null);
+                  setImageAlt("");
+                }}
+                className="rounded-md px-3 py-2 text-sm text-gray-300 hover:bg-white/5"
+              >
+                Hủy
+              </button>
+              <button
+                type="button"
+                disabled={!imageAlt.trim()}
+                onClick={() => {
+                  activeEditor
+                    .chain()
+                    .focus()
+                    .setImage({ src: pendingMedia.url, alt: imageAlt.trim() })
+                    .run();
+                  setPendingMedia(null);
+                  setImageAlt("");
+                }}
+                className="rounded-md bg-pink-600 px-3 py-2 text-sm font-medium text-white hover:bg-pink-500 disabled:cursor-not-allowed disabled:opacity-40"
+              >
+                Chèn ảnh
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </>
   );
 }

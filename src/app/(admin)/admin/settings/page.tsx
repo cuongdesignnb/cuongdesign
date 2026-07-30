@@ -10,6 +10,20 @@ export default async function AdminSettingsPage() {
   dbSettings.forEach((s) => {
     settingsObj[s.key] = s.value;
   });
+  const configuredSecrets = {
+    textApiKey: Boolean(
+      settingsObj.openai_text_api_key ||
+        settingsObj.openai_api_key ||
+        process.env.OPENAI_TEXT_API_KEY ||
+        process.env.OPENAI_API_KEY,
+    ),
+    imageApiKey: Boolean(
+      settingsObj.openai_image_api_key || process.env.OPENAI_IMAGE_API_KEY,
+    ),
+  };
+  delete settingsObj.openai_text_api_key;
+  delete settingsObj.openai_image_api_key;
+  delete settingsObj.openai_api_key;
 
   return (
     <div className="space-y-8">
@@ -20,7 +34,10 @@ export default async function AdminSettingsPage() {
         </p>
       </div>
 
-      <AdminSettingsForm initialSettings={settingsObj} />
+      <AdminSettingsForm
+        initialSettings={settingsObj}
+        configuredSecrets={configuredSecrets}
+      />
     </div>
   );
 }
