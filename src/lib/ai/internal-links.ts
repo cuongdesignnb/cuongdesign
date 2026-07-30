@@ -4,11 +4,12 @@ import type {
   InternalLinkUsed,
 } from "./types";
 
-interface LinkablePost {
+export interface LinkableTarget {
   id: string;
+  targetType: "article" | "product";
   title: string;
-  slug: string;
-  excerpt?: string | null;
+  href: string;
+  searchText?: string | null;
   seoKeywords: string[];
 }
 
@@ -40,20 +41,28 @@ function validAnchor(value: string) {
 }
 
 export function rankInternalLinkCandidates(
-  posts: LinkablePost[],
+  targets: LinkableTarget[],
   topic: string,
   sharedKeywords: string[],
   limit = 8,
 ): InternalLinkCandidate[] {
   const intent = tokens([topic, ...sharedKeywords].join(" "));
 
-  const ranked = posts
-    .map((post) => {
-      const anchors = [...new Set([...post.seoKeywords, post.title].map((item) => item.trim()))]
+  const ranked = targets
+    .map((targetItem) => {
+      const anchors = [
+        ...new Set(
+          [...targetItem.seoKeywords, targetItem.title].map((item) => item.trim()),
+        ),
+      ]
         .filter(validAnchor)
         .sort((left, right) => right.length - left.length);
       const target = tokens(
-        [post.title, post.excerpt || "", ...post.seoKeywords].join(" "),
+        [
+          targetItem.title,
+          targetItem.searchText || "",
+          ...targetItem.seoKeywords,
+        ].join(" "),
       );
       const phraseBonus = anchors.some((anchor) =>
         normalize(topic).includes(normalize(anchor)),
@@ -62,9 +71,10 @@ export function rankInternalLinkCandidates(
         : 0;
 
       return {
-        postId: post.id,
-        title: post.title,
-        href: `/bai-viet/${post.slug}`,
+        targetId: targetItem.id,
+        targetType: targetItem.targetType,
+        title: targetItem.title,
+        href: targetItem.href,
         anchors,
         score: overlap(intent, target) + phraseBonus,
       };
@@ -149,7 +159,8 @@ export function injectInternalLinks(
       links.push({
         anchor,
         href: candidate.href,
-        postId: candidate.postId,
+        targetId: candidate.targetId,
+        targetType: candidate.targetType,
       });
       break;
     }

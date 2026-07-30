@@ -160,6 +160,7 @@ async function processClaimedTask(
   const inlineImages: Array<
     Awaited<ReturnType<ImageGenerator["generate"]>> & { afterHeading?: string }
   > = [];
+  const imageWarnings: string[] = [];
 
   if (task.withImages) {
     const statusUpdated = await prisma.aiTask.updateMany({
@@ -168,20 +169,32 @@ async function processClaimedTask(
     });
     if (statusUpdated.count !== 1) throw new Error("AI_TASK_CLAIM_LOST");
 
-    coverImage = await dependencies.imageGenerator.generate({
-      title: article.title,
-      prompt: article.coverImagePrompt,
-      alt: article.coverImageAlt,
-      kind: "cover",
-    });
-    for (const plan of article.imagePlans.slice(0, task.imageCount)) {
-      const image = await dependencies.imageGenerator.generate({
+    try {
+      coverImage = await dependencies.imageGenerator.generate({
         title: article.title,
-        prompt: plan.prompt,
-        alt: plan.alt,
-        kind: "inline",
+        prompt: article.coverImagePrompt,
+        alt: article.coverImageAlt,
+        caption: article.coverImageAlt,
+        kind: "cover",
       });
-      inlineImages.push({ ...image, afterHeading: plan.afterHeading });
+    } catch (error) {
+      imageWarnings.push(`Ảnh bìa: ${errorMessage(error)}`);
+    }
+    for (const plan of article.imagePlans.slice(0, task.imageCount)) {
+      try {
+        const image = await dependencies.imageGenerator.generate({
+          title: article.title,
+          prompt: plan.prompt,
+          alt: plan.alt,
+          caption: plan.alt,
+          kind: "inline",
+        });
+        inlineImages.push({ ...image, afterHeading: plan.afterHeading });
+      } catch (error) {
+        imageWarnings.push(
+          `Ảnh nội dung "${plan.afterHeading || plan.alt}": ${errorMessage(error)}`,
+        );
+      }
     }
   }
 
@@ -221,15 +234,28 @@ async function processClaimedTask(
         ogImage: coverImage?.url || null,
         schemaMarkup: {
           generatedBy: "ai-queue",
+          usage: article.usage || null,
           internalLinks: article.internalLinks.map((link) => ({
             anchor: link.anchor,
             href: link.href,
-            postId: link.postId,
+            targetId: link.targetId,
+            targetType: link.targetType,
           })),
           generatedImages: [
-            ...(coverImage ? [{ url: coverImage.url, alt: coverImage.alt }] : []),
-            ...inlineImages.map((image) => ({ url: image.url, alt: image.alt })),
+            ...(coverImage
+              ? [{
+                  url: coverImage.url,
+                  alt: coverImage.alt,
+                  caption: coverImage.caption,
+                }]
+              : []),
+            ...inlineImages.map((image) => ({
+              url: image.url,
+              alt: image.alt,
+              caption: image.caption,
+            })),
           ],
+          warnings: imageWarnings,
         } as Prisma.InputJsonObject,
       },
     });
@@ -247,7 +273,7 @@ async function processClaimedTask(
         lockedAt: null,
         claimToken: null,
         nextAttemptAt: null,
-        errorMessage: null,
+        errorMessage: imageWarnings.length ? imageWarnings.join("\n") : null,
       },
     });
     if (updated.count !== 1) throw new Error("AI_TASK_FINALIZE_FAILED");
@@ -262,6 +288,14 @@ async function processClaimedTask(
     });
     return null;
   }
+
+  imageWarnings.forEach((warning) =>
+    logEvent("AI_QUEUE_IMAGE_WARNING", {
+      queue_item_id: task.id,
+      topic: task.keyword,
+      warning,
+    }),
+  );
 
   logEvent("AI_QUEUE_ITEM_DONE", {
     queue_item_id: task.id,

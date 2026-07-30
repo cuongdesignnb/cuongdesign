@@ -28,6 +28,7 @@ test("inserts generated images with alt and captions near requested headings", (
       {
         url: "/uploads/blog/process.webp",
         alt: "Sơ đồ các bước thiết kế website",
+        caption: "Sơ đồ các bước thiết kế website",
         mediaId: "media-1",
         width: 1536,
         height: 1024,

@@ -1,5 +1,6 @@
 import { prisma } from "@/lib/db";
 import AdminSettingsForm from "@/components/sections/AdminSettingsForm";
+import { isSecretSettingKey } from "@/lib/settings/secrets";
 
 export default async function AdminSettingsPage() {
   // Query all system settings from the database
@@ -20,10 +21,14 @@ export default async function AdminSettingsPage() {
     imageApiKey: Boolean(
       settingsObj.openai_image_api_key || process.env.OPENAI_IMAGE_API_KEY,
     ),
+    smtpPass: Boolean(settingsObj.smtp_pass),
+    telegramBotToken: Boolean(settingsObj.telegram_bot_token),
   };
-  delete settingsObj.openai_text_api_key;
-  delete settingsObj.openai_image_api_key;
-  delete settingsObj.openai_api_key;
+  Object.keys(settingsObj).forEach((key) => {
+    if (isSecretSettingKey(key)) delete settingsObj[key];
+  });
+  settingsObj.openai_text_model =
+    settingsObj.openai_text_model || settingsObj.openai_model || "gpt-5.5";
 
   return (
     <div className="space-y-8">

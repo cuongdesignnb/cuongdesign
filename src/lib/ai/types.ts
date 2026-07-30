@@ -1,8 +1,10 @@
 export type AiTone = "professional" | "casual" | "luxury";
 export type AiArticleLength = "short" | "medium" | "long";
+export type InternalLinkTargetType = "article" | "product";
 
 export interface InternalLinkCandidate {
-  postId: string;
+  targetId: string;
+  targetType: InternalLinkTargetType;
   title: string;
   href: string;
   anchors: string[];
@@ -12,13 +14,20 @@ export interface InternalLinkCandidate {
 export interface InternalLinkUsed {
   anchor: string;
   href: string;
-  postId: string;
+  targetId: string;
+  targetType: InternalLinkTargetType;
 }
 
 export interface AiImagePlan {
   prompt: string;
   alt: string;
   afterHeading: string;
+}
+
+export interface AiUsage {
+  promptTokens?: number;
+  completionTokens?: number;
+  totalTokens?: number;
 }
 
 export interface GeneratedArticle {
@@ -32,6 +41,7 @@ export interface GeneratedArticle {
   coverImagePrompt: string;
   imagePlans: AiImagePlan[];
   internalLinks: InternalLinkUsed[];
+  usage?: AiUsage;
 }
 
 export interface GenerateArticleInput {
@@ -47,6 +57,7 @@ export interface GeneratedImage {
   mediaId: string;
   url: string;
   alt: string;
+  caption: string;
   width: number | null;
   height: number | null;
 }
@@ -60,6 +71,7 @@ export interface ImageGenerator {
     title: string;
     prompt: string;
     alt: string;
+    caption?: string;
     kind: "cover" | "inline";
   }): Promise<GeneratedImage>;
 }

@@ -1,5 +1,7 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
+import { requestChatText } from "@/lib/ai/provider";
+import { getAiRuntimeConfig } from "@/lib/ai/settings";
 
 // POST /api/chat - client sends a message
 export async function POST(request: Request) {
@@ -27,7 +29,7 @@ export async function POST(request: Request) {
     }
 
     // Save user message
-    const userMessage = await prisma.chatMessage.create({
+    await prisma.chatMessage.create({
       data: {
         sessionId: session.id,
         sender: "USER",
@@ -38,10 +40,9 @@ export async function POST(request: Request) {
     // If AI is active, query OpenAI GPT-4o
     if (session.status === "AI_ACTIVE") {
       try {
-        const openAiKeySetting = await prisma.setting.findUnique({ where: { key: "openai_api_key" } });
-        const apiKey = openAiKeySetting?.value || process.env.OPENAI_API_KEY;
+        const aiConfig = await getAiRuntimeConfig();
 
-        if (apiKey) {
+        if (aiConfig.textApiKey) {
           // Fetch custom system prompt
           const customPromptSetting = await prisma.setting.findUnique({ where: { key: "ai_chat_prompt" } });
           const systemPrompt = customPromptSetting?.value || 
@@ -68,43 +69,21 @@ export async function POST(request: Request) {
             })),
           ];
 
-          const gptRes = await fetch("https://api.openai.com/v1/chat/completions", {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-              Authorization: `Bearer ${apiKey}`,
-            },
-            body: JSON.stringify({
-              model: "gpt-4o",
-              messages: messagesForAI,
-              temperature: 0.7,
-              max_tokens: 500,
-            }),
+          const aiReply = await requestChatText({
+            config: aiConfig,
+            messages: messagesForAI as Array<{
+              role: "system" | "user" | "assistant";
+              content: string;
+            }>,
+            maxTokens: 500,
           });
-
-          if (gptRes.ok) {
-            const textData = await gptRes.json();
-            const aiReply = textData.choices[0].message.content.trim();
-
-            // Save AI reply
-            await prisma.chatMessage.create({
-              data: {
-                sessionId: session.id,
-                sender: "AI",
-                content: aiReply,
-              },
-            });
-          } else {
-            console.error("OpenAI Chat API error status:", gptRes.status);
-            // Save a polite error response from AI
-            await prisma.chatMessage.create({
-              data: {
-                sessionId: session.id,
-                sender: "AI",
-                content: "Tôi xin lỗi, hệ thống AI đang bận một chút. Bạn có thể để lại lời nhắn qua Form liên hệ hoặc quay lại sau giây lát!",
-              },
-            });
-          }
+          await prisma.chatMessage.create({
+            data: {
+              sessionId: session.id,
+              sender: "AI",
+              content: aiReply.trim(),
+            },
+          });
         } else {
           // If no API Key configured, fallback response
           await prisma.chatMessage.create({
@@ -116,7 +95,18 @@ export async function POST(request: Request) {
           });
         }
       } catch (aiError) {
-        console.error("AI Error in Chat API:", aiError);
+        console.error(
+          "AI Error in Chat API:",
+          aiError instanceof Error ? aiError.message : "UNKNOWN_ERROR",
+        );
+        await prisma.chatMessage.create({
+          data: {
+            sessionId: session.id,
+            sender: "AI",
+            content:
+              "Tôi xin lỗi, hệ thống AI đang bận một chút. Bạn có thể để lại lời nhắn qua form liên hệ hoặc quay lại sau.",
+          },
+        });
       }
     }
 

@@ -5,6 +5,7 @@ import {
   rankInternalLinkCandidates,
   validateInternalLinks,
 } from "./internal-links";
+import { cleanJsonText, requestArticleText } from "./provider";
 import { getAiRuntimeConfig } from "./settings";
 import type {
   ArticleGenerator,
@@ -18,7 +19,7 @@ const WORD_TARGETS = {
   long: "2000-2600",
 } as const;
 
-const ARTICLE_SCHEMA = {
+export const ARTICLE_SCHEMA = {
   type: "object",
   additionalProperties: false,
   properties: {
@@ -56,20 +57,6 @@ const ARTICLE_SCHEMA = {
     "imagePlans",
   ],
 } as const;
-
-function responseText(payload: unknown): string {
-  const data = payload as {
-    output_text?: string;
-    output?: Array<{ content?: Array<{ type?: string; text?: string }> }>;
-  };
-  if (data.output_text) return data.output_text;
-  for (const item of data.output || []) {
-    for (const content of item.content || []) {
-      if (content.type === "output_text" && content.text) return content.text;
-    }
-  }
-  return "";
-}
 
 function cleanStringArray(value: unknown, fallback: string[]) {
   if (!Array.isArray(value)) return fallback;
@@ -122,7 +109,7 @@ function assertGeneratedArticle(value: unknown): Omit<GeneratedArticle, "interna
 
 export class OpenAiArticleGenerator implements ArticleGenerator {
   async generate(input: GenerateArticleInput): Promise<GeneratedArticle> {
-    const [config, posts] = await Promise.all([
+    const [config, posts, products] = await Promise.all([
       getAiRuntimeConfig(),
       prisma.post.findMany({
         where: { status: "PUBLISHED" },
@@ -136,18 +123,49 @@ export class OpenAiArticleGenerator implements ArticleGenerator {
         orderBy: { publishedAt: "desc" },
         take: 100,
       }),
+      prisma.product.findMany({
+        where: { isPublished: true },
+        select: {
+          id: true,
+          title: true,
+          slug: true,
+          description: true,
+          seoKeywords: true,
+        },
+        orderBy: { publishedAt: "desc" },
+        take: 100,
+      }),
     ]);
 
     if (!config.textApiKey) {
       throw new Error("AI_TEXT_API_KEY_MISSING");
     }
 
+    const linkTargets = [
+      ...posts.map((post) => ({
+        id: post.id,
+        targetType: "article" as const,
+        title: post.title,
+        href: `/bai-viet/${post.slug}`,
+        searchText: post.excerpt,
+        seoKeywords: post.seoKeywords,
+      })),
+      ...products.map((product) => ({
+        id: product.id,
+        targetType: "product" as const,
+        title: product.title,
+        href: `/san-pham/${product.slug}`,
+        searchText: product.description,
+        seoKeywords: product.seoKeywords,
+      })),
+    ];
     const candidates = rankInternalLinkCandidates(
-      posts,
+      linkTargets,
       input.topic,
       input.sharedKeywords,
     );
     const linkPlan = candidates.map((candidate) => ({
+      type: candidate.targetType,
       title: candidate.title,
       path: candidate.href,
       allowedAnchors: candidate.anchors.slice(0, 5),
@@ -164,7 +182,9 @@ Không tự tạo thẻ a. Hệ thống sẽ chèn internal link sau khi kiểm 
 Hãy nhắc tự nhiên 2-4 anchor trong danh sách internal link nếu thật sự liên quan; không nhồi từ khóa.
 Mỗi ảnh phải có alt tiếng Việt mô tả đúng nội dung ảnh, không bắt đầu bằng "hình ảnh của".
 Tạo đúng hoặc nhiều hơn ${input.imageCount} kế hoạch ảnh nội dung để hệ thống có thể chọn.
-Alt ảnh bìa và alt ảnh nội dung phải khác nhau, cụ thể và phù hợp ngữ cảnh.${customPrompt}`;
+Alt ảnh bìa và alt ảnh nội dung phải khác nhau, cụ thể và phù hợp ngữ cảnh.
+Trả về JSON thuần, không code fence, có đủ title, excerpt, seoTitle, seoDescription, keywords, content, coverImageAlt, coverImagePrompt và imagePlans.
+Mỗi imagePlans phải có prompt, alt và afterHeading.${customPrompt}`;
 
     const userInput = JSON.stringify({
       topic: input.topic,
@@ -173,39 +193,16 @@ Alt ảnh bìa và alt ảnh nội dung phải khác nhau, cụ thể và phù h
       requestedInlineImages: input.imageCount,
     });
 
-    const response = await fetch("https://api.openai.com/v1/responses", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${config.textApiKey}`,
-      },
-      body: JSON.stringify({
-        model: config.textModel,
-        instructions,
-        input: userInput,
-        max_output_tokens: 16000,
-        text: {
-          format: {
-            type: "json_schema",
-            name: "seo_article",
-            strict: true,
-            schema: ARTICLE_SCHEMA,
-          },
-        },
-      }),
+    const generated = await requestArticleText({
+      config,
+      instructions,
+      userInput,
+      schema: ARTICLE_SCHEMA,
     });
-
-    if (!response.ok) {
-      const detail = (await response.text()).slice(0, 600);
-      throw new Error(`AI_TEXT_API_ERROR_${response.status}: ${detail}`);
-    }
-
-    const raw = responseText(await response.json());
-    if (!raw) throw new Error("AI_TEXT_EMPTY_RESPONSE");
 
     let parsed: unknown;
     try {
-      parsed = JSON.parse(raw);
+      parsed = JSON.parse(cleanJsonText(generated.text));
     } catch {
       throw new Error("AI_TEXT_INVALID_JSON");
     }
@@ -227,6 +224,7 @@ Alt ảnh bìa và alt ảnh nội dung phải khác nhau, cụ thể và phù h
       content: linked.html,
       imagePlans: article.imagePlans.slice(0, input.imageCount),
       internalLinks: linked.links,
+      usage: generated.usage,
     };
   }
 }

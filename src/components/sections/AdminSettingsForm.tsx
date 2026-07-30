@@ -11,6 +11,8 @@ interface AdminSettingsFormProps {
   configuredSecrets: {
     textApiKey: boolean;
     imageApiKey: boolean;
+    smtpPass: boolean;
+    telegramBotToken: boolean;
   };
 }
 
@@ -24,17 +26,28 @@ export default function AdminSettingsForm({
     smtp_host: initialSettings.smtp_host || "",
     smtp_port: initialSettings.smtp_port || "587",
     smtp_user: initialSettings.smtp_user || "",
-    smtp_pass: initialSettings.smtp_pass || "",
+    smtp_pass: "",
     smtp_from: initialSettings.smtp_from || "",
     admin_receive_email: initialSettings.admin_receive_email || "",
-    telegram_bot_token: initialSettings.telegram_bot_token || "",
+    telegram_bot_token: "",
     telegram_chat_id: initialSettings.telegram_chat_id || "",
     ai_chat_prompt: initialSettings.ai_chat_prompt || "",
     ai_writer_prompt: initialSettings.ai_writer_prompt || "",
     openai_text_api_key: "",
-    openai_text_model: initialSettings.openai_text_model || "gpt-5-mini",
+    openai_base_url: initialSettings.openai_base_url || "https://modelapi.vn/v1",
+    openai_wire_api: initialSettings.openai_wire_api || "chat_completions",
+    openai_text_model:
+      initialSettings.openai_text_model ||
+      initialSettings.openai_model ||
+      "gpt-5.5",
+    openai_reasoning_effort:
+      initialSettings.openai_reasoning_effort || "high",
+    openai_max_tokens: initialSettings.openai_max_tokens || "4096",
     openai_image_api_key: "",
-    openai_image_model: initialSettings.openai_image_model || "gpt-image-1",
+    openai_image_base_url:
+      initialSettings.openai_image_base_url || "https://api.openai.com/v1",
+    openai_image_model: initialSettings.openai_image_model || "gpt-image-2",
+    openai_image_quality: initialSettings.openai_image_quality || "medium",
     ai_queue_auto_enabled: initialSettings.ai_queue_auto_enabled || "false",
     ai_queue_batch_limit: initialSettings.ai_queue_batch_limit || "5",
     contact_email: initialSettings.contact_email || "",
@@ -68,6 +81,8 @@ export default function AdminSettingsForm({
         ...current,
         openai_text_api_key: "",
         openai_image_api_key: "",
+        smtp_pass: "",
+        telegram_bot_token: "",
       }));
       
       // Dynamically apply primary color change to the root variables for immediate client preview
@@ -191,7 +206,8 @@ export default function AdminSettingsForm({
               name="smtp_pass"
               value={settings.smtp_pass}
               onChange={handleChange}
-              placeholder="••••••••"
+              placeholder={configuredSecrets.smtpPass ? "Đã cấu hình - để trống để giữ nguyên" : "••••••••"}
+              autoComplete="new-password"
               className="glass-input w-full px-4 py-2 text-sm focus:outline-none"
             />
           </div>
@@ -223,7 +239,8 @@ export default function AdminSettingsForm({
               name="telegram_bot_token"
               value={settings.telegram_bot_token}
               onChange={handleChange}
-              placeholder="7328919:AAEfK..."
+              placeholder={configuredSecrets.telegramBotToken ? "Đã cấu hình - để trống để giữ nguyên" : "7328919:AAEfK..."}
+              autoComplete="new-password"
               className="glass-input w-full px-4 py-2 text-sm focus:outline-none"
             />
           </div>
@@ -251,7 +268,30 @@ export default function AdminSettingsForm({
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div className="space-y-1">
-            <label className="text-xs text-gray-400 block font-medium">OpenAI API key viết bài</label>
+            <label className="text-xs text-gray-400 block font-medium">AI Provider Base URL</label>
+            <input
+              type="url"
+              name="openai_base_url"
+              value={settings.openai_base_url}
+              onChange={handleChange}
+              placeholder="https://modelapi.vn/v1"
+              className="glass-input w-full px-4 py-2 text-sm focus:outline-none"
+            />
+          </div>
+          <div className="space-y-1">
+            <label className="text-xs text-gray-400 block font-medium">Wire API viết bài</label>
+            <select
+              name="openai_wire_api"
+              value={settings.openai_wire_api}
+              onChange={handleChange}
+              className="glass-input w-full px-4 py-2 text-sm focus:outline-none"
+            >
+              <option value="chat_completions">Chat Completions</option>
+              <option value="responses">Responses API</option>
+            </select>
+          </div>
+          <div className="space-y-1">
+            <label className="text-xs text-gray-400 block font-medium">AI Provider API key viết bài</label>
             <input
               type="password"
               name="openai_text_api_key"
@@ -269,7 +309,45 @@ export default function AdminSettingsForm({
               name="openai_text_model"
               value={settings.openai_text_model}
               onChange={handleChange}
-              placeholder="gpt-5-mini"
+              placeholder="gpt-5.5"
+              className="glass-input w-full px-4 py-2 text-sm focus:outline-none"
+            />
+          </div>
+          <div className="space-y-1">
+            <label className="text-xs text-gray-400 block font-medium">Reasoning Effort</label>
+            <select
+              name="openai_reasoning_effort"
+              value={settings.openai_reasoning_effort}
+              onChange={handleChange}
+              className="glass-input w-full px-4 py-2 text-sm focus:outline-none"
+            >
+              <option value="none">None</option>
+              <option value="low">Low</option>
+              <option value="medium">Medium</option>
+              <option value="high">High</option>
+              <option value="xhigh">XHigh</option>
+            </select>
+          </div>
+          <div className="space-y-1">
+            <label className="text-xs text-gray-400 block font-medium">Max Output Tokens</label>
+            <input
+              type="number"
+              name="openai_max_tokens"
+              value={settings.openai_max_tokens}
+              onChange={handleChange}
+              min={1}
+              max={128000}
+              className="glass-input w-full px-4 py-2 text-sm focus:outline-none"
+            />
+          </div>
+          <div className="space-y-1">
+            <label className="text-xs text-gray-400 block font-medium">OpenAI Image Base URL</label>
+            <input
+              type="url"
+              name="openai_image_base_url"
+              value={settings.openai_image_base_url}
+              onChange={handleChange}
+              placeholder="https://api.openai.com/v1"
               className="glass-input w-full px-4 py-2 text-sm focus:outline-none"
             />
           </div>
@@ -286,13 +364,27 @@ export default function AdminSettingsForm({
             />
           </div>
           <div className="space-y-1">
+            <label className="text-xs text-gray-400 block font-medium">Chất lượng ảnh</label>
+            <select
+              name="openai_image_quality"
+              value={settings.openai_image_quality}
+              onChange={handleChange}
+              className="glass-input w-full px-4 py-2 text-sm focus:outline-none"
+            >
+              <option value="low">Low</option>
+              <option value="medium">Medium</option>
+              <option value="high">High</option>
+              <option value="auto">Auto</option>
+            </select>
+          </div>
+          <div className="space-y-1">
             <label className="text-xs text-gray-400 block font-medium">Model sinh ảnh</label>
             <input
               type="text"
               name="openai_image_model"
               value={settings.openai_image_model}
               onChange={handleChange}
-              placeholder="gpt-image-1"
+              placeholder="gpt-image-2"
               className="glass-input w-full px-4 py-2 text-sm focus:outline-none"
             />
           </div>

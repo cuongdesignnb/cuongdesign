@@ -11,16 +11,19 @@ import { mergeContentDefaults } from "@/lib/content/merge-defaults";
 import { revalidateContentKey } from "@/lib/content/revalidate";
 import type { Prisma } from "@prisma/client";
 import { requireAdmin } from "@/lib/auth/require-admin";
+import { validateAiSettingValues } from "@/lib/ai/settings";
+import { isSecretSettingKey } from "@/lib/settings/secrets";
 
 export async function updateSettings(data: Record<string, string>) {
   try {
     await requireAdmin();
     const normalized = Object.fromEntries(
       Object.entries(data).filter(([key, value]) => {
-        if (key.endsWith("_api_key") && !value.trim()) return false;
+        if (isSecretSettingKey(key) && !value.trim()) return false;
         return true;
-      }),
+      }).map(([key, value]) => [key, value.trim()]),
     );
+    validateAiSettingValues(normalized);
     await prisma.$transaction(async (tx) => {
       await Promise.all(Object.entries(normalized).map(([key, value]) => {
         return tx.setting.upsert({

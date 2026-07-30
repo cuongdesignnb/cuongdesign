@@ -14,10 +14,10 @@
 
 Trong Admin > Cấu hình hệ thống:
 
-1. Nhập `OpenAI API key viết bài`.
-2. Chọn model viết bài, mặc định `gpt-5-mini`.
-3. Nhập `OpenAI API key sinh ảnh` riêng.
-4. Chọn model sinh ảnh, mặc định `gpt-image-1`.
+1. Nhập key nhà cung cấp nội dung, ví dụ `modelapi.vn`.
+2. Đặt Base URL `https://modelapi.vn/v1`, Wire API `chat_completions` và model `gpt-5.5`.
+3. Nhập OpenAI API key sinh ảnh riêng.
+4. Đặt Base URL ảnh `https://api.openai.com/v1`, model `gpt-image-2` và quality `medium`.
 5. Đặt batch limit từ 1 đến 20.
 6. Chỉ bật scheduler sau khi cả cấu hình và lịch bài đã được kiểm tra.
 
@@ -26,13 +26,19 @@ Key để trống khi lưu sẽ giữ nguyên giá trị đang có. Key không �
 Có thể dùng biến môi trường thay cho Setting:
 
 ```bash
-OPENAI_TEXT_API_KEY=
-OPENAI_TEXT_MODEL=gpt-5-mini
+OPENAI_API_KEY=
+OPENAI_BASE_URL=https://modelapi.vn/v1
+OPENAI_WIRE_API=chat_completions
+OPENAI_MODEL=gpt-5.5
+OPENAI_REASONING_EFFORT=high
+OPENAI_MAX_TOKENS=4096
 OPENAI_IMAGE_API_KEY=
-OPENAI_IMAGE_MODEL=gpt-image-1
+OPENAI_IMAGE_BASE_URL=https://api.openai.com/v1
+OPENAI_IMAGE_MODEL=gpt-image-2
+OPENAI_IMAGE_QUALITY=medium
 ```
 
-Image key không tự fallback sang text key.
+Các biến `OPENAI_TEXT_API_KEY` và `OPENAI_TEXT_MODEL` cũ vẫn được hỗ trợ để tương thích production. Image key không tự fallback sang text key. Lỗi ảnh được lưu thành warning và không làm mất bài viết đã sinh thành công.
 
 ## Deploy Docker
 

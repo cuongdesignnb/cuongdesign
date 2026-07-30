@@ -560,7 +560,14 @@ export default function BlogQueueClient({
                           {state.label}
                         </span>
                         {task.errorMessage && (
-                          <div className="mt-1 max-w-[180px] truncate text-[10px] text-red-400/80" title={task.errorMessage}>
+                          <div
+                            className={`mt-1 max-w-[180px] truncate text-[10px] ${
+                              task.status === "COMPLETED"
+                                ? "text-amber-300/80"
+                                : "text-red-400/80"
+                            }`}
+                            title={task.errorMessage}
+                          >
                             {task.errorMessage}
                           </div>
                         )}

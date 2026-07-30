@@ -3,31 +3,74 @@ import path from "node:path";
 import sharp from "sharp";
 import { prisma } from "@/lib/db";
 import { normalizeSlug } from "@/lib/seo/slug";
-import { getAiRuntimeConfig } from "./settings";
+import { AiProviderError, providerEndpoint, type Fetcher } from "./provider";
+import { getAiRuntimeConfig, type AiRuntimeConfig } from "./settings";
 import type { GeneratedImage, ImageGenerator } from "./types";
 
-function extractImageBuffer(payload: unknown): Promise<Buffer> {
+async function extractImageBuffer(
+  payload: unknown,
+  fetcher: Fetcher,
+): Promise<Buffer> {
   const data = payload as {
     data?: Array<{ b64_json?: string; url?: string }>;
   };
   const first = data.data?.[0];
   if (first?.b64_json) {
-    return Promise.resolve(Buffer.from(first.b64_json, "base64"));
+    return Buffer.from(first.b64_json, "base64");
   }
   if (first?.url) {
-    return fetch(first.url).then(async (response) => {
-      if (!response.ok) throw new Error("AI_IMAGE_DOWNLOAD_FAILED");
-      return Buffer.from(await response.arrayBuffer());
-    });
+    const imageUrl = new URL(first.url);
+    if (imageUrl.protocol !== "https:") {
+      throw new Error("AI_IMAGE_DOWNLOAD_HTTPS_REQUIRED");
+    }
+    const response = await fetcher(imageUrl);
+    if (!response.ok) throw new Error("AI_IMAGE_DOWNLOAD_FAILED");
+    return Buffer.from(await response.arrayBuffer());
   }
-  return Promise.reject(new Error("AI_IMAGE_EMPTY_RESPONSE"));
+  throw new Error("AI_IMAGE_EMPTY_RESPONSE");
+}
+
+export async function requestImageSource(input: {
+  config: AiRuntimeConfig;
+  prompt: string;
+  fetcher?: Fetcher;
+}): Promise<Buffer> {
+  const fetcher = input.fetcher || fetch;
+  const response = await fetcher(
+    providerEndpoint(input.config.imageBaseUrl, "images/generations"),
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${input.config.imageApiKey}`,
+      },
+      body: JSON.stringify({
+        model: input.config.imageModel,
+        prompt: `${input.prompt}\nNo text, letters, captions, logos or watermarks.`,
+        n: 1,
+        size: "1536x1024",
+        quality: input.config.imageQuality,
+        output_format: "png",
+      }),
+    },
+  );
+  if (!response.ok) {
+    const detail =
+      (await response.text()).trim().slice(0, 600) ||
+      `Image provider returned HTTP ${response.status}`;
+    throw new AiProviderError("image", response.status, detail);
+  }
+  return extractImageBuffer(await response.json(), fetcher);
 }
 
 export class OpenAiImageGenerator implements ImageGenerator {
+  constructor(private readonly fetcher: Fetcher = fetch) {}
+
   async generate(input: {
     title: string;
     prompt: string;
     alt: string;
+    caption?: string;
     kind: "cover" | "inline";
   }): Promise<GeneratedImage> {
     const config = await getAiRuntimeConfig();
@@ -35,32 +78,26 @@ export class OpenAiImageGenerator implements ImageGenerator {
       throw new Error("AI_IMAGE_API_KEY_MISSING");
     }
 
-    const response = await fetch("https://api.openai.com/v1/images/generations", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${config.imageApiKey}`,
-      },
-      body: JSON.stringify({
-        model: config.imageModel,
-        prompt: `${input.prompt}\nNo text, letters, captions, logos or watermarks.`,
-        n: 1,
-        size: "1536x1024",
-        quality: "medium",
-        output_format: "webp",
-      }),
+    const source = await requestImageSource({
+      config,
+      prompt: input.prompt,
+      fetcher: this.fetcher,
     });
-
-    if (!response.ok) {
-      const detail = (await response.text()).slice(0, 600);
-      throw new Error(`AI_IMAGE_API_ERROR_${response.status}: ${detail}`);
-    }
-
-    const source = await extractImageBuffer(await response.json());
-    const webp = await sharp(source).webp({ quality: 82 }).toBuffer();
+    const webp = await sharp(source)
+      .rotate()
+      .resize({
+        width: 1600,
+        height: 1600,
+        fit: "inside",
+        withoutEnlargement: true,
+      })
+      .webp({ quality: 85 })
+      .toBuffer();
     const metadata = await sharp(webp).metadata();
+    const now = new Date();
     const storageKey = path.posix.join(
-      "blog",
+      "ai-generated",
+      `${now.getUTCFullYear()}-${String(now.getUTCMonth() + 1).padStart(2, "0")}`,
       `${Date.now()}-${input.kind}-${normalizeSlug(input.title).slice(0, 72)}.webp`,
     );
     const uploadRoot = path.resolve(process.cwd(), "public", "uploads");
@@ -71,6 +108,8 @@ export class OpenAiImageGenerator implements ImageGenerator {
     await fs.mkdir(path.dirname(filePath), { recursive: true });
     await fs.writeFile(filePath, webp);
 
+    const alt = input.alt.trim() || input.title.trim();
+    const caption = input.caption?.trim() || alt;
     const url = `/uploads/${storageKey}`;
     const media = await prisma.media.create({
       data: {
@@ -80,7 +119,8 @@ export class OpenAiImageGenerator implements ImageGenerator {
         size: webp.length,
         width: metadata.width || null,
         height: metadata.height || null,
-        alt: input.alt.trim(),
+        alt,
+        caption,
         mimeType: "image/webp",
       },
     });
@@ -88,7 +128,8 @@ export class OpenAiImageGenerator implements ImageGenerator {
     return {
       mediaId: media.id,
       url,
-      alt: media.alt || input.alt.trim(),
+      alt: media.alt || alt,
+      caption: media.caption || caption,
       width: media.width,
       height: media.height,
     };

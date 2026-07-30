@@ -261,7 +261,14 @@ export default function AdminPostsManager({ initialPosts, categories }: AdminPos
           seoDescription: data.seoDescription || prev.seoDescription,
           seoKeywords: data.seoKeywords?.join(', ') || prev.seoKeywords,
         }));
-        toast.success('AI đã sinh nội dung', 'Nội dung, SEO và ảnh bìa đã được tạo tự động.');
+        if (data.warnings?.length) {
+          toast.warning(
+            'Bài viết đã được tạo, ảnh có cảnh báo',
+            data.warnings.join(' '),
+          );
+        } else {
+          toast.success('AI đã sinh nội dung', 'Nội dung, SEO và ảnh bìa đã được tạo tự động.');
+        }
       } else {
         toast.error('Lỗi AI', data.error);
       }

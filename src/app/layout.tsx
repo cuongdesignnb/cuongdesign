@@ -5,7 +5,6 @@ import ChatWidget from "@/components/ui/ChatWidget";
 import DraftPreviewBanner from "@/components/admin/content/DraftPreviewBanner";
 import { JsonLd, buildSitewideGraph, createMetadataFromSeoFields } from "@/lib/seo";
 import { prisma } from "@/lib/db";
-import { SettingsProvider } from "@/components/ui/SettingsContext";
 import { getPublishedContent } from "@/lib/content/get-content";
 
 const geistSans = Geist({
@@ -51,11 +50,15 @@ export default async function RootLayout({
   children: React.ReactNode;
 }>) {
   const globalContentPromise = getPublishedContent("global");
-  // Fetch system configuration settings
-  let dbSettings: any[] = [];
+  let dbSettings: Array<{ key: string; value: string }> = [];
   try {
-    dbSettings = await prisma.setting.findMany();
-  } catch (error) {
+    dbSettings = await prisma.setting.findMany({
+      where: {
+        key: { in: ["theme_primary_color", "theme_secondary_color"] },
+      },
+      select: { key: true, value: true },
+    });
+  } catch {
     console.warn("Database connection failed during build, using default settings.");
   }
   const settings: Record<string, string> = {};
@@ -63,8 +66,10 @@ export default async function RootLayout({
     settings[s.key] = s.value;
   });
 
-  const primaryColor = settings.theme_primary_color || "#ec4899";
-  const secondaryColor = settings.theme_secondary_color || "#8b5cf6";
+  const safeColor = (value: string | undefined, fallback: string) =>
+    value && /^#[0-9a-f]{6}$/i.test(value) ? value : fallback;
+  const primaryColor = safeColor(settings.theme_primary_color, "#ec4899");
+  const secondaryColor = safeColor(settings.theme_secondary_color, "#8b5cf6");
   const globalContent = await globalContentPromise;
 
   return (
@@ -87,11 +92,9 @@ export default async function RootLayout({
       </head>
       <body className="min-h-full flex flex-col" suppressHydrationWarning>
         <DraftPreviewBanner />
-        <SettingsProvider settings={settings}>
-          <JsonLd data={buildSitewideGraph(globalContent)} />
-          {children}
-          <ChatWidget />
-        </SettingsProvider>
+        <JsonLd data={buildSitewideGraph(globalContent)} />
+        {children}
+        <ChatWidget />
       </body>
     </html>
   );

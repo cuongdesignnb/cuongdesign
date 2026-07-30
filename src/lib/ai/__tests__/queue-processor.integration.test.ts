@@ -66,6 +66,8 @@ async function createTask(
     status?: AiTaskStatus;
     attempts?: number;
     lockedAt?: Date | null;
+    withImages?: boolean;
+    imageCount?: number;
   } = {},
 ) {
   return prisma.aiTask.create({
@@ -77,6 +79,8 @@ async function createTask(
       status: input.status || "PENDING",
       attempts: input.attempts || 0,
       lockedAt: input.lockedAt,
+      withImages: input.withImages ?? false,
+      imageCount: input.imageCount ?? 0,
       claimToken: input.status?.startsWith("GENERATING") ? `${keyword}-claim` : null,
     },
   });
@@ -185,6 +189,25 @@ describe(
       assert.equal(draft.status, "DRAFT");
       assert.equal(draft.publishedAt, null);
       assert.equal(draft.categoryId, category.id);
+    });
+
+    test("keeps the article when image generation fails", async () => {
+      const task = await createTask("Bài vẫn giữ khi ảnh lỗi", {
+        withImages: true,
+      });
+      const stats = await processAiQueueBatch({
+        taskId: task.id,
+        force: true,
+        dependencies: dependencies(new FakeArticleGenerator()),
+      });
+      const completed = await prisma.aiTask.findUniqueOrThrow({
+        where: { id: task.id },
+      });
+
+      assert.equal(stats.success, 1);
+      assert.equal(completed.status, "COMPLETED");
+      assert.match(completed.errorMessage || "", /IMAGE_GENERATOR_MUST_NOT_BE_CALLED/);
+      assert.equal(await prisma.post.count(), 1);
     });
 
     test("atomic claim prevents duplicate posts from concurrent callers", async () => {

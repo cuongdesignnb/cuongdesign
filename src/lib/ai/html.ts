@@ -53,7 +53,9 @@ export function insertInlineImages(
     if (image.width) imageElement.attr("width", String(image.width));
     if (image.height) imageElement.attr("height", String(image.height));
     figure.append(imageElement);
-    figure.append($("<figcaption></figcaption>").text(image.alt));
+    figure.append(
+      $("<figcaption></figcaption>").text(image.caption || image.alt),
+    );
 
     if (target) {
       $(target).after(figure);
