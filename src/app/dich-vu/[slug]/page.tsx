@@ -21,6 +21,8 @@ import {
 import Breadcrumbs from "@/components/ui/Breadcrumbs";
 import GlassCard from "@/components/ui/GlassCard";
 import Button from "@/components/ui/Button";
+import Header from "@/components/layout/Header";
+import Footer from "@/components/layout/Footer";
 import { resolveSeoRedirect } from "@/lib/seo/resolve-redirect";
 
 type Props = { params: Promise<{ slug: string }> };
@@ -101,8 +103,9 @@ export default async function ServiceDetailPage({ params }: Props) {
   };
 
   return (
-    <>
+    <div className="min-h-screen bg-[#030014] text-gray-200 flex flex-col">
       <JsonLd data={serviceSchema} />
+      <Header />
       <main className="flex-1 bg-[#030014] relative overflow-hidden">
         <section className="pt-32 pb-16 relative">
           <div className="absolute inset-0 bg-gradient-to-b from-purple-950/20 via-transparent to-transparent" />
@@ -183,6 +186,7 @@ export default async function ServiceDetailPage({ params }: Props) {
           </div>
         </section>
       </main>
-    </>
+      <Footer />
+    </div>
   );
 }
