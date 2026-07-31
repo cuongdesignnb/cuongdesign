@@ -1,5 +1,6 @@
 import { prisma } from "@/lib/db";
 import AdminSettingsForm from "@/components/sections/AdminSettingsForm";
+import { isManualRunSettingKey } from "@/lib/ai/manual-run";
 import { isSecretSettingKey } from "@/lib/settings/secrets";
 
 export default async function AdminSettingsPage() {
@@ -9,7 +10,7 @@ export default async function AdminSettingsPage() {
   // Format as a simple key-value object
   const settingsObj: Record<string, string> = {};
   dbSettings.forEach((s) => {
-    settingsObj[s.key] = s.value;
+    if (!isManualRunSettingKey(s.key)) settingsObj[s.key] = s.value;
   });
   const configuredSecrets = {
     textApiKey: Boolean(

@@ -66,6 +66,13 @@ interface QueueStatus {
   nextScheduledAt: string | null;
 }
 
+interface GenerateQueueResponse {
+  success?: boolean;
+  queued?: boolean;
+  message?: string;
+  error?: string;
+}
+
 interface BlogQueueClientProps {
   initialTasks: Task[];
   initialStatus: QueueStatus;
@@ -202,11 +209,27 @@ export default function BlogQueueClient({
         `/api/admin/blog/generate${id ? `?taskId=${encodeURIComponent(id)}` : ""}`,
         { method: "POST" },
       );
-      const result = await response.json();
+      const rawBody = await response.text();
+      let result: GenerateQueueResponse;
+      try {
+        result = rawBody ? (JSON.parse(rawBody) as GenerateQueueResponse) : {};
+      } catch {
+        const detail =
+          response.status === 504
+            ? "Máy chủ hết thời gian chờ. Tác vụ có thể vẫn đang được xử lý nền."
+            : `Máy chủ trả về dữ liệu không hợp lệ (HTTP ${response.status}).`;
+        throw new Error(detail);
+      }
       if (!response.ok || !result.success) {
-        toast.error("Xử lý chưa thành công", result.error || result.message);
+        toast.error(
+          "Xử lý chưa thành công",
+          result.error || result.message || `HTTP ${response.status}`,
+        );
       } else {
-        toast.success("Đã xử lý", `${result.stats.success} bài viết hoàn thành.`);
+        toast.success(
+          "Đã giao cho AI worker",
+          result.message || "Tác vụ đang được xử lý nền.",
+        );
       }
       router.refresh();
     } catch (error) {

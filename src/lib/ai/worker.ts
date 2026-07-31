@@ -1,4 +1,4 @@
-import { processAiQueueBatch } from "./queue-processor";
+import { runAiQueueCycle } from "./manual-run";
 
 const WORKER_INTERVAL_MS = 60_000;
 
@@ -11,7 +11,7 @@ async function tick() {
   if (globalThis.__cuongDesignAiQueueWorkerRunning) return;
   globalThis.__cuongDesignAiQueueWorkerRunning = true;
   try {
-    await processAiQueueBatch();
+    await runAiQueueCycle();
   } catch (error) {
     console.error(
       "AI_QUEUE_INFRASTRUCTURE_ERROR",

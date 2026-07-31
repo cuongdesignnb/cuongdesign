@@ -6,6 +6,10 @@ import {
   processAiQueueBatch,
   recoverStaleAiTasks,
 } from "../queue-processor";
+import {
+  enqueueManualQueueRun,
+  processManualQueueRuns,
+} from "../manual-run";
 import { getQueueStatus } from "../settings";
 import type {
   ArticleGenerator,
@@ -273,6 +277,28 @@ describe(
       assert.equal(status.pendingCount, 1);
       assert.ok(status.schedulerLastSeenAt);
       assert.ok(status.schedulerLastRunAt);
+    });
+
+    test("manual requests run in the background when the scheduler is disabled", async () => {
+      const task = await createTask("Bài chạy thủ công");
+      await setAutoEnabled(false);
+      const requestKey = await enqueueManualQueueRun(task.id);
+
+      const results = await processManualQueueRuns({
+        requestKey,
+        dependencies: dependencies(new FakeArticleGenerator()),
+      });
+
+      assert.equal(results.length, 1);
+      assert.equal(results[0].stats.success, 1);
+      assert.equal(
+        (await prisma.aiTask.findUniqueOrThrow({ where: { id: task.id } })).status,
+        "COMPLETED",
+      );
+      assert.equal(
+        await prisma.setting.count({ where: { key: requestKey } }),
+        0,
+      );
     });
   },
 );

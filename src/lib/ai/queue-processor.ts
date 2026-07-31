@@ -24,13 +24,13 @@ export interface QueueBatchStats {
   recovered: number;
 }
 
-interface ProcessorDependencies {
+export interface ProcessorDependencies {
   articleGenerator: ArticleGenerator;
   imageGenerator: ImageGenerator;
   now: () => Date;
 }
 
-interface ProcessBatchOptions {
+export interface ProcessBatchOptions {
   limit?: number;
   force?: boolean;
   taskId?: string;

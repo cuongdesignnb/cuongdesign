@@ -1,4 +1,4 @@
-import { processAiQueueBatch } from "../src/lib/ai/queue-processor";
+import { runAiQueueCycle } from "../src/lib/ai/manual-run";
 
 const interval = Math.max(
   15_000,
@@ -10,7 +10,7 @@ async function run() {
   if (running) return;
   running = true;
   try {
-    await processAiQueueBatch();
+    await runAiQueueCycle();
   } catch (error) {
     console.error(
       "AI_QUEUE_INFRASTRUCTURE_ERROR",
