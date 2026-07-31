@@ -1,12 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { promises as fs } from "fs";
-import path from "path";
 import sharp from "sharp";
 import {
   adminAuthorizationResponse,
   requireAdmin,
 } from "@/lib/auth/require-admin";
+import { resolveMediaStoragePath } from "@/lib/media/storage";
 import { getMediaUsage } from "@/lib/media/usage";
 
 const MAX_FILE_SIZE = 10 * 1024 * 1024;
@@ -28,12 +28,7 @@ function safeBaseName(name: string) {
 }
 
 function uploadsPath(storageKey: string) {
-  const uploadDirectory = path.resolve(process.cwd(), "public", "uploads");
-  const filePath = path.resolve(uploadDirectory, storageKey);
-  if (!filePath.startsWith(`${uploadDirectory}${path.sep}`)) {
-    throw new Error("Invalid media storage path.");
-  }
-  return { uploadDirectory, filePath };
+  return resolveMediaStoragePath(storageKey);
 }
 
 export async function GET(request: NextRequest) {

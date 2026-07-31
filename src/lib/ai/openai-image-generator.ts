@@ -2,6 +2,7 @@ import { promises as fs } from "node:fs";
 import path from "node:path";
 import sharp from "sharp";
 import { prisma } from "@/lib/db";
+import { resolveMediaStoragePath } from "@/lib/media/storage";
 import { normalizeSlug } from "@/lib/seo/slug";
 import { AiProviderError, providerEndpoint, type Fetcher } from "./provider";
 import { getAiRuntimeConfig, type AiRuntimeConfig } from "./settings";
@@ -100,11 +101,7 @@ export class OpenAiImageGenerator implements ImageGenerator {
       `${now.getUTCFullYear()}-${String(now.getUTCMonth() + 1).padStart(2, "0")}`,
       `${Date.now()}-${input.kind}-${normalizeSlug(input.title).slice(0, 72)}.webp`,
     );
-    const uploadRoot = path.resolve(process.cwd(), "public", "uploads");
-    const filePath = path.resolve(uploadRoot, ...storageKey.split("/"));
-    if (!filePath.startsWith(`${uploadRoot}${path.sep}`)) {
-      throw new Error("AI_IMAGE_INVALID_STORAGE_PATH");
-    }
+    const { filePath } = resolveMediaStoragePath(storageKey);
     await fs.mkdir(path.dirname(filePath), { recursive: true });
     await fs.writeFile(filePath, webp);
 

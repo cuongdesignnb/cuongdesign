@@ -1,10 +1,10 @@
 import { promises as fs } from "fs";
 import { NextResponse } from "next/server";
 import path from "path";
+import { resolveMediaStoragePath } from "@/lib/media/storage";
 
 export const dynamic = "force-dynamic";
 
-const STORAGE_KEY_PATTERN = /^[a-zA-Z0-9][a-zA-Z0-9._-]{0,199}$/;
 const MIME_TYPES: Record<string, string> = {
   ".avif": "image/avif",
   ".gif": "image/gif",
@@ -16,16 +16,16 @@ const MIME_TYPES: Record<string, string> = {
 
 export async function GET(
   _request: Request,
-  { params }: { params: Promise<{ storageKey: string }> },
+  { params }: { params: Promise<{ storageKey: string[] }> },
 ) {
-  const { storageKey } = await params;
-  if (!STORAGE_KEY_PATTERN.test(storageKey)) {
-    return NextResponse.json({ error: "Invalid media path." }, { status: 400 });
-  }
-
-  const uploadDirectory = path.resolve(process.cwd(), "public", "uploads");
-  const filePath = path.resolve(uploadDirectory, storageKey);
-  if (!filePath.startsWith(`${uploadDirectory}${path.sep}`)) {
+  const { storageKey: segments } = await params;
+  let storageKey: string;
+  let filePath: string;
+  try {
+    const resolved = resolveMediaStoragePath(segments);
+    storageKey = resolved.storageKey;
+    filePath = resolved.filePath;
+  } catch {
     return NextResponse.json({ error: "Invalid media path." }, { status: 400 });
   }
 
