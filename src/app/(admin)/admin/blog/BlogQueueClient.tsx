@@ -227,11 +227,12 @@ export default function BlogQueueClient({
         );
       } else {
         toast.success(
-          "Đã giao cho AI worker",
-          result.message || "Tác vụ đang được xử lý nền.",
+          "Đã bắt đầu xử lý",
+          result.message || "Worker đang xử lý tác vụ nền.",
         );
       }
       router.refresh();
+      window.setTimeout(() => router.refresh(), 1000);
     } catch (error) {
       toast.error(
         "Không thể kết nối",

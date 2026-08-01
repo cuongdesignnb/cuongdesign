@@ -1,6 +1,9 @@
 import { runAiQueueCycle } from "./manual-run";
 
-const WORKER_INTERVAL_MS = 60_000;
+const WORKER_INTERVAL_MS = Math.max(
+  15_000,
+  Number.parseInt(process.env.AI_QUEUE_INTERVAL_MS || "15000", 10),
+);
 
 declare global {
   var __cuongDesignAiQueueWorkerStarted: boolean | undefined;

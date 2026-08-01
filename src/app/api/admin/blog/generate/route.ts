@@ -5,6 +5,7 @@ import {
 } from "@/lib/auth/require-admin";
 import {
   enqueueManualQueueRun,
+  processManualQueueRuns,
 } from "@/lib/ai/manual-run";
 import { prisma } from "@/lib/db";
 
@@ -36,7 +37,15 @@ export async function POST(request: Request) {
       }
     }
 
-    await enqueueManualQueueRun(taskId);
+    const requestKey = await enqueueManualQueueRun(taskId);
+    // Start the work immediately when the web process is available; the durable
+    // database request remains available for the scheduled worker as a fallback.
+    void processManualQueueRuns({ requestKey }).catch((error: unknown) => {
+      console.error(
+        "AI_QUEUE_MANUAL_WAKE_FAILED",
+        error instanceof Error ? error.message : error,
+      );
+    });
 
     return NextResponse.json(
       {
