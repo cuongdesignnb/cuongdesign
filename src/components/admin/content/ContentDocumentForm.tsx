@@ -79,33 +79,51 @@ export default function ContentDocumentForm({
   const [currentPublishedAt, setCurrentPublishedAt] = useState(publishedAt);
   const unsaved = useMemo(() => JSON.stringify(data) !== savedSnapshot, [data, savedSnapshot]);
 
+  function actionError(error: unknown, fallback: string) {
+    if (error instanceof Error && error.message.includes("Failed to find Server Action")) {
+      return "Phiên làm việc đã cũ sau khi hệ thống cập nhật. Hãy tải lại trang bằng Ctrl+F5 rồi lưu lại.";
+    }
+    return error instanceof Error ? error.message : fallback;
+  }
+
   async function save(showMessage = true) {
     setBusy(true);
-    const result = await saveContentDraft(contentKey, data);
-    setBusy(false);
-    if (!result.success) {
-      window.alert(result.error);
+    try {
+      const result = await saveContentDraft(contentKey, data);
+      if (!result.success) {
+        window.alert(result.error);
+        return false;
+      }
+      const document = result.data as { id?: string };
+      if (document.id) setCurrentDocumentId(document.id);
+      setSavedSnapshot(JSON.stringify(data));
+      if (showMessage) window.alert("Đã lưu bản nháp.");
+      router.refresh();
+      return true;
+    } catch (error) {
+      window.alert(actionError(error, "Không thể lưu bản nháp."));
       return false;
+    } finally {
+      setBusy(false);
     }
-    const document = result.data as { id?: string };
-    if (document.id) setCurrentDocumentId(document.id);
-    setSavedSnapshot(JSON.stringify(data));
-    if (showMessage) window.alert("Đã lưu bản nháp.");
-    router.refresh();
-    return true;
   }
 
   async function publish() {
     const saved = await save(false);
     if (!saved) return;
     setBusy(true);
-    const result = await publishContentDocument(contentKey);
-    setBusy(false);
-    if (!result.success) return window.alert(result.error);
-    const document = result.data as { publishedAt?: string | Date | null };
-    setCurrentPublishedAt(document.publishedAt ? String(document.publishedAt) : new Date().toISOString());
-    window.alert("Đã publish nội dung.");
-    router.refresh();
+    try {
+      const result = await publishContentDocument(contentKey);
+      if (!result.success) return window.alert(result.error);
+      const document = result.data as { publishedAt?: string | Date | null };
+      setCurrentPublishedAt(document.publishedAt ? String(document.publishedAt) : new Date().toISOString());
+      window.alert("Đã publish nội dung.");
+      router.refresh();
+    } catch (error) {
+      window.alert(actionError(error, "Không thể publish nội dung."));
+    } finally {
+      setBusy(false);
+    }
   }
 
   function renderField(key: string, value: unknown, onChange: (value: unknown) => void, path: string): React.ReactNode {

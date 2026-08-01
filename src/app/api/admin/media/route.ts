@@ -12,8 +12,14 @@ import { getMediaUsage } from "@/lib/media/usage";
 
 const MAX_FILE_SIZE = 10 * 1024 * 1024;
 const MAX_DIMENSION = 8000;
-const ALLOWED_MIME = new Set(["image/jpeg", "image/png", "image/webp", "image/avif"]);
-const ALLOWED_FORMATS = new Set(["jpeg", "png", "webp", "avif"]);
+const ALLOWED_MIME = new Set([
+  "image/jpeg",
+  "image/png",
+  "image/webp",
+  "image/avif",
+  "image/svg+xml",
+]);
+const ALLOWED_FORMATS = new Set(["jpeg", "png", "webp", "avif", "svg"]);
 
 function safeBaseName(name: string) {
   return (

@@ -44,7 +44,7 @@ export default function MediaUploadButton({
       <input
         ref={inputRef}
         type="file"
-        accept="image/jpeg,image/png,image/webp,image/avif"
+        accept="image/jpeg,image/png,image/webp,image/avif,image/svg+xml,image/x-icon,.ico"
         multiple={multiple}
         className="hidden"
         onChange={(event) => void upload(event.target.files)}
