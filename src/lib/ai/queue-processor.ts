@@ -42,6 +42,8 @@ interface ClaimedTask {
   claimToken: string;
 }
 
+type ImageInput = Parameters<ImageGenerator["generate"]>[0];
+
 function logEvent(
   event: string,
   context: Record<string, string | number | boolean | null | undefined>,
@@ -51,6 +53,38 @@ function logEvent(
 
 function errorMessage(error: unknown) {
   return error instanceof Error ? error.message.slice(0, 2000) : "UNKNOWN_ERROR";
+}
+
+async function generateQueuedImage(
+  task: AiTask,
+  imageGenerator: ImageGenerator,
+  input: ImageInput,
+) {
+  const started = Date.now();
+  logEvent("AI_QUEUE_IMAGE_STARTED", {
+    queue_item_id: task.id,
+    topic: task.keyword,
+    kind: input.kind,
+  });
+  try {
+    const image = await imageGenerator.generate(input);
+    logEvent("AI_QUEUE_IMAGE_DONE", {
+      queue_item_id: task.id,
+      topic: task.keyword,
+      kind: input.kind,
+      duration_ms: Date.now() - started,
+    });
+    return image;
+  } catch (error) {
+    logEvent("AI_QUEUE_IMAGE_FAILED", {
+      queue_item_id: task.id,
+      topic: task.keyword,
+      kind: input.kind,
+      duration_ms: Date.now() - started,
+      error: errorMessage(error),
+    });
+    throw error;
+  }
 }
 
 export async function recoverStaleAiTasks(now = new Date()) {
@@ -111,6 +145,7 @@ async function claimTask(
       lastAttemptAt: now,
       startedAt: now,
       attempts: { increment: 1 },
+      nextAttemptAt: null,
       errorMessage: null,
     },
   });
@@ -170,7 +205,7 @@ async function processClaimedTask(
     if (statusUpdated.count !== 1) throw new Error("AI_TASK_CLAIM_LOST");
 
     try {
-      coverImage = await dependencies.imageGenerator.generate({
+      coverImage = await generateQueuedImage(task, dependencies.imageGenerator, {
         title: article.title,
         prompt: article.coverImagePrompt,
         alt: article.coverImageAlt,
@@ -182,7 +217,7 @@ async function processClaimedTask(
     }
     for (const plan of article.imagePlans.slice(0, task.imageCount)) {
       try {
-        const image = await dependencies.imageGenerator.generate({
+        const image = await generateQueuedImage(task, dependencies.imageGenerator, {
           title: article.title,
           prompt: plan.prompt,
           alt: plan.alt,

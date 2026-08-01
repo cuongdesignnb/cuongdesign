@@ -186,6 +186,21 @@ test("image request downloads HTTPS URLs and rejects HTTP URLs", async () => {
   );
 });
 
+test("image request stops a stalled provider call at the configured timeout", async () => {
+  const stalledFetcher: Fetcher = async () =>
+    await new Promise<Response>(() => undefined);
+
+  await assert.rejects(
+    requestImageSource({
+      config: runtime(),
+      prompt: "Image",
+      fetcher: stalledFetcher,
+      timeouts: { generationMs: 5 },
+    }),
+    /AI_IMAGE_TIMEOUT: generation/,
+  );
+});
+
 test("secret setting detector blocks all sensitive setting families", () => {
   for (const key of [
     "openai_api_key",

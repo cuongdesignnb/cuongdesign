@@ -8,9 +8,62 @@ import { AiProviderError, providerEndpoint, type Fetcher } from "./provider";
 import { getAiRuntimeConfig, type AiRuntimeConfig } from "./settings";
 import type { GeneratedImage, ImageGenerator } from "./types";
 
+const DEFAULT_GENERATION_TIMEOUT_MS = timeoutFromEnv(
+  "AI_IMAGE_GENERATION_TIMEOUT_MS",
+  120_000,
+);
+const DEFAULT_DOWNLOAD_TIMEOUT_MS = timeoutFromEnv(
+  "AI_IMAGE_DOWNLOAD_TIMEOUT_MS",
+  45_000,
+);
+
+function timeoutFromEnv(name: string, fallback: number) {
+  const value = Number.parseInt(process.env[name] || "", 10);
+  if (!Number.isFinite(value)) return fallback;
+  return Math.min(5 * 60_000, Math.max(5_000, value));
+}
+
+async function withImageTimeout<T>(
+  operation: () => Promise<T>,
+  timeoutMs: number,
+  stage: "generation" | "download",
+  cancel?: () => void,
+) {
+  let timer: ReturnType<typeof setTimeout> | undefined;
+  const timeout = new Promise<never>((_, reject) => {
+    timer = setTimeout(() => {
+      cancel?.();
+      reject(new Error(`AI_IMAGE_TIMEOUT: ${stage}`));
+    }, timeoutMs);
+  });
+
+  try {
+    return await Promise.race([Promise.resolve().then(operation), timeout]);
+  } finally {
+    if (timer) clearTimeout(timer);
+  }
+}
+
+async function fetchImageWithTimeout(
+  fetcher: Fetcher,
+  input: string | URL,
+  init: RequestInit | undefined,
+  timeoutMs: number,
+  stage: "generation" | "download",
+) {
+  const controller = new AbortController();
+  return withImageTimeout(
+    () => fetcher(input, { ...init, signal: controller.signal }),
+    timeoutMs,
+    stage,
+    () => controller.abort(),
+  );
+}
+
 async function extractImageBuffer(
   payload: unknown,
   fetcher: Fetcher,
+  downloadTimeoutMs: number,
 ): Promise<Buffer> {
   const data = payload as {
     data?: Array<{ b64_json?: string; url?: string }>;
@@ -24,9 +77,21 @@ async function extractImageBuffer(
     if (imageUrl.protocol !== "https:") {
       throw new Error("AI_IMAGE_DOWNLOAD_HTTPS_REQUIRED");
     }
-    const response = await fetcher(imageUrl);
+    const response = await fetchImageWithTimeout(
+      fetcher,
+      imageUrl,
+      undefined,
+      downloadTimeoutMs,
+      "download",
+    );
     if (!response.ok) throw new Error("AI_IMAGE_DOWNLOAD_FAILED");
-    return Buffer.from(await response.arrayBuffer());
+    return Buffer.from(
+      await withImageTimeout(
+        () => response.arrayBuffer(),
+        downloadTimeoutMs,
+        "download",
+      ),
+    );
   }
   throw new Error("AI_IMAGE_EMPTY_RESPONSE");
 }
@@ -35,9 +100,16 @@ export async function requestImageSource(input: {
   config: AiRuntimeConfig;
   prompt: string;
   fetcher?: Fetcher;
+  timeouts?: {
+    generationMs?: number;
+    downloadMs?: number;
+  };
 }): Promise<Buffer> {
   const fetcher = input.fetcher || fetch;
-  const response = await fetcher(
+  const generationTimeoutMs = input.timeouts?.generationMs || DEFAULT_GENERATION_TIMEOUT_MS;
+  const downloadTimeoutMs = input.timeouts?.downloadMs || DEFAULT_DOWNLOAD_TIMEOUT_MS;
+  const response = await fetchImageWithTimeout(
+    fetcher,
     providerEndpoint(input.config.imageBaseUrl, "images/generations"),
     {
       method: "POST",
@@ -54,14 +126,28 @@ export async function requestImageSource(input: {
         output_format: "png",
       }),
     },
+    generationTimeoutMs,
+    "generation",
   );
   if (!response.ok) {
     const detail =
-      (await response.text()).trim().slice(0, 600) ||
+      (await withImageTimeout(
+        () => response.text(),
+        generationTimeoutMs,
+        "generation",
+      )).trim().slice(0, 600) ||
       `Image provider returned HTTP ${response.status}`;
     throw new AiProviderError("image", response.status, detail);
   }
-  return extractImageBuffer(await response.json(), fetcher);
+  return extractImageBuffer(
+    await withImageTimeout(
+      () => response.json(),
+      generationTimeoutMs,
+      "generation",
+    ),
+    fetcher,
+    downloadTimeoutMs,
+  );
 }
 
 export class OpenAiImageGenerator implements ImageGenerator {
