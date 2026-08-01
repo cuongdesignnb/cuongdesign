@@ -6,6 +6,7 @@ import {
   adminAuthorizationResponse,
   requireAdmin,
 } from "@/lib/auth/require-admin";
+import { isIcoFile } from "@/lib/media/ico";
 import { resolveMediaStoragePath } from "@/lib/media/storage";
 import { getMediaUsage } from "@/lib/media/usage";
 
@@ -72,7 +73,8 @@ export async function POST(request: Request) {
 
     const uploaded = [];
     for (const file of files) {
-      if (!ALLOWED_MIME.has(file.type) || file.size > MAX_FILE_SIZE) {
+      const isIco = file.name.toLowerCase().endsWith(".ico");
+      if ((!ALLOWED_MIME.has(file.type) && !isIco) || file.size > MAX_FILE_SIZE) {
         return NextResponse.json(
           { error: `File ${file.name} không hợp lệ hoặc vượt quá 10 MB.` },
           { status: 400 },
@@ -80,6 +82,34 @@ export async function POST(request: Request) {
       }
 
       const source = Buffer.from(await file.arrayBuffer());
+      if (isIco) {
+        if (!isIcoFile(source)) {
+          return NextResponse.json(
+            { error: `File ${file.name} không phải favicon ICO hợp lệ.` },
+            { status: 400 },
+          );
+        }
+
+        const storageKey = `${Date.now()}-${crypto.randomUUID().slice(0, 8)}-${safeBaseName(file.name)}.ico`;
+        const { uploadDirectory, filePath } = uploadsPath(storageKey);
+        await fs.mkdir(uploadDirectory, { recursive: true });
+        await fs.writeFile(filePath, source);
+
+        const media = await prisma.media.create({
+          data: {
+            name: file.name,
+            url: `/uploads/${storageKey}`,
+            storageKey,
+            size: source.length,
+            mimeType: "image/x-icon",
+            alt: safeBaseName(file.name).replace(/-/g, " "),
+            createdById: admin.id,
+          },
+        });
+        uploaded.push(media);
+        continue;
+      }
+
       const metadata = await sharp(source).metadata();
       if (
         !metadata.format ||

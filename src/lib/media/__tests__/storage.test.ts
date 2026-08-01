@@ -3,6 +3,7 @@ import { promises as fs } from "node:fs";
 import path from "node:path";
 import { afterEach, test } from "node:test";
 import { GET } from "@/app/uploads/[...storageKey]/route";
+import { isIcoFile } from "../ico";
 import { resolveMediaStoragePath } from "../storage";
 
 const testDirectory = `route-test-${process.pid}`;
@@ -43,6 +44,11 @@ test("rejects unsafe or malformed media keys", () => {
       /INVALID_MEDIA_STORAGE_PATH/,
     );
   }
+});
+
+test("recognizes a valid favicon ICO header", () => {
+  assert.equal(isIcoFile(Uint8Array.from([0, 0, 1, 0, 1, 0])), true);
+  assert.equal(isIcoFile(Uint8Array.from([0, 0, 2, 0, 1, 0])), false);
 });
 
 test("serves an AI-style nested upload path", async () => {

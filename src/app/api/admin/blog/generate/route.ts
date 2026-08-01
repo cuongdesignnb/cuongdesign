@@ -1,11 +1,10 @@
-import { after, NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 import {
   adminAuthorizationResponse,
   requireAdmin,
 } from "@/lib/auth/require-admin";
 import {
   enqueueManualQueueRun,
-  processManualQueueRuns,
 } from "@/lib/ai/manual-run";
 import { prisma } from "@/lib/db";
 
@@ -37,10 +36,7 @@ export async function POST(request: Request) {
       }
     }
 
-    const requestKey = await enqueueManualQueueRun(taskId);
-    after(async () => {
-      await processManualQueueRuns({ requestKey });
-    });
+    await enqueueManualQueueRun(taskId);
 
     return NextResponse.json(
       {
