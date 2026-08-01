@@ -82,14 +82,7 @@ export async function POST(request: Request) {
       }
 
       const source = Buffer.from(await file.arrayBuffer());
-      if (isIco) {
-        if (!isIcoFile(source)) {
-          return NextResponse.json(
-            { error: `File ${file.name} không phải favicon ICO hợp lệ.` },
-            { status: 400 },
-          );
-        }
-
+      if (isIco && isIcoFile(source)) {
         const storageKey = `${Date.now()}-${crypto.randomUUID().slice(0, 8)}-${safeBaseName(file.name)}.ico`;
         const { uploadDirectory, filePath } = uploadsPath(storageKey);
         await fs.mkdir(uploadDirectory, { recursive: true });
@@ -110,7 +103,15 @@ export async function POST(request: Request) {
         continue;
       }
 
-      const metadata = await sharp(source).metadata();
+      let metadata;
+      try {
+        metadata = await sharp(source).metadata();
+      } catch {
+        return NextResponse.json(
+          { error: `File ${file.name} không phải ICO hoặc định dạng hình ảnh hợp lệ.` },
+          { status: 400 },
+        );
+      }
       if (
         !metadata.format ||
         !ALLOWED_FORMATS.has(metadata.format) ||
