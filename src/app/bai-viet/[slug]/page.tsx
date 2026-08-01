@@ -12,6 +12,7 @@ import Link from "next/link";
 import type { Metadata } from "next";
 import { getCategoryBySlug, getPostBySlug } from "@/lib/seo/queries";
 import { resolveSeoRedirect } from "@/lib/seo/resolve-redirect";
+import { siteConfig } from "@/data/site";
 
 interface BlogPostPageProps {
   params: Promise<{ slug: string }>;
@@ -88,7 +89,7 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
     slug: post.slug,
     headline: post.title,
     description: post.excerpt || post.seoDescription || post.title,
-    image: post.coverImage || "/images/og-image.jpg",
+    image: post.coverImage || siteConfig.ogImage,
     publishedAt: post.publishedAt || post.createdAt,
     updatedAt: post.updatedAt,
     section: post.category?.name,

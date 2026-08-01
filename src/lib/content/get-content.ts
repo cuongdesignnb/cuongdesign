@@ -7,6 +7,7 @@ import { connection } from "next/server";
 import { cache } from "react";
 import { mergeContentDefaults } from "./merge-defaults";
 import { sanitizeContentTree } from "./sanitize";
+import { globalContentDefaults } from "@/content/defaults/global";
 import {
   applyGlobalSettings,
   GLOBAL_SETTING_KEYS,
@@ -31,11 +32,22 @@ async function readDocument(key: ContentKey, preview: boolean) {
 
     const content = sanitizeContentTree(parsed.data);
     if (key === "global") {
+      const globalContent = content as GlobalContent;
+      const normalizedContent =
+        globalContent.brand.defaultOgMedia === "/images/og-image.jpg"
+          ? {
+              ...globalContent,
+              brand: {
+                ...globalContent.brand,
+                defaultOgMedia: globalContentDefaults.brand.defaultOgMedia,
+              },
+            }
+          : globalContent;
       const settings = await prisma.setting.findMany({
         where: { key: { in: [...GLOBAL_SETTING_KEYS] } },
         select: { key: true, value: true },
       });
-      return applyGlobalSettings(content as GlobalContent, settings);
+      return applyGlobalSettings(normalizedContent, settings);
     }
 
     return content;
