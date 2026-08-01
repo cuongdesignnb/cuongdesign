@@ -150,6 +150,23 @@ export async function requestImageSource(input: {
   );
 }
 
+export function buildAiImageStorageKey(input: {
+  title: string;
+  alt: string;
+  kind: "cover" | "inline";
+  now: Date;
+}) {
+  const filenameSlug =
+    normalizeSlug(input.alt).slice(0, 80) ||
+    normalizeSlug(input.title).slice(0, 80) ||
+    "ai-image";
+  return path.posix.join(
+    "ai-generated",
+    `${input.now.getUTCFullYear()}-${String(input.now.getUTCMonth() + 1).padStart(2, "0")}`,
+    `${filenameSlug}-${input.kind}-${input.now.getTime()}.webp`,
+  );
+}
+
 export class OpenAiImageGenerator implements ImageGenerator {
   constructor(private readonly fetcher: Fetcher = fetch) {}
 
@@ -182,11 +199,12 @@ export class OpenAiImageGenerator implements ImageGenerator {
       .toBuffer();
     const metadata = await sharp(webp).metadata();
     const now = new Date();
-    const storageKey = path.posix.join(
-      "ai-generated",
-      `${now.getUTCFullYear()}-${String(now.getUTCMonth() + 1).padStart(2, "0")}`,
-      `${Date.now()}-${input.kind}-${normalizeSlug(input.title).slice(0, 72)}.webp`,
-    );
+    const storageKey = buildAiImageStorageKey({
+      title: input.title,
+      alt: input.alt,
+      kind: input.kind,
+      now,
+    });
     const { filePath } = resolveMediaStoragePath(storageKey);
     await fs.mkdir(path.dirname(filePath), { recursive: true });
     await fs.writeFile(filePath, webp);

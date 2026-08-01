@@ -2,6 +2,7 @@ import React from "react";
 import { notFound, permanentRedirect } from "next/navigation";
 import { prisma } from "@/lib/db";
 import { sanitizeRichHtml } from "@/lib/content/sanitize";
+import { markdownToHtml } from "@/lib/content/markdown";
 import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
 import Breadcrumbs from "@/components/ui/Breadcrumbs";
@@ -98,6 +99,9 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
   });
 
   const accentColor = post.category?.color || "#ec4899";
+  const articleHtml = /<\/?[a-z][^>]*>/i.test(post.content || "")
+    ? sanitizeRichHtml(post.content)
+    : sanitizeRichHtml(markdownToHtml(post.content || ""));
 
   return (
     <div className="min-h-screen bg-[#030014] text-gray-200 flex flex-col">
@@ -189,8 +193,8 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
 
           {/* Article content parsed */}
           <article
-            className="prose prose-invert prose-pink max-w-none text-gray-300 leading-relaxed text-sm sm:text-base space-y-6 text-left"
-            dangerouslySetInnerHTML={{ __html: sanitizeRichHtml(post.content || "") }}
+            className="article-content max-w-none text-gray-300 text-sm sm:text-base text-left"
+            dangerouslySetInnerHTML={{ __html: articleHtml }}
           />
 
           {/* Tags */}

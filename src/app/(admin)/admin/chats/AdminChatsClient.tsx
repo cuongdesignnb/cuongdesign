@@ -3,6 +3,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import { MessageSquare, Bot, User, Shield, Send, Check, Loader2, Power } from "lucide-react";
 import Button from "@/components/ui/Button";
+import { markdownToHtml } from "@/lib/content/markdown";
 
 interface ChatMessage {
   id: string;
@@ -293,15 +294,15 @@ export default function AdminChatsClient({ initialSessions }: AdminChatsClientPr
 
                         {/* Content bubble */}
                         <div
-                          className={`px-4 py-2.5 rounded-2xl text-xs whitespace-pre-wrap ${
+                          className={`chat-rich-text px-4 py-2.5 rounded-2xl text-xs ${
                             isUser
                               ? "bg-gradient-to-r from-pink-600 to-purple-600 text-white rounded-tr-none"
                               : isAdmin
                               ? "bg-gradient-to-r from-violet-900 to-indigo-950 text-white rounded-tl-none border border-violet-500/20"
                               : "bg-[#14122e] text-gray-200 rounded-tl-none border border-white/5"
                           }`}
+                          dangerouslySetInnerHTML={{ __html: markdownToHtml(msg.content) }}
                         >
-                          {msg.content}
                         </div>
 
                         {/* Message date */}

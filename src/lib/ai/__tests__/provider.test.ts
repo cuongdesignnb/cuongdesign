@@ -5,7 +5,10 @@ import {
   requestArticleText,
   type Fetcher,
 } from "../provider";
-import { requestImageSource } from "../openai-image-generator";
+import {
+  buildAiImageStorageKey,
+  requestImageSource,
+} from "../openai-image-generator";
 import {
   resolveAiRuntimeConfig,
   type AiRuntimeConfig,
@@ -198,6 +201,18 @@ test("image request stops a stalled provider call at the configured timeout", as
       timeouts: { generationMs: 5 },
     }),
     /AI_IMAGE_TIMEOUT: generation/,
+  );
+});
+
+test("AI image filenames use the image alt text as their SEO slug", () => {
+  assert.equal(
+    buildAiImageStorageKey({
+      title: "Xu hướng UI UX năm 2026",
+      alt: "Giao diện dashboard phân tích dữ liệu cho doanh nghiệp",
+      kind: "cover",
+      now: new Date("2026-08-01T10:20:30.000Z"),
+    }),
+    "ai-generated/2026-08/giao-dien-dashboard-phan-tich-du-lieu-cho-doanh-nghiep-cover-1785579630000.webp",
   );
 });
 

@@ -4,6 +4,7 @@ import React, { useState, useEffect, useRef } from "react";
 import { usePathname } from "next/navigation";
 import { MessageSquare, Send, X, Bot, User, Loader2, Sparkles } from "lucide-react";
 import Button from "@/components/ui/Button";
+import { markdownToHtml } from "@/lib/content/markdown";
 
 interface ChatMessage {
   id: string;
@@ -198,15 +199,15 @@ export default function ChatWidget() {
                       )}
                     </span>
                     <div
-                      className={`px-3 py-2 rounded-2xl text-xs whitespace-pre-wrap leading-relaxed ${
+                      className={`chat-rich-text px-3 py-2 rounded-2xl text-xs leading-relaxed ${
                         isUser
                           ? "bg-gradient-to-r from-pink-600 to-purple-600 text-white rounded-tr-none"
                           : isAdmin
                           ? "bg-[#1f163b] text-white border border-purple-500/20 rounded-tl-none font-medium"
                           : "bg-white/5 text-gray-200 border border-white/5 rounded-tl-none"
                       }`}
+                      dangerouslySetInnerHTML={{ __html: markdownToHtml(msg.content) }}
                     >
-                      {msg.content}
                     </div>
                   </div>
                 </div>
