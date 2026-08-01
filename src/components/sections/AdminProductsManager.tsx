@@ -1,6 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import Link from "next/link";
+import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import { upsertProduct, deleteProduct } from "@/app/actions/products";
 import GlassCard from "@/components/ui/GlassCard";
 import Button from "@/components/ui/Button";
@@ -8,20 +10,27 @@ import MediaField from "@/components/admin/content/MediaField";
 import MediaGalleryField from "@/components/admin/content/MediaGalleryField";
 import ContentEditor from "@/components/admin/content/ContentEditor";
 import SeoFields, { type SeoValue } from "@/components/admin/content/SeoFields";
-import { Plus, Edit2, Trash2, X } from "lucide-react";
+import { ArrowLeft, Edit2, Plus, Trash2 } from "lucide-react";
 import { formatVND, slugify } from "@/lib/utils";
 
 interface AdminProductsManagerProps {
   initialProducts: any[];
   mediaLibrary: any[];
+  editorOnly?: boolean;
+  editProduct?: any | null;
+  initialOrder?: number;
 }
 
 export default function AdminProductsManager({
   initialProducts,
+  editorOnly = false,
+  editProduct = null,
+  initialOrder,
 }: AdminProductsManagerProps) {
+  const router = useRouter();
   const [products, setProducts] = useState(initialProducts);
   const [editingProduct, setEditingProduct] = useState<any | null>(null);
-  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isModalOpen, setIsModalOpen] = useState(editorOnly);
   const [loading, setLoading] = useState(false);
 
   // Form State
@@ -103,7 +112,7 @@ export default function AdminProductsManager({
       robotsFollow: true,
       isPublished: false,
       isFeatured: false,
-      order: products.length,
+      order: initialOrder ?? products.length,
     });
     setEditingProduct(null);
     setIsModalOpen(true);
@@ -152,6 +161,17 @@ export default function AdminProductsManager({
     });
     setIsModalOpen(true);
   };
+
+  useEffect(() => {
+    if (!editorOnly) return;
+    if (editProduct) {
+      openEditModal(editProduct);
+      return;
+    }
+    openCreateModal();
+    // The route input is fixed for the editor page's lifetime.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value, type } = e.target;
@@ -206,7 +226,12 @@ export default function AdminProductsManager({
       } else {
         setProducts((prev) => [...prev, res.product]);
       }
-      setIsModalOpen(false);
+      if (editorOnly) {
+        router.push("/admin/products");
+        router.refresh();
+      } else {
+        setIsModalOpen(false);
+      }
     } else {
       alert("Lỗi khi lưu: " + res.error);
     }
@@ -216,19 +241,19 @@ export default function AdminProductsManager({
   return (
     <div className="space-y-6">
       {/* Header Bar */}
-      <div className="flex items-center justify-between">
+      {!editorOnly && <div className="flex items-center justify-between">
         <div>
           <h2 className="text-2xl font-bold text-white">Quản lý Sản phẩm số</h2>
           <p className="text-xs text-gray-500 mt-0.5">Thêm, sửa đổi hoặc xóa các template, source code hoặc bộ UI kit.</p>
         </div>
-        <Button variant="primary" size="sm" onClick={openCreateModal} className="flex items-center gap-1">
+        <Link href="/admin/products/new" className="inline-flex items-center gap-1 rounded-md bg-pink-600 px-3 py-2 text-sm font-medium text-white transition-colors hover:bg-pink-500">
           <Plus className="w-4 h-4" />
           <span>Thêm Sản phẩm</span>
-        </Button>
-      </div>
+        </Link>
+      </div>}
 
       {/* Grid of Products */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      {!editorOnly && <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {products.map((product) => (
           <GlassCard key={product.id} className="p-6 border-white/5 bg-[#0a0822]/60 flex flex-col justify-between h-60">
             <div className="space-y-2">
@@ -251,12 +276,12 @@ export default function AdminProductsManager({
             <div className="flex justify-between items-center pt-4 border-t border-white/5 mt-4">
               <span className="text-[10px] font-mono text-gray-500">Giới hạn tải: {product.maxDownloads}</span>
               <div className="flex gap-2">
-                <button
-                  onClick={() => openEditModal(product)}
+                <Link
+                  href={`/admin/products/${product.id}`}
                   className="p-2 hover:bg-white/5 text-gray-400 hover:text-white rounded-lg transition-colors cursor-pointer"
                 >
                   <Edit2 className="w-4 h-4" />
-                </button>
+                </Link>
                 <button
                   onClick={() => handleDelete(product.id)}
                   className="p-2 hover:bg-red-500/10 text-gray-500 hover:text-red-400 rounded-lg transition-colors cursor-pointer"
@@ -267,18 +292,19 @@ export default function AdminProductsManager({
             </div>
           </GlassCard>
         ))}
-      </div>
+      </div>}
 
       {/* CRUD Modal */}
       {isModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 backdrop-blur-md overflow-y-auto">
-          <div className="relative w-full max-w-4xl glass-card border border-white/10 p-6 md:p-8 flex flex-col space-y-6 bg-[#0c0a21] my-8 max-h-[90vh] overflow-y-auto">
+        <div className={editorOnly ? "mx-auto w-full max-w-6xl" : "fixed inset-0 z-50 flex items-center justify-center overflow-y-auto bg-black/85 p-4 backdrop-blur-md"}>
+          <div className={`relative flex w-full flex-col space-y-6 glass-card border border-white/10 bg-[#0c0a21] p-6 md:p-8 ${editorOnly ? "max-w-6xl" : "my-8 max-w-4xl max-h-[90vh] overflow-y-auto"}`}>
             {/* Close Button */}
             <button
-              onClick={() => setIsModalOpen(false)}
+              onClick={() => editorOnly ? router.push("/admin/products") : setIsModalOpen(false)}
               className="absolute top-6 right-6 text-gray-400 hover:text-white p-2 hover:bg-white/5 rounded-lg cursor-pointer"
+              title="Quay lại danh sách sản phẩm"
             >
-              <X className="w-5 h-5" />
+              <ArrowLeft className="w-5 h-5" />
             </button>
 
             {/* Modal Title */}
@@ -551,7 +577,7 @@ export default function AdminProductsManager({
 
               {/* Submit Buttons */}
               <div className="flex justify-end gap-3 pt-4 border-t border-white/5">
-                <Button type="button" variant="outline" size="sm" onClick={() => setIsModalOpen(false)}>
+                <Button type="button" variant="outline" size="sm" onClick={() => editorOnly ? router.push("/admin/products") : setIsModalOpen(false)}>
                   Hủy
                 </Button>
                 <Button type="submit" disabled={loading} size="sm" className="px-8">

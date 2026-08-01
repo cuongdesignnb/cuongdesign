@@ -72,11 +72,11 @@ export default function MediaPickerDialog({
   }
 
   return (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/75 p-4">
-      <div className="flex max-h-[88vh] w-full max-w-5xl flex-col overflow-hidden rounded-lg border border-white/10 bg-[#0a0822] shadow-2xl">
+    <div className="fixed inset-0 z-[200] grid place-items-center overflow-y-auto bg-black/75 p-4" role="presentation">
+      <div role="dialog" aria-modal="true" aria-labelledby="media-picker-title" className="flex max-h-[88vh] w-full max-w-5xl flex-col overflow-hidden rounded-lg border border-white/10 bg-[#0a0822] shadow-2xl">
         <header className="flex items-center justify-between border-b border-white/10 px-5 py-4">
           <div>
-            <h2 className="font-semibold text-white">Thư viện Media</h2>
+            <h2 id="media-picker-title" className="font-semibold text-white">Thư viện Media</h2>
             <p className="text-xs text-gray-500">Chọn ảnh đã có hoặc tải ảnh mới.</p>
           </div>
           <button type="button" onClick={onClose} className="rounded-md p-2 text-gray-400 hover:bg-white/5 hover:text-white" title="Đóng">
