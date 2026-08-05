@@ -21,6 +21,7 @@ export function revalidateContentKey(key: ContentKey) {
 
   if (key === "global" || key === "footer" || key === "system-copy") {
     globalRoutes.forEach((path) => revalidatePath(path));
+    revalidatePath("/favicon.ico");
   }
 }
 

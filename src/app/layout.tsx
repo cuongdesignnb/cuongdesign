@@ -40,7 +40,7 @@ export async function generateMetadata(): Promise<Metadata> {
       default: global.seo.title,
       template: `%s | ${global.brand.legalName}`,
     },
-    icons: { icon: global.brand.faviconMedia || "/favicon.ico" },
+    icons: { icon: "/favicon.ico" },
   };
 }
 
