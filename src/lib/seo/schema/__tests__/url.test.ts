@@ -80,3 +80,44 @@ test("metadata uses the route path when SEO fields have no canonical override", 
   assert.equal(fromSeoFields.alternates?.canonical, "https://cuongdesign.net/dich-vu");
   assert.equal(fromSeoFields.openGraph?.url, "https://cuongdesign.net/dich-vu");
 });
+
+test("metadata keeps CMS robots index and follow controls independent", () => {
+  const publicPage = createMetadata({ path: "/gioi-thieu" });
+  const noindexFollow = createMetadata({
+    path: "/bai-viet/noindex-follow",
+    robotsIndex: false,
+    robotsFollow: true,
+  });
+  const noindexNofollow = createMetadata({
+    path: "/bai-viet/noindex-nofollow",
+    robotsIndex: false,
+    robotsFollow: false,
+  });
+  const preview = createMetadata({ path: "/preview/demo", noIndex: true });
+
+  const robots = (metadata: ReturnType<typeof createMetadata>) =>
+    metadata.robots as {
+      index?: boolean;
+      follow?: boolean;
+      googleBot?: { index?: boolean; follow?: boolean };
+    };
+
+  assert.deepEqual(robots(publicPage), {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      "max-video-preview": -1,
+      "max-image-preview": "large",
+      "max-snippet": -1,
+    },
+  });
+  assert.equal(robots(noindexFollow).index, false);
+  assert.equal(robots(noindexFollow).follow, true);
+  assert.equal(robots(noindexFollow).googleBot?.follow, true);
+  assert.equal(robots(noindexNofollow).index, false);
+  assert.equal(robots(noindexNofollow).follow, false);
+  assert.equal(robots(preview).index, false);
+  assert.equal(robots(preview).follow, true);
+});

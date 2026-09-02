@@ -10,8 +10,6 @@ export default function robots(): MetadataRoute.Robots {
       disallow: [
         "/admin/",
         "/api/",
-        "/login",
-        "/preview/",
         "/draft/",
         "/thanh-toan/",
         "/download/",

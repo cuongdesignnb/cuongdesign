@@ -47,7 +47,7 @@ export function createMetadata(options: CreateMetadataOptions = {}): Metadata {
   const description = options.description || siteConfig.description;
   const title = options.titleAbsolute || options.title || siteConfig.title;
   const index = options.noIndex ? false : options.robotsIndex ?? options.robots?.index ?? true;
-  const follow = options.noIndex ? false : options.robotsFollow ?? options.robots?.follow ?? true;
+  const follow = options.robotsFollow ?? options.robots?.follow ?? true;
   const images = (options.ogImages || legacyOg.images || [
     {
       url: siteConfig.ogImage,
