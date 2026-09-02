@@ -9,7 +9,7 @@ export function getSiteUrl(): string {
 }
 
 function internalPath(pathOrUrl: string | null | undefined): string | null {
-  if (!pathOrUrl?.trim()) return "/";
+  if (!pathOrUrl?.trim()) return null;
 
   try {
     const parsed = new URL(pathOrUrl.trim(), `${CANONICAL_SITE_URL}/`);
