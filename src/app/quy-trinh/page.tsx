@@ -7,7 +7,12 @@ import GradientText from "@/components/ui/GradientText";
 import Button from "@/components/ui/Button";
 import { MessageSquare, Layout, Paintbrush, Cpu, CheckCircle2, ShieldAlert, ArrowRight } from "lucide-react";
 import Link from "next/link";
-import { buildWebPageSchema, createMetadataFromSeoFields, JsonLd } from "@/lib/seo";
+import {
+  buildWebPageSchema,
+  createMetadataFromSeoFields,
+  JsonLd,
+  resolveCanonicalPath,
+} from "@/lib/seo";
 import { getPublishedContent } from "@/lib/content/get-content";
 
 export async function generateMetadata() {
@@ -24,6 +29,7 @@ export async function generateMetadata() {
 
 export default async function ProcessPage() {
   const content = await getPublishedContent("process");
+  const canonicalPath = resolveCanonicalPath(content.metadata.canonical, "/quy-trinh");
   const defaultSteps = [
     {
       id: "01",
@@ -113,7 +119,7 @@ export default async function ProcessPage() {
     "@context": "https://schema.org",
     "@graph": [
       buildWebPageSchema({
-        path: "/quy-trinh",
+        path: canonicalPath,
         name: content.hero.title,
         description: content.hero.intro,
       }),

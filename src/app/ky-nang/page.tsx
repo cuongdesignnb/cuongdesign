@@ -7,7 +7,7 @@ import GradientText from "@/components/ui/GradientText";
 import Button from "@/components/ui/Button";
 import { Cpu, Layout, Server, Database, Settings, Sparkles, ArrowRight, ShieldCheck } from "lucide-react";
 import Link from "next/link";
-import { createMetadataFromSeoFields, JsonLd } from "@/lib/seo";
+import { createMetadataFromSeoFields, JsonLd, resolveCanonicalPath } from "@/lib/seo";
 import { absoluteUrl } from "@/lib/seo/url";
 import { getPublishedContent } from "@/lib/content/get-content";
 
@@ -25,6 +25,7 @@ export async function generateMetadata() {
 
 export default async function SkillsPage() {
   const content = await getPublishedContent("skills");
+  const canonicalPath = resolveCanonicalPath(content.metadata.canonical, "/ky-nang");
   const defaultSkillGroups = [
     {
       category: "Frontend Engineering",
@@ -142,7 +143,7 @@ export default async function SkillsPage() {
     "@type": "WebPage",
     "name": "Kỹ năng & Công nghệ sử dụng — Cường Design",
     "description": "Tổng hợp bộ kỹ năng lập trình Fullstack và thiết kế UI/UX của Cường Design.",
-    "url": absoluteUrl("/ky-nang"),
+    "url": absoluteUrl(canonicalPath),
     "mainEntity": {
       "@type": "ItemList",
       "numberOfItems": skillGroups.length,

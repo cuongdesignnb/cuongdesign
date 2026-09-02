@@ -6,7 +6,12 @@ import Breadcrumbs from "@/components/ui/Breadcrumbs";
 import GlassCard from "@/components/ui/GlassCard";
 import { BookOpen, Calendar, ArrowRight, Clock, Layers } from "lucide-react";
 import Link from "next/link";
-import { buildCollectionPageSchema, createMetadataFromSeoFields, JsonLd } from "@/lib/seo";
+import {
+  buildCollectionPageSchema,
+  createMetadataFromSeoFields,
+  JsonLd,
+  resolveCanonicalPath,
+} from "@/lib/seo";
 import type { Metadata } from "next";
 import { getCategoryBySlug } from "@/lib/seo/queries";
 import { prisma } from "@/lib/db";
@@ -51,6 +56,11 @@ export default async function CategoryPage({ params }: CategoryPageProps) {
     notFound();
   }
 
+  const canonicalPath = resolveCanonicalPath(
+    category.canonicalPath,
+    `/bai-viet/chuyen-muc/${category.slug}`,
+  );
+
   // Fetch all categories for navigation pills + posts for this category
   const [allCategories] = await Promise.all([
     prisma.category.findMany({ orderBy: { order: "asc" } }),
@@ -67,12 +77,12 @@ export default async function CategoryPage({ params }: CategoryPageProps) {
 
   // Schema.org CollectionPage structured data
   const collectionSchema = buildCollectionPageSchema({
-    path: `/bai-viet/chuyen-muc/${category.slug}`,
+    path: canonicalPath,
     name: `${category.name} — Chuyên mục Blog`,
     description: category.description || undefined,
     items: posts.map((post) => ({
       name: post.title,
-      url: `/bai-viet/${post.slug}`,
+      url: resolveCanonicalPath(post.canonicalPath, `/bai-viet/${post.slug}`),
       description: post.excerpt || undefined,
       image: post.coverImage || undefined,
     })),
@@ -102,7 +112,7 @@ export default async function CategoryPage({ params }: CategoryPageProps) {
           <Breadcrumbs
             items={[
               { label: "Bài viết", href: "/bai-viet" },
-              { label: category.name },
+              { label: category.name, href: canonicalPath },
             ]}
           />
 

@@ -12,6 +12,7 @@ const availabilityMap: Record<ProductAvailability, string> = {
 
 export function buildProductSchema(input: {
   slug: string;
+  path?: string;
   name: string;
   description: string;
   images: string[];
@@ -29,7 +30,7 @@ export function buildProductSchema(input: {
     user: { name: string | null };
   }[];
 }) {
-  const path = `/san-pham/${input.slug}`;
+  const path = input.path || `/san-pham/${input.slug}`;
   const reviews = input.reviews || [];
   const canOffer = input.pricingMode !== "CONTACT";
   const amount = input.pricingMode === "FREE" ? 0 : input.salePrice ?? input.price;

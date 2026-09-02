@@ -3,7 +3,12 @@ import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
 import Breadcrumbs from "@/components/ui/Breadcrumbs";
 import ContactPageClient from "@/components/sections/ContactPageClient";
-import { buildContactPageSchema, createMetadataFromSeoFields, JsonLd } from "@/lib/seo";
+import {
+  buildContactPageSchema,
+  createMetadataFromSeoFields,
+  JsonLd,
+  resolveCanonicalPath,
+} from "@/lib/seo";
 import { getPublishedContent } from "@/lib/content/get-content";
 
 export async function generateMetadata() {
@@ -24,6 +29,7 @@ export default async function ContactListPage() {
     getPublishedContent("global"),
   ]);
   const faqs = content.faqs as { question: string; answer: string }[];
+  const canonicalPath = resolveCanonicalPath(content.metadata.canonical, "/lien-he");
   // Schema.org FAQPage metadata
   const faqSchema = {
     "@context": "https://schema.org",
@@ -39,6 +45,7 @@ export default async function ContactListPage() {
   };
   const contactSchemas = [
     buildContactPageSchema({
+      path: canonicalPath,
       name: content.hero.title,
       description: content.hero.intro,
     }),

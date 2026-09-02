@@ -8,7 +8,12 @@ import Button from "@/components/ui/Button";
 import { User, Calendar, Briefcase, Award, ArrowRight, ShieldCheck, Mail, Phone, MapPin } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
-import { buildProfilePageSchema, createMetadataFromSeoFields, JsonLd } from "@/lib/seo";
+import {
+  buildProfilePageSchema,
+  createMetadataFromSeoFields,
+  JsonLd,
+  resolveCanonicalPath,
+} from "@/lib/seo";
 import { getPublishedContent } from "@/lib/content/get-content";
 
 export async function generateMetadata() {
@@ -31,8 +36,10 @@ export default async function AboutPage() {
     getPublishedContent("global"),
   ]);
   const avatarUrl = content.hero.avatarMedia || global.author.avatarMedia;
+  const canonicalPath = resolveCanonicalPath(content.metadata.canonical, "/gioi-thieu");
   // Schema.org Person & AboutPage Structured Metadata
   const personSchema = buildProfilePageSchema({
+    path: canonicalPath,
     name: content.metadata.title,
     description: content.metadata.description,
   });

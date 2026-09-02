@@ -10,7 +10,7 @@
 | Job title | Freelancer Developer & UI/UX Designer |
 | Production URL | `https://cuongdesign.net` |
 
-`NEXT_PUBLIC_SITE_URL` or `SITE_URL` can override the production URL. Public pages do not construct the canonical domain directly.
+`src/config/site.ts` is the single source of truth for the production canonical origin. Public pages do not construct the canonical domain directly, and deployment environment host variables cannot override it.
 
 ## URL Inventory
 

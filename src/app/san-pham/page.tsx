@@ -4,7 +4,12 @@ import Footer from "@/components/layout/Footer";
 import Breadcrumbs from "@/components/ui/Breadcrumbs";
 import DigitalProductsSection from "@/components/sections/DigitalProductsSection";
 import { prisma } from "@/lib/db";
-import { buildCollectionPageSchema, createMetadataFromSeoFields, JsonLd } from "@/lib/seo";
+import {
+  buildCollectionPageSchema,
+  createMetadataFromSeoFields,
+  JsonLd,
+  resolveCanonicalPath,
+} from "@/lib/seo";
 import { getPublishedContent } from "@/lib/content/get-content";
 
 export const dynamic = "force-dynamic";
@@ -23,6 +28,7 @@ export async function generateMetadata() {
 
 export default async function ProductsListPage() {
   const content = await getPublishedContent("products");
+  const canonicalPath = resolveCanonicalPath(content.metadata.canonical, "/san-pham");
   // Fetch active products from database
   let dbProducts: any[] = [];
   try {
@@ -36,14 +42,14 @@ export default async function ProductsListPage() {
 
   // CollectionPage JSON-LD schema
   const collectionSchema = buildCollectionPageSchema({
-    path: "/san-pham",
+    path: canonicalPath,
     name: content.hero.title,
     description: content.hero.intro,
     items: dbProducts.map((product) => ({
       name: product.title,
       description: product.description,
       image: product.coverImage,
-      url: `/san-pham/${product.slug}`,
+      url: resolveCanonicalPath(product.canonicalPath, `/san-pham/${product.slug}`),
     })),
   });
 

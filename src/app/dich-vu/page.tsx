@@ -18,7 +18,12 @@ import Breadcrumbs from "@/components/ui/Breadcrumbs";
 import Button from "@/components/ui/Button";
 import GlassCard from "@/components/ui/GlassCard";
 import GradientText from "@/components/ui/GradientText";
-import { buildCollectionPageSchema, createMetadataFromSeoFields, JsonLd } from "@/lib/seo";
+import {
+  buildCollectionPageSchema,
+  createMetadataFromSeoFields,
+  JsonLd,
+  resolveCanonicalPath,
+} from "@/lib/seo";
 import { getPublishedContent } from "@/lib/content/get-content";
 import { getPublishedServices } from "@/lib/content/get-service-content";
 
@@ -41,16 +46,17 @@ export default async function ServicesPage() {
     getPublishedContent("services"),
     getPublishedServices(),
   ]);
+  const canonicalPath = resolveCanonicalPath(content.metadata.canonical, "/dich-vu");
 
   const servicesSchema = buildCollectionPageSchema({
-    path: "/dich-vu",
+    path: canonicalPath,
     name: content.hero.title,
     description: content.hero.intro,
     items: services.map((service) => ({
       name: service.title,
       description: service.shortDescription,
       image: service.coverMedia?.url,
-      url: `/dich-vu/${service.slug}`,
+      url: resolveCanonicalPath(service.canonicalPath, `/dich-vu/${service.slug}`),
     })),
   });
 

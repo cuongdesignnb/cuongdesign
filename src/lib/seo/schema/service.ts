@@ -4,12 +4,13 @@ import { compact, plainText } from "./shared";
 
 export function buildServiceSchema(input: {
   slug: string;
+  path?: string;
   name: string;
   description: string;
   image?: string | null;
   priceText?: string | null;
 }) {
-  const path = `/dich-vu/${input.slug}`;
+  const path = input.path || `/dich-vu/${input.slug}`;
   return compact({
     "@type": "Service",
     "@id": schemaIds.entity(path, "service"),

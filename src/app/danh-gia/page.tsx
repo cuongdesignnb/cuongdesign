@@ -9,7 +9,13 @@ import PublicAvatar from "@/components/ui/PublicAvatar";
 import { prisma } from "@/lib/db";
 import { testimonials as staticTestimonials } from "@/data/testimonials";
 import { Star, Quote, MessageSquare } from "lucide-react";
-import { buildCollectionPageSchema, buildReviewSchema, createMetadataFromSeoFields, JsonLd } from "@/lib/seo";
+import {
+  buildCollectionPageSchema,
+  buildReviewSchema,
+  createMetadataFromSeoFields,
+  JsonLd,
+  resolveCanonicalPath,
+} from "@/lib/seo";
 import { getPublishedContent } from "@/lib/content/get-content";
 
 export const dynamic = "force-dynamic";
@@ -28,6 +34,7 @@ export async function generateMetadata() {
 
 export default async function TestimonialsListPage() {
   const content = await getPublishedContent("reviews");
+  const canonicalPath = resolveCanonicalPath(content.metadata.canonical, "/danh-gia");
   // Fetch only published testimonials from database
   let dbTestimonials: any[] = [];
   try {
@@ -52,7 +59,7 @@ export default async function TestimonialsListPage() {
 
   const ratingSchema = [
     buildCollectionPageSchema({
-      path: "/danh-gia",
+      path: canonicalPath,
       name: content.hero.title,
       description: content.hero.intro,
       items: testimonials.map((testimonial) => ({

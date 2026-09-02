@@ -1,6 +1,6 @@
 import type { MetadataRoute } from "next";
 import { prisma } from "@/lib/db";
-import { absoluteUrl, getSiteUrl } from "@/lib/seo/url";
+import { absoluteUrl, getSiteUrl, resolveCanonicalPath } from "@/lib/seo/url";
 
 export const dynamic = "force-dynamic";
 
@@ -31,16 +31,7 @@ const staticPriorities: Record<string, number> = {
 };
 
 function sitemapUrl(canonicalPath: string | null | undefined, fallbackPath: string) {
-  if (!canonicalPath) return absoluteUrl(fallbackPath);
-
-  try {
-    const siteUrl = getSiteUrl();
-    const candidate = new URL(canonicalPath, siteUrl);
-    if (candidate.origin !== new URL(siteUrl).origin) return absoluteUrl(fallbackPath);
-    return absoluteUrl(candidate.pathname);
-  } catch {
-    return absoluteUrl(fallbackPath);
-  }
+  return absoluteUrl(resolveCanonicalPath(canonicalPath, fallbackPath));
 }
 
 function sitemapImages(...values: Array<string | string[] | null | undefined>) {

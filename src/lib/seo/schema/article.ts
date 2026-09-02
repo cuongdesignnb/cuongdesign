@@ -4,6 +4,7 @@ import { compact, plainText } from "./shared";
 
 export function buildArticleSchema(input: {
   slug: string;
+  path?: string;
   headline: string;
   description: string;
   image: string;
@@ -13,7 +14,7 @@ export function buildArticleSchema(input: {
   keywords: string[];
   content: string;
 }) {
-  const path = `/bai-viet/${input.slug}`;
+  const path = input.path || `/bai-viet/${input.slug}`;
   const wordCount = plainText(input.content).split(/\s+/).filter(Boolean).length;
   return compact({
     "@context": "https://schema.org",

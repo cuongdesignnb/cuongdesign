@@ -17,6 +17,7 @@ import {
   buildWebPageSchema,
   createMetadataFromSeoFields,
   JsonLd,
+  resolveCanonicalPath,
 } from "@/lib/seo";
 import Breadcrumbs from "@/components/ui/Breadcrumbs";
 import GlassCard from "@/components/ui/GlassCard";
@@ -69,16 +70,22 @@ export default async function ServiceDetailPage({ params }: Props) {
     notFound();
   }
 
+  const canonicalPath = resolveCanonicalPath(
+    service.canonicalPath,
+    `/dich-vu/${service.slug}`,
+  );
+
   const serviceSchema = {
     "@context": "https://schema.org",
     "@graph": [
       buildWebPageSchema({
-        path: `/dich-vu/${service.slug}`,
+        path: canonicalPath,
         name: service.title,
         description: service.shortDescription,
       }),
       buildServiceSchema({
         slug: service.slug,
+        path: canonicalPath,
         name: service.title,
         description: service.seoDescription || service.shortDescription,
         image: service.coverMedia?.url,
@@ -87,7 +94,7 @@ export default async function ServiceDetailPage({ params }: Props) {
       buildBreadcrumbSchema([
         { name: "Trang chủ", href: "/" },
         { name: "Dịch vụ", href: "/dich-vu" },
-        { name: service.title, href: `/dich-vu/${service.slug}` },
+        { name: service.title, href: canonicalPath },
       ]),
       ...(service.faqs.length
         ? [{

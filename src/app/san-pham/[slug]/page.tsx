@@ -6,7 +6,12 @@ import Footer from "@/components/layout/Footer";
 import Breadcrumbs from "@/components/ui/Breadcrumbs";
 import ProductDetailClient from "./ProductDetailClient";
 import { Metadata } from "next";
-import { buildProductSchema, createMetadataFromSeoFields, JsonLd } from "@/lib/seo";
+import {
+  buildProductSchema,
+  createMetadataFromSeoFields,
+  JsonLd,
+  resolveCanonicalPath,
+} from "@/lib/seo";
 import { getProductBySlug } from "@/lib/seo/queries";
 import { resolveSeoRedirect } from "@/lib/seo/resolve-redirect";
 
@@ -57,6 +62,11 @@ export default async function ProductDetailPage({ params }: ProductPageProps) {
     notFound();
   }
 
+  const canonicalPath = resolveCanonicalPath(
+    product.canonicalPath,
+    `/san-pham/${product.slug}`,
+  );
+
   const reviews = product.reviews;
 
   // 3. Check login status
@@ -65,6 +75,7 @@ export default async function ProductDetailPage({ params }: ProductPageProps) {
 
   const jsonLd = buildProductSchema({
     slug: product.slug,
+    path: canonicalPath,
     name: product.title,
     description: product.description,
     images: [product.coverImage, ...product.images],
@@ -94,7 +105,7 @@ export default async function ProductDetailPage({ params }: ProductPageProps) {
           <Breadcrumbs
             items={[
               { label: "Sản phẩm số", href: "/san-pham" },
-              { label: product.title },
+              { label: product.title, href: canonicalPath },
             ]}
           />
 

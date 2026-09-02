@@ -7,7 +7,12 @@ import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
 import Breadcrumbs from "@/components/ui/Breadcrumbs";
 import GlassCard from "@/components/ui/GlassCard";
-import { buildArticleSchema, createMetadataFromSeoFields, JsonLd } from "@/lib/seo";
+import {
+  buildArticleSchema,
+  createMetadataFromSeoFields,
+  JsonLd,
+  resolveCanonicalPath,
+} from "@/lib/seo";
 import { Clock, Calendar, User, ArrowLeft, ArrowRight, Tag, BookOpen, Layers } from "lucide-react";
 import Link from "next/link";
 import type { Metadata } from "next";
@@ -60,6 +65,11 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
     notFound();
   }
 
+  const canonicalPath = resolveCanonicalPath(
+    post.canonicalPath,
+    `/bai-viet/${post.slug}`,
+  );
+
   // Calculate reading time
   const getReadTime = (content: string | null) => {
     if (!content) return "1 phút đọc";
@@ -88,6 +98,7 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
   // Schema.org BlogPosting structured data
   const blogPostingSchema = buildArticleSchema({
     slug: post.slug,
+    path: canonicalPath,
     headline: post.title,
     description: post.excerpt || post.seoDescription || post.title,
     image: post.coverImage || siteConfig.ogImage,
@@ -126,7 +137,7 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
                     },
                   ]
                 : []),
-              { label: post.title },
+              { label: post.title, href: canonicalPath },
             ]}
           />
 

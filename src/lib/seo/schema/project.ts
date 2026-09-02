@@ -12,6 +12,7 @@ const projectTypes: Record<ProjectSchemaKind, string> = {
 
 export function buildProjectSchema(input: {
   slug: string;
+  path?: string;
   title: string;
   description: string;
   image: string;
@@ -23,7 +24,7 @@ export function buildProjectSchema(input: {
   updatedAt: Date;
   completedAt?: Date | null;
 }) {
-  const path = `/du-an/${input.slug}`;
+  const path = input.path || `/du-an/${input.slug}`;
   return compact({
     "@context": "https://schema.org",
     "@type": projectTypes[input.projectType],

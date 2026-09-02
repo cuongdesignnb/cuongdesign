@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import type { SeoValue } from "@/components/admin/content/SeoFields";
 import { siteConfig } from "@/data/site";
-import { absoluteUrl, getSiteUrl, normalizeCanonicalPath } from "./url";
+import { absoluteUrl, getSiteUrl, resolveCanonicalPath } from "./url";
 
 export interface SeoImage {
   url: string;
@@ -42,7 +42,7 @@ export interface CreateMetadataOptions {
 
 export function createMetadata(options: CreateMetadataOptions = {}): Metadata {
   const legacyOg = options.openGraph || {};
-  const path = normalizeCanonicalPath(options.canonicalPath || options.path || "/");
+  const path = resolveCanonicalPath(options.canonicalPath, options.path || "/");
   const canonical = absoluteUrl(path);
   const description = options.description || siteConfig.description;
   const title = options.titleAbsolute || options.title || siteConfig.title;

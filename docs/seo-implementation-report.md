@@ -39,7 +39,7 @@ The generated runtime results are stored in `reports/seo-audit.json` and `report
 
 ## Operational Notes
 
-- Set `NEXT_PUBLIC_SITE_URL=https://cuongdesign.net` in production when possible. The fallback is already the same domain.
+- Canonical metadata, Open Graph, JSON-LD, robots, and sitemap URLs are pinned to `https://cuongdesign.net` in `src/config/site.ts`; deployment environment host variables cannot override them.
 - The Docker build stage does not receive `DATABASE_URL`; build-time database reads fall back safely. The container applies migrations before starting Next.js.
 - Populate meaningful image alt text and dimensions in Media Library. The code preserves media metadata, but editorial quality still depends on admin input.
 - Related-content links should be curated according to relevance; the implementation does not inject keyword links into editorial content automatically.

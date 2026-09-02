@@ -7,7 +7,12 @@ import GradientText from "@/components/ui/GradientText";
 import { prisma } from "@/lib/db";
 import { BookOpen, Calendar, ArrowRight, Clock } from "lucide-react";
 import Link from "next/link";
-import { buildCollectionPageSchema, createMetadataFromSeoFields, JsonLd } from "@/lib/seo";
+import {
+  buildCollectionPageSchema,
+  createMetadataFromSeoFields,
+  JsonLd,
+  resolveCanonicalPath,
+} from "@/lib/seo";
 import { getPublishedContent } from "@/lib/content/get-content";
 
 export const dynamic = "force-dynamic";
@@ -27,6 +32,7 @@ export async function generateMetadata() {
 
 export default async function BlogListPage() {
   const content = await getPublishedContent("blog");
+  const canonicalPath = resolveCanonicalPath(content.metadata.canonical, "/bai-viet");
   // Fetch categories and published posts
   const [categories, dbPosts] = await Promise.all([
     prisma.category.findMany({ orderBy: { order: "asc" } }),
@@ -51,7 +57,7 @@ export default async function BlogListPage() {
 
   // Schema.org Blog structured data metadata
   const blogSchema = buildCollectionPageSchema({
-    path: "/bai-viet",
+    path: canonicalPath,
     name: content.hero.title,
     description: content.hero.intro,
     type: "Blog",
@@ -59,7 +65,7 @@ export default async function BlogListPage() {
       name: post.title,
       description: post.excerpt || undefined,
       image: post.coverImage || undefined,
-      url: `/bai-viet/${post.slug}`,
+      url: resolveCanonicalPath(post.canonicalPath, `/bai-viet/${post.slug}`),
     })),
   });
 

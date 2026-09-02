@@ -10,6 +10,7 @@ import {
   buildWebPageSchema,
   createMetadataFromSeoFields,
   JsonLd,
+  resolveCanonicalPath,
 } from "@/lib/seo";
 import { getPageBySlug } from "@/lib/seo/queries";
 import { resolveSeoRedirect } from "@/lib/seo/resolve-redirect";
@@ -53,15 +54,17 @@ export default async function PolicyPage({ params }: PolicyPageProps) {
     notFound();
   }
 
+  const canonicalPath = resolveCanonicalPath(page.canonicalPath, `/${page.slug}`);
+
   const schemas = [
     buildWebPageSchema({
-      path: `/${page.slug}`,
+      path: canonicalPath,
       name: page.title,
       description: page.seoDescription || page.title,
     }),
     buildBreadcrumbSchema([
       { name: "Trang chủ", href: "/" },
-      { name: page.title, href: `/${page.slug}` },
+      { name: page.title, href: canonicalPath },
     ]),
   ];
 
@@ -75,7 +78,7 @@ export default async function PolicyPage({ params }: PolicyPageProps) {
         <div className="absolute inset-0 bg-[linear-gradient(to_right,rgba(255,255,255,0.015)_1px,transparent_1px),linear-gradient(to_bottom,rgba(255,255,255,0.015)_1px,transparent_1px)] bg-[size:40px_40px] pointer-events-none select-none z-0" />
         
         <div className="max-w-3xl mx-auto relative z-10 space-y-8 mt-8">
-          <Breadcrumbs items={[{ label: page.title, href: `/${page.slug}` }]} />
+          <Breadcrumbs items={[{ label: page.title, href: canonicalPath }]} />
           <div className="space-y-3">
             <h1 className="text-3xl sm:text-4xl font-extrabold text-white tracking-tight">
               {page.title}

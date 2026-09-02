@@ -13,6 +13,7 @@ import {
   buildProjectSchema,
   createMetadataFromSeoFields,
   JsonLd,
+  resolveCanonicalPath,
 } from "@/lib/seo";
 import { getProjectBySlug } from "@/lib/seo/queries";
 import { resolveSeoRedirect } from "@/lib/seo/resolve-redirect";
@@ -63,8 +64,14 @@ export default async function ProjectDetailPage({ params }: ProjectPageProps) {
     notFound();
   }
 
+  const canonicalPath = resolveCanonicalPath(
+    project.canonicalPath,
+    `/du-an/${project.slug}`,
+  );
+
   const jsonLd = buildProjectSchema({
     slug: project.slug,
+    path: canonicalPath,
     title: project.title,
     description: project.description,
     image: project.coverImage,
@@ -92,7 +99,7 @@ export default async function ProjectDetailPage({ params }: ProjectPageProps) {
           <Breadcrumbs
             items={[
               { label: "Dự án đã làm", href: "/du-an" },
-              { label: project.title },
+              { label: project.title, href: canonicalPath },
             ]}
           />
 

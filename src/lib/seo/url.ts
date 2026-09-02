@@ -1,49 +1,37 @@
-import { siteConfig } from "@/data/site";
+import { CANONICAL_SITE_HOSTNAMES, CANONICAL_SITE_URL } from "@/config/site";
 
-function cleanSiteUrl(value: string) {
-  const url = new URL(value);
-  url.protocol = "https:";
-  url.pathname = "";
-  url.search = "";
-  url.hash = "";
-  return url.toString().replace(/\/$/, "");
+function normalizePathname(pathname: string) {
+  return `/${pathname}`.replace(/\/{2,}/g, "/").replace(/\/$/, "") || "/";
 }
 
 export function getSiteUrl(): string {
-  return cleanSiteUrl(
-    process.env.NEXT_PUBLIC_SITE_URL ||
-      process.env.SITE_URL ||
-      siteConfig.url ||
-      "https://cuongdesign.net",
-  );
+  return CANONICAL_SITE_URL;
+}
+
+function internalPath(pathOrUrl: string | null | undefined): string | null {
+  if (!pathOrUrl?.trim()) return "/";
+
+  try {
+    const parsed = new URL(pathOrUrl.trim(), `${CANONICAL_SITE_URL}/`);
+    if (!CANONICAL_SITE_HOSTNAMES.has(parsed.hostname)) return null;
+    return normalizePathname(parsed.pathname);
+  } catch {
+    return null;
+  }
 }
 
 export function normalizeCanonicalPath(pathOrUrl: string): string {
-  const siteUrl = getSiteUrl();
-  const input = pathOrUrl.trim() || "/";
-  const parsed = new URL(input, `${siteUrl}/`);
-
-  if (parsed.origin !== new URL(siteUrl).origin) {
-    return "/";
-  }
-
-  const pathname = `/${parsed.pathname}`
-    .replace(/\/{2,}/g, "/")
-    .replace(/\/$/, "") || "/";
-
-  return pathname;
+  return internalPath(pathOrUrl) || "/";
 }
 
-export function absoluteUrl(pathOrUrl: string): string {
-  const siteUrl = getSiteUrl();
-  if (!pathOrUrl) return siteUrl;
+export function resolveCanonicalPath(
+  pathOrUrl: string | null | undefined,
+  fallbackPath: string,
+): string {
+  return internalPath(pathOrUrl) || normalizeCanonicalPath(fallbackPath);
+}
 
-  try {
-    const parsed = new URL(pathOrUrl);
-    if (parsed.origin !== new URL(siteUrl).origin) return siteUrl;
-    return `${siteUrl}${normalizeCanonicalPath(parsed.pathname)}`;
-  } catch {
-    const path = normalizeCanonicalPath(pathOrUrl);
-    return path === "/" ? siteUrl : `${siteUrl}${path}`;
-  }
+export function absoluteUrl(pathOrUrl: string | null | undefined): string {
+  const path = normalizeCanonicalPath(pathOrUrl || "/");
+  return path === "/" ? CANONICAL_SITE_URL : `${CANONICAL_SITE_URL}${path}`;
 }

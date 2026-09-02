@@ -4,7 +4,12 @@ import Footer from "@/components/layout/Footer";
 import Breadcrumbs from "@/components/ui/Breadcrumbs";
 import FeaturedProjectsSection from "@/components/sections/FeaturedProjectsSection";
 import { prisma } from "@/lib/db";
-import { buildCollectionPageSchema, createMetadataFromSeoFields, JsonLd } from "@/lib/seo";
+import {
+  buildCollectionPageSchema,
+  createMetadataFromSeoFields,
+  JsonLd,
+  resolveCanonicalPath,
+} from "@/lib/seo";
 import { getPublishedContent } from "@/lib/content/get-content";
 
 export const dynamic = "force-dynamic";
@@ -23,6 +28,7 @@ export async function generateMetadata() {
 
 export default async function ProjectsListPage() {
   const content = await getPublishedContent("projects");
+  const canonicalPath = resolveCanonicalPath(content.metadata.canonical, "/du-an");
   // Fetch active projects from database
   let dbProjects: any[] = [];
   try {
@@ -36,14 +42,14 @@ export default async function ProjectsListPage() {
 
   // CollectionPage JSON-LD schema
   const collectionSchema = buildCollectionPageSchema({
-    path: "/du-an",
+    path: canonicalPath,
     name: content.hero.title,
     description: content.hero.intro,
     items: dbProjects.map((project) => ({
       name: project.title,
       description: project.description,
       image: project.coverImage,
-      url: `/du-an/${project.slug}`,
+      url: resolveCanonicalPath(project.canonicalPath, `/du-an/${project.slug}`),
     })),
   });
 
