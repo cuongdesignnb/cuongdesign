@@ -3,7 +3,7 @@ import { prisma } from "@/lib/db";
 import { absoluteUrl } from "@/lib/seo/url";
 import {
   dedupeSitemapEntries,
-  getDocumentCanonicalPath,
+  getDocumentSeoState,
   isSitemapIndexable,
   sitemapImages,
   sitemapUrl,
@@ -122,12 +122,18 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       ]);
 
     const documentsByKey = new Map(documents.map((document) => [document.key, document]));
-    const staticEntries = Object.entries(staticRoutes).map(([key, path]) => ({
-      url: sitemapUrl(getDocumentCanonicalPath(documentsByKey.get(key)?.publishedData), path),
-      lastModified: documentsByKey.get(key)?.updatedAt,
-      changeFrequency: key === "home" ? ("weekly" as const) : ("monthly" as const),
-      priority: staticPriorities[key] || 0.6,
-    }));
+    const staticEntries = Object.entries(staticRoutes).flatMap(([key, path]) => {
+      const document = documentsByKey.get(key);
+      const seo = getDocumentSeoState(document?.publishedData);
+      if (!seo.robotsIndex) return [];
+
+      return [{
+        url: sitemapUrl(seo.canonicalPath, path),
+        lastModified: document?.updatedAt,
+        changeFrequency: key === "home" ? ("weekly" as const) : ("monthly" as const),
+        priority: staticPriorities[key] || 0.6,
+      }];
+    });
 
     return dedupeSitemapEntries([
       ...staticEntries,

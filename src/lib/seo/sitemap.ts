@@ -25,14 +25,26 @@ export function sitemapImages(...values: Array<string | string[] | null | undefi
     .filter((value) => value !== getSiteUrl());
 }
 
-export function getDocumentCanonicalPath(data: unknown): string | null {
-  if (!data || typeof data !== "object" || Array.isArray(data)) return null;
+export type DocumentSeoState = {
+  canonicalPath: string | null;
+  robotsIndex: boolean;
+};
+
+export function getDocumentSeoState(data: unknown): DocumentSeoState {
+  if (!data || typeof data !== "object" || Array.isArray(data)) {
+    return { canonicalPath: null, robotsIndex: true };
+  }
 
   const metadata = (data as Record<string, unknown>).metadata;
-  if (!metadata || typeof metadata !== "object" || Array.isArray(metadata)) return null;
+  if (!metadata || typeof metadata !== "object" || Array.isArray(metadata)) {
+    return { canonicalPath: null, robotsIndex: true };
+  }
 
-  const canonical = (metadata as Record<string, unknown>).canonical;
-  return typeof canonical === "string" ? canonical : null;
+  const values = metadata as Record<string, unknown>;
+  return {
+    canonicalPath: typeof values.canonical === "string" ? values.canonical : null,
+    robotsIndex: values.robotsIndex !== false,
+  };
 }
 
 export function dedupeSitemapEntries<T extends { url: string }>(entries: T[]): T[] {

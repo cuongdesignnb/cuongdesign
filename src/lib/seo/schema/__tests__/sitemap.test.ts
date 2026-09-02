@@ -2,7 +2,7 @@ import assert from "node:assert/strict";
 import test from "node:test";
 import {
   dedupeSitemapEntries,
-  getDocumentCanonicalPath,
+  getDocumentSeoState,
   isSitemapIndexable,
   sitemapImages,
   sitemapUrl,
@@ -39,16 +39,33 @@ test("sitemap normalizes canonical overrides and removes duplicate URLs", () => 
   ]);
 });
 
-test("sitemap honors static Content Hub canonical overrides", () => {
+test("static Content Hub SEO state defaults to indexable and normalizes canonicals", () => {
+  assert.deepEqual(getDocumentSeoState(null), { canonicalPath: null, robotsIndex: true });
+  assert.deepEqual(getDocumentSeoState("malformed"), { canonicalPath: null, robotsIndex: true });
+  assert.deepEqual(getDocumentSeoState({ metadata: {} }), { canonicalPath: null, robotsIndex: true });
+  assert.deepEqual(getDocumentSeoState({ metadata: { canonical: "/gioi-thieu" } }), {
+    canonicalPath: "/gioi-thieu",
+    robotsIndex: true,
+  });
+  assert.deepEqual(getDocumentSeoState({ metadata: { robotsIndex: false } }), {
+    canonicalPath: null,
+    robotsIndex: false,
+  });
+
+  const seo = getDocumentSeoState({
+    metadata: {
+      canonical: "https://www.cuongdesign.net/gioi-thieu/?x=1",
+      robotsIndex: true,
+    },
+  });
   assert.equal(
     sitemapUrl(
-      getDocumentCanonicalPath({
-        metadata: { canonical: "https://www.cuongdesign.net/gioi-thieu/" },
-      }),
+      seo.canonicalPath,
       "/gioi-thieu",
     ),
     "https://cuongdesign.net/gioi-thieu",
   );
+  assert.equal(seo.robotsIndex, true);
 });
 
 test("image sitemap entries only retain local canonical media URLs", () => {
