@@ -18,6 +18,7 @@ import Link from "next/link";
 import type { Metadata } from "next";
 import { getCategoryBySlug, getPostBySlug } from "@/lib/seo/queries";
 import { resolveSeoRedirect } from "@/lib/seo/resolve-redirect";
+import { blogCategoryPath } from "@/lib/seo/blog-routes";
 import { siteConfig } from "@/data/site";
 
 interface BlogPostPageProps {
@@ -60,7 +61,7 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
 
   if (!post) {
     const category = await getCategoryBySlug(slug);
-    if (category) permanentRedirect(`/bai-viet/chuyen-muc/${category.slug}`);
+    if (category) permanentRedirect(blogCategoryPath(category.slug));
     await resolveSeoRedirect(`/bai-viet/${slug}`);
     notFound();
   }

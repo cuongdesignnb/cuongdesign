@@ -3,6 +3,7 @@
 import { prisma } from "@/lib/db";
 import { auth } from "@/auth";
 import { revalidatePath } from "next/cache";
+import { blogCategoryPath, blogPostPath } from "@/lib/seo/blog-routes";
 
 export interface MenuItemInput {
   id?: string;
@@ -145,16 +146,15 @@ export async function getRouteSuggestions() {
       });
     });
 
-    // 4. Fetch blog posts slugs (with category for new URL pattern)
+    // 4. Fetch blog posts using the current flattened URL pattern.
     const posts = await prisma.post.findMany({
       where: { status: "PUBLISHED" },
-      select: { title: true, slug: true, category: { select: { slug: true } } }
+      select: { title: true, slug: true }
     });
     posts.forEach(post => {
-      const catSlug = post.category?.slug || "chua-phan-loai";
       suggestions.push({
-        label: `Bài viết: ${post.title} (/bai-viet/${catSlug}/${post.slug})`,
-        value: `/bai-viet/${catSlug}/${post.slug}`
+        label: `Bài viết: ${post.title} (${blogPostPath(post.slug)})`,
+        value: blogPostPath(post.slug)
       });
     });
 
@@ -164,8 +164,8 @@ export async function getRouteSuggestions() {
     });
     blogCategories.forEach(cat => {
       suggestions.push({
-        label: `Chuyên mục: ${cat.name} (/bai-viet/${cat.slug})`,
-        value: `/bai-viet/${cat.slug}`
+        label: `Chuyên mục: ${cat.name} (${blogCategoryPath(cat.slug)})`,
+        value: blogCategoryPath(cat.slug)
       });
     });
 

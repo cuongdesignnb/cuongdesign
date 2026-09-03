@@ -36,7 +36,6 @@
 
 ## Redirect Inventory
 
-- `/bai-viet/:category/:slug` redirects permanently to `/bai-viet/:slug`.
 - A legacy category URL `/bai-viet/:slug` redirects to `/bai-viet/chuyen-muc/:slug` when no post owns that slug.
 - Project, Product, Post, Category, Service and Page slug changes create `SeoRedirect` records.
 - Updating a slug also rewrites prior redirect destinations to the newest URL, preventing redirect chains.
