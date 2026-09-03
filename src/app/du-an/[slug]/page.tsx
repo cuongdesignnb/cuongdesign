@@ -27,7 +27,7 @@ export async function generateMetadata({ params }: ProjectPageProps): Promise<Me
   const project = await getProjectBySlug(slug);
 
   if (!project) {
-    return { robots: { index: false, follow: false } };
+    return {};
   }
 
   return createMetadataFromSeoFields({

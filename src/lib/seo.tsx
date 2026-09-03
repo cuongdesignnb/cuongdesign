@@ -1,4 +1,8 @@
-export { createMetadata, createMetadataFromSeoFields } from "./seo/metadata";
+export {
+  createMetadata,
+  createMetadataFromSeoFields,
+  createSitewideMetadata,
+} from "./seo/metadata";
 export * from "./seo/schema";
 export * from "./seo/url";
 

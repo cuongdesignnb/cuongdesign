@@ -40,6 +40,32 @@ export interface CreateMetadataOptions {
   robots?: { index?: boolean; follow?: boolean };
 }
 
+interface CreateSitewideMetadataOptions {
+  title: string;
+  titleTemplate: string;
+  description: string;
+  keywords?: string | string[];
+}
+
+export function createSitewideMetadata({
+  title,
+  titleTemplate,
+  description,
+  keywords,
+}: CreateSitewideMetadataOptions): Metadata {
+  return {
+    metadataBase: new URL(getSiteUrl()),
+    title: { default: title, template: titleTemplate },
+    description,
+    authors: [{ name: "Đinh Cường", url: absoluteUrl("/gioi-thieu") }],
+    creator: "Đinh Cường",
+    publisher: "Cường Design",
+    keywords: Array.isArray(keywords)
+      ? keywords
+      : keywords?.split(",").map((keyword) => keyword.trim()).filter(Boolean),
+  };
+}
+
 export function createMetadata(options: CreateMetadataOptions = {}): Metadata {
   const legacyOg = options.openGraph || {};
   const path = resolveCanonicalPath(options.canonicalPath, options.path || "/");

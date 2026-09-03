@@ -31,7 +31,7 @@ type Props = { params: Promise<{ slug: string }> };
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
   const service = await getPublishedService(slug);
-  if (!service) return { robots: { index: false, follow: false } };
+  if (!service) return {};
   return createMetadataFromSeoFields({
     seo: {
       title: service.seoTitle || undefined,

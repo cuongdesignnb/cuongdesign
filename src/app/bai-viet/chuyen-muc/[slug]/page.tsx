@@ -24,7 +24,7 @@ export async function generateMetadata({ params }: CategoryPageProps): Promise<M
   const { slug } = await params;
   const category = await getCategoryBySlug(slug);
 
-  if (!category) return { robots: { index: false, follow: false } };
+  if (!category) return {};
 
   return createMetadataFromSeoFields({
     seo: {

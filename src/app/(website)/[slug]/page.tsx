@@ -24,7 +24,7 @@ export async function generateMetadata({ params }: PolicyPageProps): Promise<Met
   const page = await getPageBySlug(slug);
 
   if (!page || !page.isPublished) {
-    return { robots: { index: false, follow: false } };
+    return {};
   }
 
   return createMetadataFromSeoFields({

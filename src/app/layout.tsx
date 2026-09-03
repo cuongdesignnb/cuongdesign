@@ -3,7 +3,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import ChatWidget from "@/components/ui/ChatWidget";
 import DraftPreviewBanner from "@/components/admin/content/DraftPreviewBanner";
-import { JsonLd, buildSitewideGraph, createMetadataFromSeoFields } from "@/lib/seo";
+import { JsonLd, buildSitewideGraph, createSitewideMetadata } from "@/lib/seo";
 import { prisma } from "@/lib/db";
 import { getPublishedContent } from "@/lib/content/get-content";
 
@@ -20,26 +20,12 @@ const geistMono = Geist_Mono({
 export async function generateMetadata(): Promise<Metadata> {
   const global = await getPublishedContent("global");
   return {
-    ...createMetadataFromSeoFields({
-      seo: {
-        title: global.seo.title,
-        description: global.seo.description,
-        keywords: global.seo.keywords,
-        ogTitle: global.seo.ogTitle,
-        ogDescription: global.seo.ogDescription,
-        ogImage: global.brand.defaultOgMedia,
-      },
-      fallback: {
-        title: "Cường Design",
-        description: global.seo.description,
-        image: global.brand.defaultOgMedia,
-      },
-      path: "/",
+    ...createSitewideMetadata({
+      title: global.seo.title,
+      titleTemplate: `%s | ${global.brand.legalName}`,
+      description: global.seo.description,
+      keywords: global.seo.keywords,
     }),
-    title: {
-      default: global.seo.title,
-      template: `%s | ${global.brand.legalName}`,
-    },
     icons: { icon: "/favicon.ico" },
   };
 }

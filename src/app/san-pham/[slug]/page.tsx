@@ -24,7 +24,7 @@ export async function generateMetadata({ params }: ProductPageProps): Promise<Me
   const product = await getProductBySlug(slug);
 
   if (!product) {
-    return { robots: { index: false, follow: false } };
+    return {};
   }
 
   return createMetadataFromSeoFields({
