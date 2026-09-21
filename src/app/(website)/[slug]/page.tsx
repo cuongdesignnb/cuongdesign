@@ -6,7 +6,6 @@ import Footer from "@/components/layout/Footer";
 import { Metadata } from "next";
 import Breadcrumbs from "@/components/ui/Breadcrumbs";
 import {
-  buildBreadcrumbSchema,
   buildWebPageSchema,
   createMetadataFromSeoFields,
   JsonLd,
@@ -62,10 +61,6 @@ export default async function PolicyPage({ params }: PolicyPageProps) {
       name: page.title,
       description: page.seoDescription || page.title,
     }),
-    buildBreadcrumbSchema([
-      { name: "Trang chủ", href: "/" },
-      { name: page.title, href: canonicalPath },
-    ]),
   ];
 
   return (

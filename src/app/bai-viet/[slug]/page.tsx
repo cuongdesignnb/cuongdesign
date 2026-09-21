@@ -70,6 +70,12 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
     post.canonicalPath,
     blogPostPath(post.slug),
   );
+  const categoryPath = post.category
+    ? resolveCanonicalPath(
+        post.category.canonicalPath,
+        blogCategoryPath(post.category.slug),
+      )
+    : undefined;
 
   // Calculate reading time
   const getReadTime = (content: string | null) => {
@@ -134,7 +140,7 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
                 ? [
                     {
                       label: post.category.name,
-                      href: blogCategoryPath(post.category.slug),
+                      href: categoryPath || blogCategoryPath(post.category.slug),
                     },
                   ]
                 : []),
@@ -146,7 +152,7 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
           <div className="space-y-4 text-left">
             {/* Category badge */}
             {post.category && (
-              <Link href={blogCategoryPath(post.category.slug)}>
+              <Link href={categoryPath || blogCategoryPath(post.category.slug)}>
                 <span
                   className="inline-flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider px-3 py-1.5 rounded-full transition-opacity hover:opacity-80"
                   style={{
@@ -226,7 +232,7 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
           {/* Back to blog */}
           <div className="border-t border-white/5 pt-6">
             <Link
-              href={post.category ? blogCategoryPath(post.category.slug) : "/bai-viet"}
+              href={post.category ? categoryPath || blogCategoryPath(post.category.slug) : "/bai-viet"}
               className="inline-flex items-center gap-2 text-sm text-gray-400 hover:text-pink-400 transition-colors"
             >
               <ArrowLeft className="w-4 h-4" />

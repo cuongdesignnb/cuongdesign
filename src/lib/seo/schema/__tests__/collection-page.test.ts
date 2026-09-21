@@ -5,10 +5,16 @@ import { assertSchema } from "./helpers";
 
 test("CollectionPage schema contains ItemList", () => {
   const schema = buildCollectionPageSchema({
-    path: "/du-an",
-    name: "Dự án",
-    items: [{ name: "Example", url: "/du-an/example" }],
+    path: "/bai-viet/chuyen-muc/cong-nghe",
+    name: "Công nghệ",
+    items: [{ name: "Example", url: "/bai-viet/thiet-ke-ui-ux" }],
   });
   assertSchema(schema, "CollectionPage");
+  assert.equal(schema.url, "https://cuongdesign.net/bai-viet/chuyen-muc/cong-nghe");
   assert.equal((schema.mainEntity as Record<string, unknown>)["@type"], "ItemList");
+  assert.equal(
+    ((schema.mainEntity as Record<string, unknown>).itemListElement as Record<string, unknown>[])[0].url,
+    "https://cuongdesign.net/bai-viet/thiet-ke-ui-ux",
+  );
+  assert.doesNotMatch(JSON.stringify(schema), /\/bai-viet\/cong-nghe(?:["#?]|$)/);
 });

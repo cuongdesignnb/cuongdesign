@@ -11,7 +11,6 @@ import { testimonials as staticTestimonials } from "@/data/testimonials";
 import { Star, Quote, MessageSquare } from "lucide-react";
 import {
   buildCollectionPageSchema,
-  buildReviewSchema,
   createMetadataFromSeoFields,
   JsonLd,
   resolveCanonicalPath,
@@ -57,7 +56,7 @@ export default async function TestimonialsListPage() {
     quote: "quote" in t ? (t as any).quote : (t as any).quoteVi,
   }));
 
-  const ratingSchema = [
+  const schemas = [
     buildCollectionPageSchema({
       path: canonicalPath,
       name: content.hero.title,
@@ -69,19 +68,12 @@ export default async function TestimonialsListPage() {
         image: testimonial.avatar,
       })),
     }),
-    ...testimonials.map((testimonial) =>
-      buildReviewSchema({
-        author: testimonial.name,
-        body: testimonial.quote,
-        rating: testimonial.rating,
-      }),
-    ),
   ];
 
   return (
     <div className="min-h-screen bg-[#030014] text-gray-200 flex flex-col">
       {/* Inject Structured Data */}
-      <JsonLd data={ratingSchema} />
+      <JsonLd data={schemas} />
 
       <Header />
 

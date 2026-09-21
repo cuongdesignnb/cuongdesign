@@ -12,7 +12,6 @@ import {
 import { getPublishedService } from "@/lib/content/get-service-content";
 import { getPublishedContent } from "@/lib/content/get-content";
 import {
-  buildBreadcrumbSchema,
   buildServiceSchema,
   buildWebPageSchema,
   createMetadataFromSeoFields,
@@ -91,11 +90,6 @@ export default async function ServiceDetailPage({ params }: Props) {
         image: service.coverMedia?.url,
         priceText: service.priceText,
       }),
-      buildBreadcrumbSchema([
-        { name: "Trang chủ", href: "/" },
-        { name: "Dịch vụ", href: "/dich-vu" },
-        { name: service.title, href: canonicalPath },
-      ]),
       ...(service.faqs.length
         ? [{
             "@type": "FAQPage",
@@ -117,7 +111,7 @@ export default async function ServiceDetailPage({ params }: Props) {
         <section className="pt-32 pb-16 relative">
           <div className="absolute inset-0 bg-gradient-to-b from-purple-950/20 via-transparent to-transparent" />
           <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-            <Breadcrumbs items={[{ label: "Dịch vụ", href: "/dich-vu" }, { label: service.title, href: `/dich-vu/${slug}` }]} />
+            <Breadcrumbs items={[{ label: "Dịch vụ", href: "/dich-vu" }, { label: service.title, href: canonicalPath }]} />
             <div className="mt-8 space-y-6">
               <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-pink-500/10 border border-pink-500/20 text-pink-400 text-xs font-medium">
                 <Sparkles className="w-3.5 h-3.5" /><span>Dịch vụ chuyên nghiệp</span>
