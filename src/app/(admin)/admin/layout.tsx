@@ -26,7 +26,7 @@ import { ToastProvider } from "@/components/ui/Toast";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Quản trị Cường Design",
+  title: { absolute: "Quản trị Cường Design" },
   robots: { index: false, follow: false },
 };
 

@@ -12,7 +12,7 @@ interface CheckoutPageProps {
 
 export async function generateMetadata(): Promise<Metadata> {
   return {
-    title: "Thanh toán đơn hàng | CUONG DESIGN",
+    title: { absolute: "Thanh toán đơn hàng | CUONG DESIGN" },
     description: "Trang thanh toán đơn hàng — Cường Design",
     robots: {
       index: false,

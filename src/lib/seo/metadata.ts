@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import type { SeoValue } from "@/components/admin/content/SeoFields";
 import { siteConfig } from "@/data/site";
-import { absoluteUrl, getSiteUrl, resolveCanonicalPath } from "./url";
+import { absoluteMediaUrl, absoluteUrl, getSiteUrl, resolveCanonicalPath } from "./url";
 
 export interface SeoImage {
   url: string;
@@ -55,8 +55,8 @@ export function createSitewideMetadata({
 }: CreateSitewideMetadataOptions): Metadata {
   return {
     metadataBase: new URL(getSiteUrl()),
-    title: { default: title, template: titleTemplate },
-    description,
+    title: { default: title.trim() || siteConfig.title, template: titleTemplate },
+    description: description.trim() || siteConfig.description,
     authors: [{ name: "Đinh Cường", url: absoluteUrl("/gioi-thieu") }],
     creator: "Đinh Cường",
     publisher: "Cường Design",
@@ -70,8 +70,9 @@ export function createMetadata(options: CreateMetadataOptions = {}): Metadata {
   const legacyOg = options.openGraph || {};
   const path = resolveCanonicalPath(options.canonicalPath, options.path || "/");
   const canonical = absoluteUrl(path);
-  const description = options.description || siteConfig.description;
-  const title = options.titleAbsolute || options.title || siteConfig.title;
+  const description = options.description?.trim() || siteConfig.description;
+  const titleAbsolute = options.titleAbsolute?.trim();
+  const title = titleAbsolute || options.title?.trim() || siteConfig.title;
   const index = options.noIndex ? false : options.robotsIndex ?? options.robots?.index ?? true;
   const follow = options.robotsFollow ?? options.robots?.follow ?? true;
   const images = (options.ogImages || legacyOg.images || [
@@ -81,7 +82,7 @@ export function createMetadata(options: CreateMetadataOptions = {}): Metadata {
       height: siteConfig.defaultOG.height,
       alt: siteConfig.defaultOG.alt,
     },
-  ]).map((image) => ({ ...image, url: absoluteUrl(image.url) }));
+  ]).map((image) => ({ ...image, url: absoluteMediaUrl(image.url) }));
   const type = options.type || legacyOg.type || "website";
   const publishedTime = options.publishedTime || legacyOg.publishedTime;
   const modifiedTime = options.modifiedTime || legacyOg.modifiedTime;
@@ -89,7 +90,7 @@ export function createMetadata(options: CreateMetadataOptions = {}): Metadata {
 
   return {
     metadataBase: new URL(getSiteUrl()),
-    title: options.titleAbsolute ? { absolute: options.titleAbsolute } : options.title || siteConfig.title,
+    title: titleAbsolute ? { absolute: titleAbsolute } : options.title?.trim() || siteConfig.title,
     description,
     keywords: [...new Set([...siteConfig.keywords, ...(options.keywords || [])])],
     authors: [{ name: "Đinh Cường", url: absoluteUrl("/gioi-thieu") }],
@@ -97,8 +98,8 @@ export function createMetadata(options: CreateMetadataOptions = {}): Metadata {
     publisher: "Cường Design",
     alternates: { canonical },
     openGraph: {
-      title: options.ogTitle || title,
-      description: options.ogDescription || description,
+      title: options.ogTitle?.trim() || title,
+      description: options.ogDescription?.trim() || description,
       url: canonical,
       siteName: "Cường Design",
       locale: siteConfig.locale,
@@ -110,9 +111,9 @@ export function createMetadata(options: CreateMetadataOptions = {}): Metadata {
     },
     twitter: {
       card: "summary_large_image",
-      title: options.twitterTitle || options.ogTitle || title,
-      description: options.twitterDescription || options.ogDescription || description,
-      images: options.twitterImages || images.map((image) => image.url),
+      title: options.twitterTitle?.trim() || options.ogTitle?.trim() || title,
+      description: options.twitterDescription?.trim() || options.ogDescription?.trim() || description,
+      images: options.twitterImages?.map(absoluteMediaUrl) || images.map((image) => image.url),
     },
     robots: {
       index,
@@ -150,14 +151,16 @@ export function createMetadataFromSeoFields({
   publishedTime,
   modifiedTime,
 }: MetadataFromSeoFieldsOptions): Metadata {
+  const title = seo?.title?.trim() || fallback.title;
+  const description = seo?.description?.trim() || fallback.description;
   const keywords = Array.isArray(seo?.keywords)
     ? seo.keywords
     : String(seo?.keywords || "").split(",").map((item) => item.trim()).filter(Boolean);
   const image = seo?.ogImage || seo?.ogMedia || fallback.image;
 
   return createMetadata({
-    title: seo?.title || fallback.title,
-    description: seo?.description || fallback.description,
+    title,
+    description,
     keywords: keywords.length ? keywords : fallback.keywords,
     path,
     canonicalPath: seo?.canonicalPath || seo?.canonical,

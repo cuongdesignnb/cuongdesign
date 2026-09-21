@@ -35,3 +35,21 @@ export function absoluteUrl(pathOrUrl: string | null | undefined): string {
   const path = normalizeCanonicalPath(pathOrUrl || "/");
   return path === "/" ? CANONICAL_SITE_URL : `${CANONICAL_SITE_URL}${path}`;
 }
+
+export function absoluteMediaUrl(url: string): string {
+  const value = url.trim();
+  if (!value) return value;
+
+  try {
+    const parsed = new URL(value, `${CANONICAL_SITE_URL}/`);
+    if (parsed.protocol !== "http:" && parsed.protocol !== "https:") {
+      return absoluteUrl(value);
+    }
+    if (CANONICAL_SITE_HOSTNAMES.has(parsed.hostname)) {
+      return absoluteUrl(parsed.pathname);
+    }
+    return parsed.toString();
+  } catch {
+    return absoluteUrl(value);
+  }
+}

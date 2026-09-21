@@ -19,6 +19,15 @@ test("sitewide metadata does not establish a canonical, Open Graph URL, or robot
   assert.equal(metadata.robots, undefined);
 });
 
+test("root HTML declares Vietnamese language and the standard viewport", async () => {
+  const source = await readFile(new URL("../../../../app/layout.tsx", import.meta.url), "utf8");
+
+  assert.match(source, /export const viewport:\s*Viewport/);
+  assert.match(source, /width:\s*["']device-width["']/);
+  assert.match(source, /initialScale:\s*1/);
+  assert.match(source, /<html[\s\S]*lang="vi"/);
+});
+
 test("homepage metadata remains explicit, canonical, and indexable", () => {
   const metadata = createMetadataFromSeoFields({
     seo: { title: "Cường Design" },
@@ -52,6 +61,15 @@ test("not-found routes leave the single noindex signal to Next.js", async () => 
 
 test("login remains explicitly noindex and nofollow without a canonical URL", () => {
   assert.deepEqual(loginMetadata.robots, { index: false, follow: false });
+  assert.deepEqual(loginMetadata.title, { absolute: "Đăng nhập | CUONG DESIGN" });
   assert.equal(loginMetadata.alternates?.canonical, undefined);
   assert.equal(loginMetadata.openGraph?.url, undefined);
+});
+
+test("404 metadata does not add homepage canonical or Open Graph URL", async () => {
+  const source = await readFile(new URL("../../../../app/not-found.tsx", import.meta.url), "utf8");
+
+  assert.doesNotMatch(source, /alternates\s*:/);
+  assert.doesNotMatch(source, /openGraph\s*:/);
+  assert.match(source, /title:\s*["']Không tìm thấy trang["']/);
 });

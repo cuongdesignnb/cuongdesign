@@ -3,10 +3,26 @@ import test from "node:test";
 import { CANONICAL_SITE_URL } from "@/config/site";
 import { createMetadata, createMetadataFromSeoFields } from "../../metadata";
 import {
+  absoluteMediaUrl,
   absoluteUrl,
   getSiteUrl,
   resolveCanonicalPath,
 } from "../../url";
+
+test("metadata media URLs are absolute while preserving intentional external media", () => {
+  assert.equal(absoluteMediaUrl("/images/og-image.jpg"), "https://cuongdesign.net/images/og-image.jpg");
+  assert.equal(
+    absoluteMediaUrl("https://www.cuongdesign.net/images/og-image.jpg"),
+    "https://cuongdesign.net/images/og-image.jpg",
+  );
+  assert.equal(absoluteMediaUrl("https://cdn.example.com/og-image.jpg"), "https://cdn.example.com/og-image.jpg");
+
+  const metadata = createMetadata({
+    path: "/gioi-thieu",
+    twitterImages: ["/images/og-image.jpg"],
+  });
+  assert.deepEqual(metadata.twitter?.images, ["https://cuongdesign.net/images/og-image.jpg"]);
+});
 
 test("canonical URL generation always uses the production non-www HTTPS origin", () => {
   assert.equal(getSiteUrl(), CANONICAL_SITE_URL);
@@ -79,6 +95,17 @@ test("metadata uses the route path when SEO fields have no canonical override", 
   assert.equal(metadata.openGraph?.url, "https://cuongdesign.net/gioi-thieu");
   assert.equal(fromSeoFields.alternates?.canonical, "https://cuongdesign.net/dich-vu");
   assert.equal(fromSeoFields.openGraph?.url, "https://cuongdesign.net/dich-vu");
+});
+
+test("blank CMS SEO fields use the entity fallback values", () => {
+  const metadata = createMetadataFromSeoFields({
+    seo: { title: "   ", description: "   " },
+    fallback: { title: "Trang dịch vụ", description: "Mô tả dịch vụ" },
+    path: "/dich-vu",
+  });
+
+  assert.equal(metadata.title, "Trang dịch vụ");
+  assert.equal(metadata.description, "Mô tả dịch vụ");
 });
 
 test("metadata keeps CMS robots index and follow controls independent", () => {

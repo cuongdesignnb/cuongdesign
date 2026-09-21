@@ -190,7 +190,7 @@ export default async function AboutPage() {
                   )}
                 </div>
                 <div>
-                  <h2 className="text-xl font-bold text-white">{content.profile.name}</h2>
+                  <p className="text-xl font-bold text-white">{content.profile.name}</p>
                   <span className="text-[10px] text-gray-500 font-mono tracking-widest block uppercase mt-0.5">{content.profile.jobTitle}</span>
                 </div>
                 
