@@ -15,6 +15,7 @@ import {
 import type { Metadata } from "next";
 import { getCategoryBySlug } from "@/lib/seo/queries";
 import { prisma } from "@/lib/db";
+import { blogCategoryPath, blogPostPath } from "@/lib/seo/blog-routes";
 
 interface CategoryPageProps {
   params: Promise<{ slug: string }>;
@@ -44,7 +45,7 @@ export async function generateMetadata({ params }: CategoryPageProps): Promise<M
       keywords: [category.name, "Blog", "Chuyên mục"],
       image: category.coverImage || undefined,
     },
-    path: `/bai-viet/chuyen-muc/${category.slug}`,
+    path: blogCategoryPath(category.slug),
   });
 }
 
@@ -58,7 +59,7 @@ export default async function CategoryPage({ params }: CategoryPageProps) {
 
   const canonicalPath = resolveCanonicalPath(
     category.canonicalPath,
-    `/bai-viet/chuyen-muc/${category.slug}`,
+    blogCategoryPath(category.slug),
   );
 
   // Fetch all categories for navigation pills + posts for this category
@@ -82,7 +83,7 @@ export default async function CategoryPage({ params }: CategoryPageProps) {
     description: category.description || undefined,
     items: posts.map((post) => ({
       name: post.title,
-      url: resolveCanonicalPath(post.canonicalPath, `/bai-viet/${post.slug}`),
+      url: resolveCanonicalPath(post.canonicalPath, blogPostPath(post.slug)),
       description: post.excerpt || undefined,
       image: post.coverImage || undefined,
     })),
@@ -189,7 +190,7 @@ export default async function CategoryPage({ params }: CategoryPageProps) {
               return (
                 <Link
                   key={cat.id}
-                  href={`/bai-viet/chuyen-muc/${cat.slug}`}
+                  href={blogCategoryPath(cat.slug)}
                   className={`inline-flex items-center gap-1.5 px-4 py-2 rounded-full text-xs font-semibold transition-all duration-200 ${
                     isActive
                       ? "shadow-[0_0_12px_rgba(236,72,153,0.15)]"
@@ -223,7 +224,7 @@ export default async function CategoryPage({ params }: CategoryPageProps) {
           {posts.length > 0 ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
               {posts.map((post) => {
-                const postUrl = `/bai-viet/${post.slug}`;
+                const postUrl = blogPostPath(post.slug);
                 return (
                   <GlassCard
                     key={post.id}

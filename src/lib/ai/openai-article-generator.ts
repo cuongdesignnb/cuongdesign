@@ -7,6 +7,7 @@ import {
 } from "./internal-links";
 import { cleanJsonText, requestArticleText } from "./provider";
 import { getAiRuntimeConfig } from "./settings";
+import { blogPostPath } from "@/lib/seo/blog-routes";
 import type {
   ArticleGenerator,
   GenerateArticleInput,
@@ -146,7 +147,7 @@ export class OpenAiArticleGenerator implements ArticleGenerator {
         id: post.id,
         targetType: "article" as const,
         title: post.title,
-        href: `/bai-viet/${post.slug}`,
+        href: blogPostPath(post.slug),
         searchText: post.excerpt,
         seoKeywords: post.seoKeywords,
       })),

@@ -18,7 +18,7 @@ import Link from "next/link";
 import type { Metadata } from "next";
 import { getCategoryBySlug, getPostBySlug } from "@/lib/seo/queries";
 import { resolveSeoRedirect } from "@/lib/seo/resolve-redirect";
-import { blogCategoryPath } from "@/lib/seo/blog-routes";
+import { blogCategoryPath, blogPostPath } from "@/lib/seo/blog-routes";
 import { siteConfig } from "@/data/site";
 
 interface BlogPostPageProps {
@@ -48,7 +48,7 @@ export async function generateMetadata({ params }: BlogPostPageProps): Promise<M
       description: post.excerpt || post.title,
       image: post.coverImage || undefined,
     },
-    path: `/bai-viet/${post.slug}`,
+    path: blogPostPath(post.slug),
     type: "article",
     publishedTime: post.publishedAt?.toISOString(),
     modifiedTime: post.updatedAt.toISOString(),
@@ -62,13 +62,13 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
   if (!post) {
     const category = await getCategoryBySlug(slug);
     if (category) permanentRedirect(blogCategoryPath(category.slug));
-    await resolveSeoRedirect(`/bai-viet/${slug}`);
+    await resolveSeoRedirect(blogPostPath(slug));
     notFound();
   }
 
   const canonicalPath = resolveCanonicalPath(
     post.canonicalPath,
-    `/bai-viet/${post.slug}`,
+    blogPostPath(post.slug),
   );
 
   // Calculate reading time
@@ -134,7 +134,7 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
                 ? [
                     {
                       label: post.category.name,
-                      href: `/bai-viet/chuyen-muc/${post.category.slug}`,
+                      href: blogCategoryPath(post.category.slug),
                     },
                   ]
                 : []),
@@ -146,7 +146,7 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
           <div className="space-y-4 text-left">
             {/* Category badge */}
             {post.category && (
-              <Link href={`/bai-viet/chuyen-muc/${post.category.slug}`}>
+              <Link href={blogCategoryPath(post.category.slug)}>
                 <span
                   className="inline-flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider px-3 py-1.5 rounded-full transition-opacity hover:opacity-80"
                   style={{
@@ -226,7 +226,7 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
           {/* Back to blog */}
           <div className="border-t border-white/5 pt-6">
             <Link
-              href={post.category ? `/bai-viet/chuyen-muc/${post.category.slug}` : "/bai-viet"}
+              href={post.category ? blogCategoryPath(post.category.slug) : "/bai-viet"}
               className="inline-flex items-center gap-2 text-sm text-gray-400 hover:text-pink-400 transition-colors"
             >
               <ArrowLeft className="w-4 h-4" />
@@ -246,7 +246,7 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
               </h2>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 {relatedPosts.map((related) => {
-                  const relatedUrl = `/bai-viet/${related.slug}`;
+                  const relatedUrl = blogPostPath(related.slug);
                   return (
                     <GlassCard
                       key={related.id}

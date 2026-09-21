@@ -8,6 +8,7 @@ import {
   sitemapImages,
   sitemapUrl,
 } from "@/lib/seo/sitemap";
+import { blogCategoryPath, blogPostPath } from "@/lib/seo/blog-routes";
 
 export const dynamic = "force-dynamic";
 
@@ -152,14 +153,14 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
         images: sitemapImages(item.ogImage),
       })),
       ...categories.map((item) => ({
-        url: sitemapUrl(item.canonicalPath, `/bai-viet/chuyen-muc/${item.slug}`),
+        url: sitemapUrl(item.canonicalPath, blogCategoryPath(item.slug)),
         lastModified: item.updatedAt,
         changeFrequency: "weekly" as const,
         priority: 0.7,
         images: sitemapImages(item.ogImage, item.coverImage),
       })),
       ...posts.filter(isSitemapIndexable).map((item) => ({
-        url: sitemapUrl(item.canonicalPath, `/bai-viet/${item.slug}`),
+        url: sitemapUrl(item.canonicalPath, blogPostPath(item.slug)),
         lastModified: item.updatedAt,
         changeFrequency: "weekly" as const,
         priority: 0.8,
