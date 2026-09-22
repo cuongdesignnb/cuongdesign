@@ -1,6 +1,5 @@
 "use client";
 
-import { useEffect, useRef } from "react";
 import { motion } from "framer-motion";
 import { Terminal, ShoppingBag, Eye, Code2 } from "lucide-react";
 import Button from "../ui/Button";
@@ -108,14 +107,13 @@ export default function HeroSection({
               <span className="text-pink-400">{content.availableText}</span>
             </motion.div>
 
-            <motion.h1
-              variants={fadeUpItem}
+            <h1
               className="text-4xl sm:text-5xl md:text-6xl font-bold tracking-tight text-white leading-tight"
             >
               {content.headlinePrefix} <br />
               <GradientText>{content.headlineHighlight}</GradientText>
               {content.headlineSuffix && <> {content.headlineSuffix}</>}
-            </motion.h1>
+            </h1>
 
             <motion.p
               variants={fadeUpItem}
