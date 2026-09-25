@@ -122,12 +122,11 @@ export default function HeroSection({
               {content.subtitle}
             </motion.p>
 
-            <motion.p
+            <motion.div
               variants={fadeUpItem}
               className="text-gray-400 text-sm md:text-base leading-relaxed max-w-xl"
-            >
-              <span dangerouslySetInnerHTML={{ __html: content.description }} />
-            </motion.p>
+              dangerouslySetInnerHTML={{ __html: content.description }}
+            />
 
             {/* CTAs */}
             <motion.div
