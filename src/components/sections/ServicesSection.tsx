@@ -17,6 +17,7 @@ import AnimatedSectionHeading from "../motion/AnimatedSectionHeading";
 import Stagger from "../motion/Stagger";
 import { fadeUpVariants, hoverDepthVariants } from "@/lib/motion";
 import { homeContentDefaults, type HomeContent } from "@/content/defaults/home";
+import { homepageDeferredSizeStyle } from "./homepage-deferred";
 import Link from "next/link";
 
 interface PublicService {
@@ -41,9 +42,17 @@ export default function ServicesSection({
   const services = initialServices
     .filter((service) => selected.length === 0 || selected.includes(service.slug))
     .slice(0, content.displayLimit);
+  const serviceRowsDesktop = Math.ceil(services.length / 3);
 
   return (
-    <section id="services" className="py-24 relative overflow-hidden">
+    <section
+      id="services"
+      className="home-deferred-section home-deferred-section--services py-24 relative overflow-hidden"
+      style={homepageDeferredSizeStyle(
+        Math.max(520, 480 + services.length * 180),
+        Math.max(460, 430 + serviceRowsDesktop * 180),
+      )}
+    >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         <AnimatedSectionHeading title={content.title} subtitle={content.subtitle} />
 

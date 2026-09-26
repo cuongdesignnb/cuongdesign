@@ -117,7 +117,7 @@ export default function ContactSection({
   };
 
   return (
-    <section id="contact" className="py-24 relative overflow-hidden bg-[#030014]/50">
+    <section id="contact" className="home-deferred-section home-deferred-section--contact py-24 relative overflow-hidden bg-[#030014]/50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         <AnimatedSectionHeading
           title={content.title}

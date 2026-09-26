@@ -14,7 +14,7 @@ export default function CTASection({
 }) {
   if (!content.enabled) return null;
   return (
-    <section className="py-16 relative overflow-hidden bg-[#030014]">
+    <section className="home-deferred-section home-deferred-section--cta py-16 relative overflow-hidden bg-[#030014]">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         <Reveal direction="scale">
           <motion.div

@@ -34,6 +34,44 @@ body {
   overflow-x: hidden;
 }
 
+@supports (content-visibility: auto) and (contain-intrinsic-block-size: auto 1px) {
+  .home-deferred-section {
+    content-visibility: auto;
+    contain-intrinsic-block-size: auto var(--home-deferred-mobile-size);
+  }
+
+  .home-deferred-section--about {
+    --home-deferred-mobile-size: 1340px;
+    --home-deferred-desktop-size: 900px;
+  }
+
+  .home-deferred-section--process {
+    --home-deferred-mobile-size: 1580px;
+    --home-deferred-desktop-size: 700px;
+  }
+
+  .home-deferred-section--skills {
+    --home-deferred-mobile-size: 1380px;
+    --home-deferred-desktop-size: 840px;
+  }
+
+  .home-deferred-section--cta {
+    --home-deferred-mobile-size: 500px;
+    --home-deferred-desktop-size: 420px;
+  }
+
+  .home-deferred-section--contact {
+    --home-deferred-mobile-size: 1380px;
+    --home-deferred-desktop-size: 840px;
+  }
+
+  @media (min-width: 768px) {
+    .home-deferred-section {
+      contain-intrinsic-block-size: auto var(--home-deferred-desktop-size);
+    }
+  }
+}
+
 /* Custom Scrollbar */
 ::-webkit-scrollbar {
   width: 8px;

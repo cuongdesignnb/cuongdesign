@@ -15,6 +15,7 @@ import Badge from "../ui/Badge";
 import Button from "../ui/Button";
 import { fadeUpVariants, hoverDepthVariants, motionTokens } from "@/lib/motion";
 import { homeContentDefaults, type HomeContent } from "@/content/defaults/home";
+import { homepageDeferredSizeStyle } from "./homepage-deferred";
 
 const modalOverlayVariants = {
   hidden: { opacity: 0 },
@@ -52,6 +53,7 @@ export default function DigitalProductsSection({
   headingLevel?: 1 | 2;
 }) {
   const products = initialProducts;
+  const displayedProducts = products.slice(0, content.displayLimit);
   const [selectedProduct, setSelectedProduct] = useState<ProductItem | null>(null);
   const [formData, setFormData] = useState({
     name: "",
@@ -158,14 +160,21 @@ export default function DigitalProductsSection({
   return (
     <section id="products" className="py-24 relative overflow-hidden bg-[#030014]/50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-        <AnimatedSectionHeading
-          title={content.title}
-          subtitle={content.subtitle}
-          level={headingLevel}
-        />
+        <div
+          className="home-deferred-section home-deferred-section--products"
+          style={homepageDeferredSizeStyle(
+            240 + displayedProducts.length * 500,
+            200 + Math.ceil(displayedProducts.length / 3) * 390,
+          )}
+        >
+          <AnimatedSectionHeading
+            title={content.title}
+            subtitle={content.subtitle}
+            level={headingLevel}
+          />
 
-        <Stagger className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8" stagger={0.12}>
-          {products.slice(0, content.displayLimit).map((product) => (
+          <Stagger className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8" stagger={0.12}>
+          {displayedProducts.map((product) => (
             <motion.div key={product.id} variants={fadeUpVariants}>
               <motion.div
                 initial="rest"
@@ -288,7 +297,8 @@ export default function DigitalProductsSection({
               </motion.div>
             </motion.div>
           ))}
-        </Stagger>
+          </Stagger>
+        </div>
       </div>
 
       {/* Free Product / Contact Form Modal */}

@@ -17,7 +17,7 @@ export default function WorkProcessSection({
   const isLineInView = useInView(lineRef, { once: true, amount: 0.3 });
 
   return (
-    <section id="process" className="py-24 relative overflow-hidden bg-[#030014]/30">
+    <section id="process" className="home-deferred-section home-deferred-section--process py-24 relative overflow-hidden bg-[#030014]/30">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         <AnimatedSectionHeading title={content.title} subtitle={content.subtitle} />
 
