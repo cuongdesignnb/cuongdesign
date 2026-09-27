@@ -46,23 +46,23 @@ body {
   }
 
   .home-deferred-section--process {
-    --home-deferred-mobile-size: 1580px;
-    --home-deferred-desktop-size: 700px;
+    --home-deferred-mobile-size: 1300px;
+    --home-deferred-desktop-size: 440px;
   }
 
   .home-deferred-section--skills {
-    --home-deferred-mobile-size: 1380px;
-    --home-deferred-desktop-size: 840px;
+    --home-deferred-mobile-size: 1145px;
+    --home-deferred-desktop-size: 615px;
   }
 
   .home-deferred-section--cta {
-    --home-deferred-mobile-size: 500px;
-    --home-deferred-desktop-size: 420px;
+    --home-deferred-mobile-size: 345px;
+    --home-deferred-desktop-size: 265px;
   }
 
   .home-deferred-section--contact {
-    --home-deferred-mobile-size: 1380px;
-    --home-deferred-desktop-size: 840px;
+    --home-deferred-mobile-size: 1115px;
+    --home-deferred-desktop-size: 600px;
   }
 
   @media (min-width: 768px) {

@@ -12,7 +12,10 @@ import Badge from "../ui/Badge";
 import Button from "../ui/Button";
 import { motionTokens, hoverDepthVariants } from "@/lib/motion";
 import { homeContentDefaults, type HomeContent } from "@/content/defaults/home";
-import { homepageDeferredSizeStyle } from "./homepage-deferred";
+import {
+  homepageDeferredSizeStyle,
+  homepageProjectsDeferredSizes,
+} from "./homepage-deferred";
 
 const cardVariants = {
   hidden: { opacity: 0, y: 40, filter: `blur(${motionTokens.blur.sm})` },
@@ -70,6 +73,7 @@ export default function FeaturedProjectsSection({
     });
   }, [activeCategory, projects, selectedTech, searchQuery]);
   const visibleProjectCount = Math.min(filteredProjects.length, content.displayLimit);
+  const deferredSizes = homepageProjectsDeferredSizes(visibleProjectCount);
 
   return (
     <section
@@ -77,10 +81,9 @@ export default function FeaturedProjectsSection({
       className={deferLayout
         ? "home-deferred-section home-deferred-section--projects py-24 relative overflow-hidden bg-[#030014]/30"
         : "py-24 relative overflow-hidden bg-[#030014]/30"}
-      style={deferLayout ? homepageDeferredSizeStyle(
-        820 + visibleProjectCount * 500,
-        670 + Math.ceil(visibleProjectCount / 3) * 390,
-      ) : undefined}
+      style={deferLayout
+        ? homepageDeferredSizeStyle(deferredSizes.mobile, deferredSizes.desktop)
+        : undefined}
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         <AnimatedSectionHeading

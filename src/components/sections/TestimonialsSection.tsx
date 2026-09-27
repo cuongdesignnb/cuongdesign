@@ -9,7 +9,10 @@ import Stagger from "../motion/Stagger";
 import PublicAvatar from "../ui/PublicAvatar";
 import { fadeUpVariants, hoverDepthVariants } from "@/lib/motion";
 import { homeContentDefaults, type HomeContent } from "@/content/defaults/home";
-import { homepageDeferredSizeStyle } from "./homepage-deferred";
+import {
+  homepageDeferredSizeStyle,
+  homepageTestimonialsDeferredSizes,
+} from "./homepage-deferred";
 
 export default function TestimonialsSection({
   initialTestimonials,
@@ -20,14 +23,12 @@ export default function TestimonialsSection({
 }) {
   const testimonials = (initialTestimonials || staticTestimonials).slice(0, content.displayLimit);
   const visibleTestimonialCount = testimonials.length;
+  const deferredSizes = homepageTestimonialsDeferredSizes(visibleTestimonialCount);
   return (
     <section
       id="testimonials"
       className="home-deferred-section home-deferred-section--testimonials py-24 relative overflow-hidden"
-      style={homepageDeferredSizeStyle(
-        420 + visibleTestimonialCount * 270,
-        350 + Math.ceil(visibleTestimonialCount / 2) * 230,
-      )}
+      style={homepageDeferredSizeStyle(deferredSizes.mobile, deferredSizes.desktop)}
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         <AnimatedSectionHeading

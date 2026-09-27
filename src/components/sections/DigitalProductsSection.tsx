@@ -15,7 +15,10 @@ import Badge from "../ui/Badge";
 import Button from "../ui/Button";
 import { fadeUpVariants, hoverDepthVariants, motionTokens } from "@/lib/motion";
 import { homeContentDefaults, type HomeContent } from "@/content/defaults/home";
-import { homepageDeferredSizeStyle } from "./homepage-deferred";
+import {
+  homepageDeferredSizeStyle,
+  homepageProductsDeferredSizes,
+} from "./homepage-deferred";
 
 const modalOverlayVariants = {
   hidden: { opacity: 0 },
@@ -56,6 +59,7 @@ export default function DigitalProductsSection({
 }) {
   const products = initialProducts;
   const displayedProducts = products.slice(0, content.displayLimit);
+  const deferredSizes = homepageProductsDeferredSizes(displayedProducts.length);
   const [selectedProduct, setSelectedProduct] = useState<ProductItem | null>(null);
   const [formData, setFormData] = useState({
     name: "",
@@ -164,10 +168,9 @@ export default function DigitalProductsSection({
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         <div
           className={deferLayout ? "home-deferred-section home-deferred-section--products" : undefined}
-          style={deferLayout ? homepageDeferredSizeStyle(
-            240 + displayedProducts.length * 500,
-            200 + Math.ceil(displayedProducts.length / 3) * 390,
-          ) : undefined}
+          style={deferLayout
+            ? homepageDeferredSizeStyle(deferredSizes.mobile, deferredSizes.desktop)
+            : undefined}
         >
           <AnimatedSectionHeading
             title={content.title}
