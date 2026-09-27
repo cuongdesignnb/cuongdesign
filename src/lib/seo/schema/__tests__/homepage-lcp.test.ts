@@ -103,3 +103,43 @@ test("homepage defers only below-fold sections and preserves the server-rendered
   assert.match(hero, /<h1\b[\s\S]*?content\.headlinePrefix/);
   assert.match(hero, /dangerouslySetInnerHTML=\{\{ __html: content\.description \}\}/);
 });
+
+test("shared project and product listings defer layout only when the homepage opts in", async () => {
+  const page = await readFile(
+    new URL("../../../../app/page.tsx", import.meta.url),
+    "utf8",
+  );
+  const projects = await readFile(
+    new URL("../../../../components/sections/FeaturedProjectsSection.tsx", import.meta.url),
+    "utf8",
+  );
+  const products = await readFile(
+    new URL("../../../../components/sections/DigitalProductsSection.tsx", import.meta.url),
+    "utf8",
+  );
+  const projectsRoute = await readFile(
+    new URL("../../../../app/du-an/page.tsx", import.meta.url),
+    "utf8",
+  );
+  const productsRoute = await readFile(
+    new URL("../../../../app/san-pham/page.tsx", import.meta.url),
+    "utf8",
+  );
+
+  assert.match(page, /<FeaturedProjectsSection\b[\s\S]*?\bdeferLayout\s*\/>/);
+  assert.match(page, /<DigitalProductsSection\b[\s\S]*?\bdeferLayout\s*\/>/);
+
+  for (const source of [projects, products]) {
+    assert.match(source, /deferLayout\s*=\s*false/);
+    assert.match(source, /deferLayout\?: boolean/);
+  }
+
+  assert.match(projects, /className=\{deferLayout\s*\?/);
+  assert.match(projects, /style=\{deferLayout\s*\?\s*homepageDeferredSizeStyle/);
+  assert.match(products, /className=\{deferLayout\s*\?/);
+  assert.match(products, /style=\{deferLayout\s*\?\s*homepageDeferredSizeStyle/);
+  assert.match(products, /<\/Stagger>\s*<\/div>\s*<\/div>\s*\{\/\* Free Product \/ Contact Form Modal \*\//);
+
+  assert.doesNotMatch(projectsRoute, /\bdeferLayout\b/);
+  assert.doesNotMatch(productsRoute, /\bdeferLayout\b/);
+});

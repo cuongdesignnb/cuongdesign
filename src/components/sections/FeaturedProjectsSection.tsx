@@ -37,10 +37,12 @@ export default function FeaturedProjectsSection({
   initialProjects = [],
   content = homeContentDefaults.projects,
   headingLevel = 2,
+  deferLayout = false,
 }: {
   initialProjects?: any[];
   content?: HomeContent["projects"];
   headingLevel?: 1 | 2;
+  deferLayout?: boolean;
 }) {
   const projects = initialProjects;
   const [activeCategory, setActiveCategory] = useState<string>("All");
@@ -72,11 +74,13 @@ export default function FeaturedProjectsSection({
   return (
     <section
       id="projects"
-      className="home-deferred-section home-deferred-section--projects py-24 relative overflow-hidden bg-[#030014]/30"
-      style={homepageDeferredSizeStyle(
+      className={deferLayout
+        ? "home-deferred-section home-deferred-section--projects py-24 relative overflow-hidden bg-[#030014]/30"
+        : "py-24 relative overflow-hidden bg-[#030014]/30"}
+      style={deferLayout ? homepageDeferredSizeStyle(
         820 + visibleProjectCount * 500,
         670 + Math.ceil(visibleProjectCount / 3) * 390,
-      )}
+      ) : undefined}
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         <AnimatedSectionHeading

@@ -47,10 +47,12 @@ export default function DigitalProductsSection({
   initialProducts = [],
   content = homeContentDefaults.products,
   headingLevel = 2,
+  deferLayout = false,
 }: {
   initialProducts?: any[];
   content?: HomeContent["products"];
   headingLevel?: 1 | 2;
+  deferLayout?: boolean;
 }) {
   const products = initialProducts;
   const displayedProducts = products.slice(0, content.displayLimit);
@@ -161,11 +163,11 @@ export default function DigitalProductsSection({
     <section id="products" className="py-24 relative overflow-hidden bg-[#030014]/50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         <div
-          className="home-deferred-section home-deferred-section--products"
-          style={homepageDeferredSizeStyle(
+          className={deferLayout ? "home-deferred-section home-deferred-section--products" : undefined}
+          style={deferLayout ? homepageDeferredSizeStyle(
             240 + displayedProducts.length * 500,
             200 + Math.ceil(displayedProducts.length / 3) * 390,
-          )}
+          ) : undefined}
         >
           <AnimatedSectionHeading
             title={content.title}

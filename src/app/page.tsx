@@ -75,8 +75,8 @@ export default async function Home() {
         <HeroSection content={homeContent.hero} />
         <AboutSection content={homeContent.about} />
         <ServicesSection content={homeContent.services} initialServices={services} />
-        <FeaturedProjectsSection initialProjects={dbProjects} content={homeContent.projects} />
-        <DigitalProductsSection initialProducts={dbProducts} content={homeContent.products} />
+        <FeaturedProjectsSection initialProjects={dbProjects} content={homeContent.projects} deferLayout />
+        <DigitalProductsSection initialProducts={dbProducts} content={homeContent.products} deferLayout />
         <WorkProcessSection content={homeContent.process} />
         <TechStackSection content={homeContent.techStack} />
         <TestimonialsSection initialTestimonials={dbTestimonials} content={homeContent.testimonials} />
