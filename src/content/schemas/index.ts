@@ -73,7 +73,11 @@ export const serviceContentSchema = z.object({
   heroContent: z.string().min(1),
   iconKey: z.string().nullable().optional(),
   colorKey: z.enum(["pink", "purple", "blue", "emerald", "amber", "cyan", "violet"]).nullable().optional(),
-  coverMediaId: z.string().nullable().optional(),
+  coverMediaId: z
+    .string()
+    .nullable()
+    .optional()
+    .transform((value) => (value === "" ? null : value)),
   priceText: z.string().nullable().optional(),
   durationText: z.string().nullable().optional(),
   features: z.array(titledItemSchema),
