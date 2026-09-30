@@ -25,7 +25,7 @@ import {
   Strikethrough,
   Undo2,
 } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import MediaPickerDialog from "./MediaPickerDialog";
 import type { MediaRecord } from "./media-types";
 
@@ -35,6 +35,7 @@ export interface ContentEditorProps {
   placeholder?: string;
   minHeight?: number;
   allowMedia?: boolean;
+  lazyImages?: boolean;
 }
 
 function sanitizePastedHtml(html: string) {
@@ -54,12 +55,48 @@ export default function ContentEditor({
   placeholder = "Bắt đầu viết nội dung...",
   minHeight = 280,
   allowMedia = true,
+  lazyImages = false,
 }: ContentEditorProps) {
   const [mediaOpen, setMediaOpen] = useState(false);
   const [pendingMedia, setPendingMedia] = useState<MediaRecord | null>(null);
   const [imageAlt, setImageAlt] = useState("");
   const [sourceMode, setSourceMode] = useState(false);
   const [source, setSource] = useState(value);
+  const imageExtension = useMemo(
+    () => ImageExtension.extend({
+      addAttributes() {
+        return {
+          ...this.parent?.(),
+          width: {
+            default: null,
+            parseHTML: (element) => {
+              const width = Number(element.getAttribute("width"));
+              return Number.isFinite(width) && width > 0 ? width : null;
+            },
+            renderHTML: ({ width }) =>
+              typeof width === "number" && width > 0 ? { width } : {},
+          },
+          height: {
+            default: null,
+            parseHTML: (element) => {
+              const height = Number(element.getAttribute("height"));
+              return Number.isFinite(height) && height > 0 ? height : null;
+            },
+            renderHTML: ({ height }) =>
+              typeof height === "number" && height > 0 ? { height } : {},
+          },
+          loading: {
+            default: lazyImages ? "lazy" : null,
+            parseHTML: (element) =>
+              lazyImages ? "lazy" : element.getAttribute("loading"),
+            renderHTML: ({ loading }) =>
+              loading === "lazy" ? { loading: "lazy" } : {},
+          },
+        };
+      },
+    }).configure({ allowBase64: false }),
+    [lazyImages],
+  );
   const editor = useEditor({
     immediatelyRender: false,
     extensions: [
@@ -68,7 +105,7 @@ export default function ContentEditor({
         link: { openOnClick: false, autolink: true },
       }),
       Placeholder.configure({ placeholder }),
-      ImageExtension.configure({ allowBase64: false }),
+      imageExtension,
       TextAlign.configure({ types: ["heading", "paragraph"] }),
       CharacterCount,
     ],
@@ -224,10 +261,21 @@ export default function ContentEditor({
                 type="button"
                 disabled={!imageAlt.trim()}
                 onClick={() => {
+                  const attrs = {
+                    src: pendingMedia.url,
+                    alt: imageAlt.trim(),
+                    ...(pendingMedia.width && pendingMedia.width > 0
+                      ? { width: pendingMedia.width }
+                      : {}),
+                    ...(pendingMedia.height && pendingMedia.height > 0
+                      ? { height: pendingMedia.height }
+                      : {}),
+                    ...(lazyImages ? { loading: "lazy" } : {}),
+                  };
                   activeEditor
                     .chain()
                     .focus()
-                    .setImage({ src: pendingMedia.url, alt: imageAlt.trim() })
+                    .insertContent({ type: "image", attrs })
                     .run();
                   setPendingMedia(null);
                   setImageAlt("");

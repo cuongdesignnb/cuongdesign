@@ -71,6 +71,11 @@ export const serviceContentSchema = z.object({
   subtitle: z.string().nullable().optional(),
   shortDescription: z.string().min(1),
   heroContent: z.string().min(1),
+  bodyContent: z
+    .string()
+    .nullable()
+    .optional()
+    .transform((value) => value ?? ""),
   iconKey: z.string().nullable().optional(),
   colorKey: z.enum(["pink", "purple", "blue", "emerald", "amber", "cyan", "violet"]).nullable().optional(),
   coverMediaId: z

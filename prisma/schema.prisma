@@ -152,6 +152,7 @@ model ServiceContent {
   subtitle         String?
   shortDescription String    @db.Text
   heroContent      String    @db.Text
+  bodyContent      String?   @db.Text
   iconKey          String?
   colorKey         String?
   coverMediaId     String?

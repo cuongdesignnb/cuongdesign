@@ -126,6 +126,17 @@ export default async function ServiceDetailPage({ params }: Props) {
           </div>
         </section>
 
+        {service.bodyContent.trim() && (
+          <section className="py-16">
+            <div className="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8">
+              <div
+                className="text-gray-300 text-base leading-8 [&_h2]:mb-4 [&_h2]:mt-10 [&_h2]:text-2xl [&_h2]:font-bold [&_h2]:text-white [&_h3]:mb-3 [&_h3]:mt-7 [&_h3]:text-xl [&_h3]:font-semibold [&_h3]:text-white [&_p]:mb-5 [&_a]:text-pink-400 [&_a]:underline [&_img]:my-8 [&_img]:h-auto [&_img]:max-w-full [&_img]:rounded-lg [&_ul]:mb-5 [&_ul]:list-disc [&_ul]:pl-6 [&_ol]:mb-5 [&_ol]:list-decimal [&_ol]:pl-6"
+                dangerouslySetInnerHTML={{ __html: service.bodyContent }}
+              />
+            </div>
+          </section>
+        )}
+
         <section className="py-20">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="text-center mb-12"><h2 className="text-2xl sm:text-3xl font-bold text-white">Tính năng & Ưu điểm nổi bật</h2><p className="text-gray-400 mt-3 max-w-2xl mx-auto">Những gì bạn nhận được khi sử dụng dịch vụ này</p></div>

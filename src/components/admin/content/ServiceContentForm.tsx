@@ -24,6 +24,7 @@ interface ServiceFormValue {
   subtitle: string;
   shortDescription: string;
   heroContent: string;
+  bodyContent: string;
   iconKey: string;
   colorKey: string;
   coverMediaId: string;
@@ -86,6 +87,7 @@ export default function ServiceContentForm({ initial }: { initial: ServiceFormVa
 
         <label className="space-y-1 text-xs text-gray-400">Mô tả ngắn<textarea required rows={3} value={form.shortDescription} onChange={(event) => set("shortDescription", event.target.value)} className={inputClass} /></label>
         <div className="space-y-2"><label className="text-xs text-gray-400">Nội dung Hero</label><ContentEditor value={form.heroContent} onChange={(value) => set("heroContent", value)} /></div>
+        <div className="space-y-2"><label className="text-xs text-gray-400">Nội dung chi tiết</label><ContentEditor value={form.bodyContent} onChange={(value) => set("bodyContent", value)} placeholder="Viết nội dung dịch vụ; dùng H2/H3 cho các đề mục..." minHeight={420} lazyImages /></div>
         <MediaField label="Ảnh cover" value={form.coverMediaId} valueMode="id" onChange={(value) => set("coverMediaId", value)} />
 
         <div className="grid gap-4 md:grid-cols-2">

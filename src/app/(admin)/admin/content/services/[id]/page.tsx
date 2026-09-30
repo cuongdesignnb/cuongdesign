@@ -11,6 +11,7 @@ const emptyService = {
   subtitle: "",
   shortDescription: "",
   heroContent: "<p></p>",
+  bodyContent: "",
   iconKey: "",
   colorKey: "pink",
   coverMediaId: "",
@@ -51,6 +52,7 @@ export default async function AdminServiceContentPage({
         JSON.stringify({
           ...service,
           subtitle: service.subtitle ?? "",
+          bodyContent: service.bodyContent ?? "",
           iconKey: service.iconKey ?? "",
           colorKey: service.colorKey ?? "",
           coverMediaId: service.coverMediaId ?? "",
