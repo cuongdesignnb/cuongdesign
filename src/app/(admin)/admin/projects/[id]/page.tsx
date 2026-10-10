@@ -11,5 +11,5 @@ export default async function EditAdminProjectPage({
   const project = await prisma.project.findUnique({ where: { id } });
   if (!project) notFound();
 
-  return <AdminProjectsManager initialProjects={[]} mediaLibrary={[]} editorOnly editProject={project} />;
+  return <AdminProjectsManager key={project.id} initialProjects={[]} mediaLibrary={[]} editorOnly editProject={project} />;
 }

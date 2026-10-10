@@ -7,6 +7,7 @@ import { sanitizeRichHtml } from "@/lib/content/sanitize";
 import { normalizeSlug } from "@/lib/seo/slug";
 import { recordSeoRedirect } from "@/lib/seo/redirects";
 import type { ProjectSchemaKind } from "@prisma/client";
+import { normalizeYouTubeUrl, YouTubeUrlValidationError } from "@/lib/video/youtube";
 
 export async function upsertProject(data: {
   id?: string;
@@ -19,6 +20,7 @@ export async function upsertProject(data: {
   category: string;
   demoUrl?: string;
   githubUrl?: string;
+  youtubeUrl?: string | null;
   techStack: string[];
   projectType?: ProjectSchemaKind;
   clientName?: string;
@@ -41,6 +43,13 @@ export async function upsertProject(data: {
 }) {
   try {
     await requireAdmin();
+    let youtubeUrl: string | null | undefined;
+    try {
+      youtubeUrl = normalizeYouTubeUrl(data.youtubeUrl);
+    } catch (error) {
+      if (!(error instanceof YouTubeUrlValidationError)) throw error;
+      return { success: false, error: error.message, fieldErrors: { youtubeUrl: error.message } };
+    }
     const slug = normalizeSlug(data.slug);
     if (!slug) throw new Error("Slug không hợp lệ.");
     const previous = data.id
@@ -73,6 +82,7 @@ export async function upsertProject(data: {
     const project = await prisma.project.upsert({
       where: { id: data.id || "new-project" },
       update: {
+        youtubeUrl,
         title: data.title,
         slug,
         description: data.description,
@@ -89,6 +99,7 @@ export async function upsertProject(data: {
         publishedAt: seoData.isPublished ? previous?.publishedAt || new Date() : null,
       },
       create: {
+        youtubeUrl: youtubeUrl ?? null,
         title: data.title,
         slug,
         description: data.description,

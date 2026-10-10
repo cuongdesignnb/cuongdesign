@@ -11,5 +11,5 @@ export default async function EditAdminProductPage({
   const product = await prisma.product.findUnique({ where: { id } });
   if (!product) notFound();
 
-  return <AdminProductsManager initialProducts={[]} mediaLibrary={[]} editorOnly editProduct={product} />;
+  return <AdminProductsManager key={product.id} initialProducts={[]} mediaLibrary={[]} editorOnly editProduct={product} />;
 }

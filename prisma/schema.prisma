@@ -219,6 +219,7 @@ model Project {
   category       String            @default("Web Application")
   demoUrl        String?
   githubUrl      String?
+  youtubeUrl     String?
   techStack      String[]
   projectType    ProjectSchemaKind @default(CREATIVE_WORK)
   clientName     String?
@@ -269,6 +270,7 @@ model Product {
   images           String[]
   demoUrl          String?
   downloadUrl      String?
+  youtubeUrl       String?
   maxDownloads     Int                 @default(5)
   seoTitle         String?
   seoDescription   String?

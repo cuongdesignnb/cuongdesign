@@ -8,6 +8,7 @@ import GlassCard from "@/components/ui/GlassCard";
 import Button from "@/components/ui/Button";
 import MediaField from "@/components/admin/content/MediaField";
 import MediaGalleryField from "@/components/admin/content/MediaGalleryField";
+import YouTubeUrlField from "@/components/admin/content/YouTubeUrlField";
 import ContentEditor from "@/components/admin/content/ContentEditor";
 import SeoFields, { type SeoValue } from "@/components/admin/content/SeoFields";
 import { ArrowLeft, Edit2, Plus, Trash2 } from "lucide-react";
@@ -32,6 +33,7 @@ export default function AdminProductsManager({
   const [editingProduct, setEditingProduct] = useState<any | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(editorOnly);
   const [loading, setLoading] = useState(false);
+  const [youtubeError, setYoutubeError] = useState<string>();
 
   // Form State
   const [form, setForm] = useState({
@@ -49,6 +51,7 @@ export default function AdminProductsManager({
     images: [] as string[],
     demoUrl: "",
     downloadUrl: "",
+    youtubeUrl: "",
     maxDownloads: 5,
     currency: "VND",
     pricingMode: "FIXED" as "FIXED" | "FREE" | "CONTACT",
@@ -75,6 +78,7 @@ export default function AdminProductsManager({
   });
 
   const openCreateModal = () => {
+    setYoutubeError(undefined);
     setForm({
       id: "",
       title: "",
@@ -90,6 +94,7 @@ export default function AdminProductsManager({
       images: [],
       demoUrl: "",
       downloadUrl: "",
+      youtubeUrl: "",
       maxDownloads: 5,
       currency: "VND",
       pricingMode: "FIXED",
@@ -119,6 +124,7 @@ export default function AdminProductsManager({
   };
 
   const openEditModal = (product: any) => {
+    setYoutubeError(undefined);
     setEditingProduct(product);
     setForm({
       id: product.id,
@@ -135,6 +141,7 @@ export default function AdminProductsManager({
       images: product.images || [],
       demoUrl: product.demoUrl || "",
       downloadUrl: product.downloadUrl || "",
+      youtubeUrl: product.youtubeUrl ?? "",
       maxDownloads: product.maxDownloads !== undefined ? product.maxDownloads : 5,
       currency: product.currency || "VND",
       pricingMode: product.pricingMode || (product.price === 0 ? "FREE" : "FIXED"),
@@ -203,6 +210,7 @@ export default function AdminProductsManager({
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
+    setYoutubeError(undefined);
 
     const payload = {
       ...form,
@@ -233,7 +241,8 @@ export default function AdminProductsManager({
         setIsModalOpen(false);
       }
     } else {
-      alert("Lỗi khi lưu: " + res.error);
+      if (res.fieldErrors?.youtubeUrl) setYoutubeError(res.fieldErrors.youtubeUrl);
+      else alert("Lỗi khi lưu: " + res.error);
     }
     setLoading(false);
   };
@@ -390,6 +399,10 @@ export default function AdminProductsManager({
                 value={form.images}
                 onChange={(images) => setForm((prev) => ({ ...prev, images }))}
               />
+              <YouTubeUrlField id="product-youtube-url" value={form.youtubeUrl} error={youtubeError} onChange={(youtubeUrl) => {
+                setYoutubeError(undefined);
+                setForm((prev) => ({ ...prev, youtubeUrl }));
+              }} />
 
               {/* Pricing, type and downloads */}
               <div className="grid grid-cols-1 md:grid-cols-4 gap-4">

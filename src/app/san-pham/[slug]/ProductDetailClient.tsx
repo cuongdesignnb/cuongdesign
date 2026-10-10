@@ -8,6 +8,7 @@ import { createOrder } from "@/app/actions/orders";
 import { formatVND } from "@/lib/utils";
 import GlassCard from "@/components/ui/GlassCard";
 import Button from "@/components/ui/Button";
+import YouTubeVideo from "@/components/media/YouTubeVideo";
 import {
   ShoppingBag,
   Send,
@@ -47,6 +48,7 @@ interface Product {
   coverImage: string;
   images: string[];
   demoUrl: string | null;
+  youtubeUrl?: string | null;
   maxDownloads: number;
 }
 
@@ -211,6 +213,7 @@ export default function ProductDetailClient({
         </GlassCard>
 
         {/* Dynamic Reviews Module */}
+        <YouTubeVideo url={product.youtubeUrl} title={product.title} kind="product" />
         <GlassCard className="p-6 md:p-8 border-white/5 bg-[#0a0822]/60 space-y-6">
           <div className="border-b border-white/5 pb-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <h3 className="text-lg font-bold text-white flex items-center gap-2">

@@ -7,6 +7,7 @@ import { sanitizeRichHtml } from "@/lib/content/sanitize";
 import { normalizeSlug } from "@/lib/seo/slug";
 import { recordSeoRedirect } from "@/lib/seo/redirects";
 import type { ProductAvailability, ProductPricingMode } from "@prisma/client";
+import { normalizeYouTubeUrl, YouTubeUrlValidationError } from "@/lib/video/youtube";
 
 export async function upsertProduct(data: {
   id?: string;
@@ -23,6 +24,7 @@ export async function upsertProduct(data: {
   images: string[];
   demoUrl?: string;
   downloadUrl?: string;
+  youtubeUrl?: string | null;
   maxDownloads?: number;
   currency?: string;
   pricingMode?: ProductPricingMode;
@@ -49,6 +51,13 @@ export async function upsertProduct(data: {
 }) {
   try {
     await requireAdmin();
+    let youtubeUrl: string | null | undefined;
+    try {
+      youtubeUrl = normalizeYouTubeUrl(data.youtubeUrl);
+    } catch (error) {
+      if (!(error instanceof YouTubeUrlValidationError)) throw error;
+      return { success: false, error: error.message, fieldErrors: { youtubeUrl: error.message } };
+    }
     const slug = normalizeSlug(data.slug);
     if (!slug) throw new Error("Slug không hợp lệ.");
     const previous = data.id
@@ -87,6 +96,7 @@ export async function upsertProduct(data: {
     const product = await prisma.product.upsert({
       where: { id: data.id || "new-product" },
       update: {
+        youtubeUrl,
         title: data.title,
         slug,
         description: data.description,
@@ -106,6 +116,7 @@ export async function upsertProduct(data: {
         publishedAt: seoData.isPublished ? previous?.publishedAt || new Date() : null,
       },
       create: {
+        youtubeUrl: youtubeUrl ?? null,
         title: data.title,
         slug,
         description: data.description,

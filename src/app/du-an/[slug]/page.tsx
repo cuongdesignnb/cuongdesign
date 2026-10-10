@@ -6,6 +6,7 @@ import Footer from "@/components/layout/Footer";
 import Breadcrumbs from "@/components/ui/Breadcrumbs";
 import GlassCard from "@/components/ui/GlassCard";
 import Button from "@/components/ui/Button";
+import YouTubeVideo from "@/components/media/YouTubeVideo";
 import { Folder, Globe, Code, Tag, Calendar, User, ArrowLeft, Layers } from "lucide-react";
 import Link from "next/link";
 import { Metadata } from "next";
@@ -146,10 +147,11 @@ export default async function ProjectDetailPage({ params }: ProjectPageProps) {
           </div>
 
           {/* Split Detail Grid */}
+          <YouTubeVideo url={project.youtubeUrl} title={project.title} kind="project" />
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
             
             {/* Left Column: Rich Text Content (8 cols) */}
-            <div className="lg:col-span-8 space-y-6 text-left">
+            <div className="lg:col-span-8 min-w-0 space-y-6 text-left">
               <GlassCard className="p-6 md:p-8 border-white/5 bg-[#0a0822]/60">
                 <h3 className="text-lg font-bold text-white mb-4 flex items-center gap-2">
                   <Layers className="w-5 h-5 text-pink-500" />
@@ -158,7 +160,7 @@ export default async function ProjectDetailPage({ params }: ProjectPageProps) {
                 
                 {/* Parse HTML description */}
                 <article
-                  className="prose prose-invert prose-pink max-w-none text-gray-300 leading-relaxed text-xs sm:text-sm md:text-base space-y-6"
+                  className="project-article-content"
                   dangerouslySetInnerHTML={{ __html: sanitizeRichHtml(project.content) }}
                 />
               </GlassCard>
