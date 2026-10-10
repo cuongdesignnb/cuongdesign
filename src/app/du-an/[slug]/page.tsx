@@ -82,7 +82,7 @@ export default async function ProjectDetailPage({ params }: ProjectPageProps) {
     demoUrl: project.demoUrl,
     createdAt: project.createdAt,
     updatedAt: project.updatedAt,
-    completedAt: project.completedAt,
+    publishedAt: project.publishedAt,
   });
 
   return (

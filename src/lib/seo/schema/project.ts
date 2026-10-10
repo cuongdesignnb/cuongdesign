@@ -22,7 +22,7 @@ export function buildProjectSchema(input: {
   demoUrl?: string | null;
   createdAt: Date;
   updatedAt: Date;
-  completedAt?: Date | null;
+  publishedAt?: Date | null;
 }) {
   const path = input.path || `/du-an/${input.slug}`;
   return compact({
@@ -36,7 +36,8 @@ export function buildProjectSchema(input: {
     creator: { "@id": schemaIds.person() },
     dateCreated: input.createdAt.toISOString(),
     dateModified: input.updatedAt.toISOString(),
-    datePublished: input.completedAt?.toISOString(),
+    datePublished: input.publishedAt instanceof Date && Number.isFinite(input.publishedAt.getTime())
+      ? input.publishedAt.toISOString() : undefined,
     keywords: input.techStack,
     programmingLanguage:
       input.projectType === "SOFTWARE_SOURCE_CODE" ? input.techStack : undefined,

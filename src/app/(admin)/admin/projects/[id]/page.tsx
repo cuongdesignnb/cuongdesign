@@ -1,6 +1,7 @@
 import AdminProjectsManager from "@/components/sections/AdminProjectsManager";
 import { prisma } from "@/lib/db";
 import { notFound } from "next/navigation";
+import { projectCompletedAtFormState } from "@/lib/content/project-dates";
 
 export default async function EditAdminProjectPage({
   params,
@@ -11,5 +12,7 @@ export default async function EditAdminProjectPage({
   const project = await prisma.project.findUnique({ where: { id } });
   if (!project) notFound();
 
-  return <AdminProjectsManager key={project.id} initialProjects={[]} mediaLibrary={[]} editorOnly editProject={project} />;
+  const completion = projectCompletedAtFormState(project.completedAt);
+  const editProject = { ...project, completedAt: completion.value, completedAtError: completion.error };
+  return <AdminProjectsManager key={project.id} initialProjects={[]} mediaLibrary={[]} editorOnly editProject={editProject} />;
 }

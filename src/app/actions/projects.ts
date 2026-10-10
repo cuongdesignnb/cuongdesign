@@ -8,6 +8,7 @@ import { normalizeSlug } from "@/lib/seo/slug";
 import { recordSeoRedirect } from "@/lib/seo/redirects";
 import type { ProjectSchemaKind } from "@prisma/client";
 import { normalizeYouTubeUrl, YouTubeUrlValidationError } from "@/lib/video/youtube";
+import { parseProjectCompletedAt, projectCompletedAtForUpdate, ProjectDateValidationError } from "@/lib/content/project-dates";
 
 export async function upsertProject(data: {
   id?: string;
@@ -26,7 +27,7 @@ export async function upsertProject(data: {
   clientName?: string;
   clientIndustry?: string;
   projectRole?: string;
-  completedAt?: string;
+  completedAt?: string | null;
   projectResult?: string;
   seoTitle?: string;
   seoDescription?: string;
@@ -50,12 +51,19 @@ export async function upsertProject(data: {
       if (!(error instanceof YouTubeUrlValidationError)) throw error;
       return { success: false, error: error.message, fieldErrors: { youtubeUrl: error.message } };
     }
+    let completedAt: Date | null | undefined;
+    try {
+      completedAt = parseProjectCompletedAt(data.completedAt);
+    } catch (error) {
+      if (!(error instanceof ProjectDateValidationError)) throw error;
+      return { success: false, error: error.message, fieldErrors: { completedAt: error.message } };
+    }
     const slug = normalizeSlug(data.slug);
     if (!slug) throw new Error("Slug không hợp lệ.");
     const previous = data.id
       ? await prisma.project.findUnique({
           where: { id: data.id },
-          select: { slug: true, publishedAt: true },
+          select: { slug: true, publishedAt: true, completedAt: true },
         })
       : null;
     const keywords = Array.isArray(data.seoKeywords)
@@ -66,7 +74,6 @@ export async function upsertProject(data: {
       clientName: data.clientName || null,
       clientIndustry: data.clientIndustry || null,
       projectRole: data.projectRole || null,
-      completedAt: data.completedAt ? new Date(data.completedAt) : null,
       projectResult: data.projectResult ? sanitizeRichHtml(data.projectResult) : null,
       seoTitle: data.seoTitle || null,
       seoDescription: data.seoDescription || null,
@@ -83,6 +90,7 @@ export async function upsertProject(data: {
       where: { id: data.id || "new-project" },
       update: {
         youtubeUrl,
+        completedAt: projectCompletedAtForUpdate(completedAt, previous?.completedAt ?? null),
         title: data.title,
         slug,
         description: data.description,
@@ -100,6 +108,7 @@ export async function upsertProject(data: {
       },
       create: {
         youtubeUrl: youtubeUrl ?? null,
+        completedAt: completedAt ?? null,
         title: data.title,
         slug,
         description: data.description,

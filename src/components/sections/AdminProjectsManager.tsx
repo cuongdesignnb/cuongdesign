@@ -11,6 +11,7 @@ import ContentEditor from "@/components/admin/content/ContentEditor";
 import MediaField from "@/components/admin/content/MediaField";
 import MediaGalleryField from "@/components/admin/content/MediaGalleryField";
 import YouTubeUrlField from "@/components/admin/content/YouTubeUrlField";
+import { projectCompletedAtFormState } from "@/lib/content/project-dates";
 import SeoFields, { type SeoValue } from "@/components/admin/content/SeoFields";
 import { ArrowLeft, Edit2, Plus, Trash2 } from "lucide-react";
 
@@ -34,6 +35,7 @@ export default function AdminProjectsManager({
   const [isModalOpen, setIsModalOpen] = useState(editorOnly);
   const [loading, setLoading] = useState(false);
   const [youtubeError, setYoutubeError] = useState<string>();
+  const [completedAtError, setCompletedAtError] = useState<string>();
 
   // Form State
   const [form, setForm] = useState({
@@ -71,6 +73,7 @@ export default function AdminProjectsManager({
 
   const openCreateModal = () => {
     setYoutubeError(undefined);
+    setCompletedAtError(undefined);
     setForm({
       id: "",
       title: "",
@@ -109,6 +112,8 @@ export default function AdminProjectsManager({
 
   const openEditModal = (project: any) => {
     setYoutubeError(undefined);
+    const completion = projectCompletedAtFormState(project.completedAt);
+    setCompletedAtError(project.completedAtError || completion.error);
     setEditingProject(project);
     setForm({
       id: project.id,
@@ -127,7 +132,7 @@ export default function AdminProjectsManager({
       clientName: project.clientName || "",
       clientIndustry: project.clientIndustry || "",
       projectRole: project.projectRole || "",
-      completedAt: project.completedAt ? String(project.completedAt).slice(0, 10) : "",
+      completedAt: completion.value,
       projectResult: project.projectResult || "",
       seoTitle: project.seoTitle || "",
       seoDescription: project.seoDescription || "",
@@ -159,6 +164,7 @@ export default function AdminProjectsManager({
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value, type } = e.target;
     const val = type === "checkbox" ? (e.target as HTMLInputElement).checked : value;
+    if (name === "completedAt") setCompletedAtError(undefined);
     
     setForm((prev) => {
       const updated = { ...prev, [name]: val };
@@ -185,6 +191,7 @@ export default function AdminProjectsManager({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (completedAtError) return;
     setLoading(true);
     setYoutubeError(undefined);
 
@@ -211,7 +218,8 @@ export default function AdminProjectsManager({
         setIsModalOpen(false);
       }
     } else {
-      if (res.fieldErrors?.youtubeUrl) setYoutubeError(res.fieldErrors.youtubeUrl);
+      if (res.fieldErrors?.completedAt) setCompletedAtError(res.fieldErrors.completedAt);
+      else if (res.fieldErrors?.youtubeUrl) setYoutubeError(res.fieldErrors.youtubeUrl);
       else alert("Lỗi khi lưu: " + res.error);
     }
     setLoading(false);
@@ -430,7 +438,19 @@ export default function AdminProjectsManager({
                 <label className="space-y-1 text-xs text-gray-400">Khách hàng<input name="clientName" value={form.clientName} onChange={handleInputChange} className="glass-input w-full px-4 py-2.5 text-sm" /></label>
                 <label className="space-y-1 text-xs text-gray-400">Ngành khách hàng<input name="clientIndustry" value={form.clientIndustry} onChange={handleInputChange} className="glass-input w-full px-4 py-2.5 text-sm" /></label>
                 <label className="space-y-1 text-xs text-gray-400">Vai trò của Đinh Cường<input name="projectRole" value={form.projectRole} onChange={handleInputChange} className="glass-input w-full px-4 py-2.5 text-sm" /></label>
-                <label className="space-y-1 text-xs text-gray-400">Ngày hoàn thành<input type="date" name="completedAt" value={form.completedAt} onChange={handleInputChange} className="glass-input w-full px-4 py-2.5 text-sm" /></label>
+                <div className="space-y-1 text-xs text-gray-400">
+                  <label htmlFor="project-completed-at">Ngày hoàn thành</label>
+                  <div className="flex items-center gap-2">
+                    <input id="project-completed-at" type="date" name="completedAt" value={form.completedAt} onChange={handleInputChange} aria-invalid={Boolean(completedAtError)} aria-describedby={completedAtError ? "project-completed-at-error" : undefined} className="glass-input min-w-0 w-full px-4 py-2.5 text-sm" />
+                    <button type="button" title="Xóa ngày hoàn thành" aria-label="Xóa ngày hoàn thành" onClick={() => {
+                      setCompletedAtError(undefined);
+                      setForm((current) => ({ ...current, completedAt: "" }));
+                    }} className="shrink-0 rounded-md p-2 text-gray-400 hover:bg-white/5 hover:text-white">
+                      <Trash2 className="h-4 w-4" />
+                    </button>
+                  </div>
+                  {completedAtError ? <p id="project-completed-at-error" role="alert" className="text-red-400">{completedAtError}</p> : null}
+                </div>
                 <div className="space-y-1 text-xs text-gray-400 md:col-span-2">
                   <label>Kết quả dự án</label>
                   <ContentEditor value={form.projectResult} onChange={(projectResult) => setForm((current) => ({ ...current, projectResult }))} minHeight={180} />
